@@ -96,6 +96,7 @@ export default [
     rules: {
       'react/prop-types': 'off',
       'react/no-array-index-key': 'off',
+      'react/no-unknown-property': 'off', // disable to use React-Three
       'react/jsx-props-no-spreading': 'off',
       'react/destructuring-assignment': 'off',
       'react/require-default-props': 'off',

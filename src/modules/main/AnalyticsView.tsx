@@ -1,4 +1,4 @@
-import { Box, Button, Stack, Typography } from '@mui/material';
+import { Button, Stack, Typography } from '@mui/material';
 
 import { useLocalContext } from '@graasp/apps-query-client';
 
@@ -29,10 +29,10 @@ const AnalyticsView = (): JSX.Element => {
             Post new App Action
           </Button>
         </Stack>
-        <Box p={2}>
+        <Stack p={2}>
           <Typography>App Actions</Typography>
           <pre>{JSON.stringify(appActions, null, 2)}</pre>
-        </Box>
+        </Stack>
       </Stack>
     </div>
   );

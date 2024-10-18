@@ -1,7 +1,7 @@
 import { FC, ReactElement, createContext, useContext } from 'react';
 
-import { hooks, mutations } from '../../config/queryClient';
-import Loader from '../common/Loader';
+import { hooks, mutations } from '@/config/queryClient';
+import Loader from '@/modules/common/Loader';
 
 // mapping between Setting names and their data type
 // eslint-disable-next-line @typescript-eslint/ban-types

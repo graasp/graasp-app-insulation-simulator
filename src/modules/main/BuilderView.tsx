@@ -1,4 +1,4 @@
-import { Box, Button, Stack, Typography } from '@mui/material';
+import { Button, Stack, Typography } from '@mui/material';
 
 import { useLocalContext } from '@graasp/apps-query-client';
 
@@ -9,28 +9,28 @@ import { hooks, mutations } from '../../config/queryClient';
 const AppSettingsDisplay = (): JSX.Element => {
   const { data: appSettings } = hooks.useAppSettings();
   return (
-    <Box p={2}>
+    <Stack p={2}>
       <Typography>App Setting</Typography>
       {appSettings ? (
         <pre>{JSON.stringify(appSettings, null, 2)}</pre>
       ) : (
         <Typography>Loading</Typography>
       )}
-    </Box>
+    </Stack>
   );
 };
 
 const AppActionsDisplay = (): JSX.Element => {
   const { data: appActions } = hooks.useAppActions();
   return (
-    <Box p={2}>
+    <Stack p={2}>
       <Typography>App Actions</Typography>
       {appActions ? (
         <pre>{JSON.stringify(appActions, null, 2)}</pre>
       ) : (
         <Typography>Loading</Typography>
       )}
-    </Box>
+    </Stack>
   );
 };
 
@@ -91,10 +91,10 @@ const BuilderView = (): JSX.Element => {
             Delete last App Data
           </Button>
         </Stack>
-        <Box p={2}>
+        <Stack p={2}>
           <Typography>App Data</Typography>
           <pre>{JSON.stringify(appDatas, null, 2)}</pre>
-        </Box>
+        </Stack>
         <AppSettingsDisplay />
         <AppActionsDisplay />
       </Stack>

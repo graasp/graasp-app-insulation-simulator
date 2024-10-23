@@ -30,6 +30,10 @@ jobs:
           VITE_ENABLE_MOCK_API: true
           VITE_VERSION: cypress-tests
 
+      - name: Vitest Run
+        run: yarn vitest
+        shell: bash
+
       - name: Cypress Run
         uses: cypress-io/github-action@v5
         env:

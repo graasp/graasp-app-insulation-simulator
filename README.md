@@ -84,6 +84,47 @@ If an existing model is updated, we should replace the type and the React compon
 
 The positions of the meshes within the group are auto-generated, and they should never be manually modified. If an object needs to be repositioned, adjust its `position` prop applied directly to the group instead. This maintains consistency and ensures the auto-generated structure remains intact while allowing for flexible positioning.
 
+## Downloading a CSV File
+
+To download a CSV file of temperatures, follow these steps:
+
+1. **CSV File Requirements**:
+
+   - The CSV file must contain a header.
+   - The first column should represent time in GMT+0, formatted in ISO 8601.
+   - The second column should contain the temperature values in °C.
+
+   ```
+   time,temperature
+   1999-01-01T00:00,3.9
+   1999-01-01T01:00,3.7
+   ```
+
+   Or
+
+   ```
+   time,temperature
+   1999-01-01,4.5
+   1999-01-02,3.6
+   ```
+
+2. **File Location**:
+
+   - Ensure that your CSV file is located in the `public` directory of your project.
+   - For example, if your file is named `temperatures.csv`, the path will be `'temperatures.csv'` when referencing it from the public directory (i.e., `public/temperatures.csv`).
+
+3. **Data Source**:
+
+   - You can download the required CSV data from [Open Meteo](https://open-meteo.com/).
+
+   > [!WARNING]
+   > The measurement frequency changes depending on whether you are querying historical data (one temperature value per hour) or future predictions (one temperature value per day).
+
+4. **Using the `TemperatureContext`**:
+   - In `TemperatureContext`, you can load this CSV file by referencing the appropriate path. Make sure to handle the data correctly based on the specified format and structure. Also be sure to specify the measurement frequency, which can be either per hour or per day, based on your needs.
+
+Following these guidelines will ensure that your CSV file is correctly set up and accessible for the application.
+
 ### Credits
 
 The house and tree models are created by [Sloyd.ai](https://www.sloyd.ai). All rights reserved by Sloyd for these models.

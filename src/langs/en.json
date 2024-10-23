@@ -1,6 +1,16 @@
 {
   "translations": {
     "Welcome to the Graasp App Starter Kit": "Welcome to the Graasp App Starter Kit",
+    "YEARS_one": "{{count}} year",
+    "YEARS_other": "{{count}} years",
+    "MONTHS_one": "{{count}} month",
+    "MONTHS_other": "{{count}} months",
+    "WEEKS_one": "{{count}} week",
+    "WEEKS_other": "{{count}} weeks",
+    "DAYS_one": "{{count}} day",
+    "DAYS_other": "{{count}} days",
+    "HOURS_one": "{{count}} hour",
+    "HOURS_other": "{{count}} hours",
     "ERROR_BOUNDARY": {
       "FALLBACK": {
         "MESSAGE_TITLE": "Sorry, something went wrong with this application",

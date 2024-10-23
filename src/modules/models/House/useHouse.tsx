@@ -63,7 +63,7 @@ export const useHouse = (): UseHouse => {
           material,
         };
       });
-    }, 1_000);
+    }, 5_000);
 
     return () => {
       clearInterval(intervalId);

@@ -39,6 +39,9 @@ export default ({ mode }: { mode: string }): UserConfigExport => {
               lintCommand: 'eslint "src/**/*.{ts,tsx}"',
               useFlatConfig: true,
             },
+            overlay: {
+              initialIsOpen: false,
+            },
           }),
       react(),
       istanbul({

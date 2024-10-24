@@ -1,5 +1,27 @@
 # Changelog
 
+## 1.0.0 (2024-10-24)
+
+
+### Features
+
+* add three.js and the first 3D scene ([#6](https://github.com/graasp/graasp-app-insulation-simulator/issues/6)) ([123d5ba](https://github.com/graasp/graasp-app-insulation-simulator/commit/123d5ba471706ef22795286214a7c1245b947950))
+
+
+### Bug Fixes
+
+* **deps:** update dependency @react-three/drei to v9.114.6 ([#15](https://github.com/graasp/graasp-app-insulation-simulator/issues/15)) ([c80d1ec](https://github.com/graasp/graasp-app-insulation-simulator/commit/c80d1ec7d3a77b7b8e796af42ba2d6ae6b09b892))
+* **deps:** update dependency @sentry/react to v7.119.2 ([#1](https://github.com/graasp/graasp-app-insulation-simulator/issues/1)) ([e348480](https://github.com/graasp/graasp-app-insulation-simulator/commit/e34848066004dc83a0911ab100fa197564b87b1a))
+* **deps:** update dependency @types/node to v20.16.13 ([#2](https://github.com/graasp/graasp-app-insulation-simulator/issues/2)) ([5712a14](https://github.com/graasp/graasp-app-insulation-simulator/commit/5712a14518eb608f9cc29dfd3557808905957146))
+* **deps:** update dependency @types/node to v20.16.14 ([#28](https://github.com/graasp/graasp-app-insulation-simulator/issues/28)) ([1a9c440](https://github.com/graasp/graasp-app-insulation-simulator/commit/1a9c44031ec06fd2b16736a8a0eda34d28f131e6))
+* **deps:** update dependency @types/node to v20.16.15 ([#33](https://github.com/graasp/graasp-app-insulation-simulator/issues/33)) ([d502c29](https://github.com/graasp/graasp-app-insulation-simulator/commit/d502c2954943e553d94a5057a195b6eca3fb3944))
+* **deps:** update dependency @types/react to v18.3.12 ([#34](https://github.com/graasp/graasp-app-insulation-simulator/issues/34)) ([8fbf3fa](https://github.com/graasp/graasp-app-insulation-simulator/commit/8fbf3fa3a1db1c8a29aee769d8a8c3ad0c7021f1))
+* **deps:** update dependency i18next to v23.15.2 ([#4](https://github.com/graasp/graasp-app-insulation-simulator/issues/4)) ([8cd5848](https://github.com/graasp/graasp-app-insulation-simulator/commit/8cd584819f8f9d5596f1fffe688637b3b91bfb63))
+* **deps:** update dependency i18next to v23.16.2 ([#16](https://github.com/graasp/graasp-app-insulation-simulator/issues/16)) ([c632438](https://github.com/graasp/graasp-app-insulation-simulator/commit/c632438946fd5590d7ee99eae8cc29991db733a5))
+* **deps:** update dependency react-toastify to v10.0.6 ([#5](https://github.com/graasp/graasp-app-insulation-simulator/issues/5)) ([49265ff](https://github.com/graasp/graasp-app-insulation-simulator/commit/49265ff0d848324cf51230a84f4e8afa5b990a9a))
+* **deps:** update dependency typescript to v5.6.3 ([#7](https://github.com/graasp/graasp-app-insulation-simulator/issues/7)) ([e23a8af](https://github.com/graasp/graasp-app-insulation-simulator/commit/e23a8af341c9a4aca8a232d5878e99a46e96ce04))
+* **deps:** update react monorepo ([#9](https://github.com/graasp/graasp-app-insulation-simulator/issues/9)) ([fc15764](https://github.com/graasp/graasp-app-insulation-simulator/commit/fc15764db4196c30c12f6dbd0047570ece694936))
+
 ## [1.2.7](https://github.com/graasp/graasp-app-starter-ts-vite/compare/v1.2.6...v1.2.7) (2024-09-26)
 
 

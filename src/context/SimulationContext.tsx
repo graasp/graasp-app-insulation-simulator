@@ -33,8 +33,6 @@ import {
   initSlidingWindow,
 } from '../models/TemperatureIterator';
 
-const SIMULATION_ERROR_CONTEXT = undefinedContextErrorFactory('Simulation');
-
 type SimulationContextType = {
   status: SimulationStatus;
   heatLoss: FormattedHeatLoss;
@@ -49,21 +47,7 @@ type SimulationContextType = {
   startSimulation: () => void;
 };
 
-const SimulationContext = createContext<SimulationContextType>({
-  status: SimulationStatus.IDLE,
-  heatLoss: { value: 0, unit: 'W' },
-  totalHeatLoss: { value: 0, unit: 'W' },
-  electricityCost: 0,
-  indoorTemperature: 0,
-  outdoorTemperature: 0,
-  progression: { progress: 0, timeLeft: 0 },
-  period: { from: new Date(), to: new Date(), durationInHours: 0 },
-  duration: { value: 0, unit: TimeUnit.Hours },
-  material: { price: 0, thermalConductivity: 0, thickness: 0 },
-  startSimulation: () => {
-    throw SIMULATION_ERROR_CONTEXT;
-  },
-});
+const SimulationContext = createContext<SimulationContextType | null>(null);
 
 type Props = {
   children: ReactNode;
@@ -194,5 +178,12 @@ export const SimulationProvider = ({
   );
 };
 
-export const useSimulation = (): SimulationContextType =>
-  useContext<SimulationContextType>(SimulationContext);
+export const useSimulation = (): SimulationContextType => {
+  const context = useContext(SimulationContext);
+
+  if (!context) {
+    throw undefinedContextErrorFactory('Simulation');
+  }
+
+  return context;
+};

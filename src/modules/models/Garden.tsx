@@ -2,6 +2,7 @@ import { RoundedBox } from '@react-three/drei';
 import { Vector3 } from '@react-three/fiber';
 
 import { useSeason } from '@/context/SeasonContext';
+import { useSmoothTransitionColor } from '@/hooks/useSmoothTransitionColor';
 import { Seasons } from '@/types/seasons';
 
 const COLORS_BY_SEASON = {
@@ -20,13 +21,15 @@ type Props = {
 
 export const Garden = ({ position }: Props): JSX.Element => {
   const { season } = useSeason();
+  const material = useSmoothTransitionColor({
+    color: COLORS_BY_SEASON[season],
+  });
 
   return (
     <RoundedBox
       scale={[SIZE_IN_METERS, HEIGHT_IN_METERS, SIZE_IN_METERS]}
       position={position}
-    >
-      <meshStandardMaterial color={COLORS_BY_SEASON[season]} />
-    </RoundedBox>
+      material={material}
+    />
   );
 };

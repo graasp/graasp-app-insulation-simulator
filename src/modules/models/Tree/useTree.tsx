@@ -4,6 +4,7 @@ import { GLTF } from 'three-stdlib';
 
 import { MODELS_3D_ROOT_PATH } from '@/config/models';
 import { useSeason } from '@/context/SeasonContext';
+import { useSmoothTransitionColor } from '@/hooks/useSmoothTransitionColor';
 import { Season, Seasons } from '@/types/seasons';
 import { fromRGB } from '@/utils/colors';
 
@@ -40,8 +41,10 @@ type UseTree = {
 export const useTree = (): UseTree => {
   const { season } = useSeason();
   const { nodes, materials } = useGLTF(GLB_FILE_PATH) as GLTFResult;
-  const leafMaterial = new MeshStandardMaterial().copy(materials.Leaf);
-  leafMaterial.color = COLORS_BY_SEASON[season];
+  const leafMaterial = useSmoothTransitionColor({
+    color: COLORS_BY_SEASON[season],
+    initialMaterial: materials.Leaf,
+  });
 
   return {
     season,

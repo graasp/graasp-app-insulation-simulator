@@ -11,7 +11,7 @@ const GLB_FILE_PATH = `${MODELS_3D_ROOT_PATH}/FirTree.glb`;
 
 const COLORS_BY_SEASON = {
   [Seasons.Summer]: fromRGB({ r: 0.174, g: 0.187, b: 0.097 }),
-  [Seasons.Fall]: fromRGB({ r: 0.174, g: 0.187, b: 0.097 }),
+  [Seasons.Autumn]: fromRGB({ r: 0.174, g: 0.187, b: 0.097 }),
   [Seasons.Winter]: fromRGB({ r: 0.255, g: 0.255, b: 0.255 }),
   [Seasons.Spring]: fromRGB({ r: 0.174, g: 0.187, b: 0.097 }),
 };

@@ -1,26 +1,16 @@
-import {
-  ReactNode,
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from 'react';
+import { ReactNode, createContext, useContext, useMemo } from 'react';
 
-import { AllSeasons, Season, Seasons } from '@/types/seasons';
+import { Season, Seasons } from '@/types/seasons';
+import { getMostPresentSeason } from '@/utils/seasons';
+
+import { useSimulation } from './SimulationContext';
 
 type SeasonContextType = {
   season: Season;
-  nextSeason: () => void;
 };
 
 const SeasonContext = createContext<SeasonContextType>({
   season: Seasons.Spring,
-  nextSeason: () => {
-    throw new Error(
-      'The SeasonContext has been used before its initialization',
-    );
-  },
 });
 
 type Props = {
@@ -28,23 +18,14 @@ type Props = {
 };
 
 export const SeasonProvider = ({ children }: Props): ReactNode => {
-  const [season, setSeason] = useState<Season>(Seasons.Spring);
-
-  const nextSeason = useCallback((): void => {
-    setSeason((prev) => {
-      const prevIdx = AllSeasons.findIndex((s) => s === prev);
-      const newIdx = (prevIdx + 1) % AllSeasons.length;
-
-      return Seasons[AllSeasons[newIdx]];
-    });
-  }, []);
+  const { period } = useSimulation();
+  const season = getMostPresentSeason(period.from, period.to);
 
   const contextValue = useMemo(
     () => ({
       season,
-      nextSeason,
     }),
-    [season, nextSeason],
+    [season],
   );
 
   return (

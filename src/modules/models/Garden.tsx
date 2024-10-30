@@ -8,7 +8,7 @@ const COLORS_BY_SEASON = {
   [Seasons.Winter]: '#D0D4D8',
   [Seasons.Spring]: '#76B041',
   [Seasons.Summer]: '#52b041',
-  [Seasons.Fall]: '#94b041',
+  [Seasons.Autumn]: '#94b041',
 };
 
 const SIZE_IN_METERS = 16;

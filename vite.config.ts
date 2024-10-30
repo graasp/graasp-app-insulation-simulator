@@ -39,11 +39,20 @@ export default ({ mode }: { mode: string }): UserConfigExport => {
               lintCommand: 'eslint "src/**/*.{ts,tsx}"',
               useFlatConfig: true,
             },
+            overlay: {
+              initialIsOpen: false,
+            },
           }),
       react(),
       istanbul({
         include: 'src/*',
-        exclude: ['node_modules', 'test/', '.nyc_output', 'coverage'],
+        exclude: [
+          'node_modules',
+          'test/',
+          '.nyc_output',
+          'coverage',
+          '**/*.test.ts',
+        ],
         extension: ['.js', '.ts', '.tsx'],
         requireEnv: false,
         forceBuildInstrument: mode === 'test',

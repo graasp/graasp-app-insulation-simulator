@@ -84,15 +84,14 @@ const FirstSceneComponent = (): JSX.Element => {
       </Stack>
       <Canvas
         style={{ height: '100vh', width: '100vw' }}
-        camera={{ position: [10, 1, -15], fov: 75 }}
+        camera={{ position: [10, 1, -20], fov: 75 }}
       >
-        <color attach="background" args={[0x87ceeb]} />
         {/* Ambient Light for overall illumination */}
-        <ambientLight intensity={1.2} />
+        <ambientLight intensity={1.5} />
         {/* Main Sunlight Simulation */}
         <directionalLight
           position={[6, 30, -10]}
-          intensity={2}
+          intensity={2.5}
           color={0xffffff}
         />
         <OrbitControls

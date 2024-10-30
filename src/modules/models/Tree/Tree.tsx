@@ -6,14 +6,12 @@ Model: "Trees" from: https://www.sloyd.ai/
 */
 import { GroupProps } from '@react-three/fiber';
 
-import { Seasons } from '@/types/seasons';
-
 import { useTree } from './useTree';
 
 type Props = GroupProps;
 
 export const Tree = (props: Props): JSX.Element => {
-  const { nodes, materials, season } = useTree();
+  const { nodes, materials } = useTree();
 
   /**
    * This code has been generated with the command `npx gltfjsx`.
@@ -24,7 +22,6 @@ export const Tree = (props: Props): JSX.Element => {
       <mesh
         geometry={nodes.Lofted_Patch.geometry}
         material={materials.Leaf}
-        visible={season !== Seasons.Winter}
         position={[0, 1.227, 0]}
       />
       <mesh

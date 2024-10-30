@@ -21,7 +21,7 @@ type Props = {
 
 export const Garden = ({ position }: Props): JSX.Element => {
   const { season } = useSeason();
-  const materialRef = useSmoothTransitionColor({
+  const material = useSmoothTransitionColor({
     color: COLORS_BY_SEASON[season],
   });
 
@@ -29,7 +29,7 @@ export const Garden = ({ position }: Props): JSX.Element => {
     <RoundedBox
       scale={[SIZE_IN_METERS, HEIGHT_IN_METERS, SIZE_IN_METERS]}
       position={position}
-      material={materialRef}
+      material={material}
     />
   );
 };

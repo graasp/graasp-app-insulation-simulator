@@ -10,22 +10,13 @@ import {
 } from 'react';
 
 import {
-  SIMULATION_DEFAULT_MATERIAL,
   SIMULATION_INDOOR_TEMPERATURE_CELCIUS,
   SIMULATION_PRICE_KWH,
 } from '@/config/simulation';
 import { useHeatLoss } from '@/hooks/useHeatLoss';
-import {
-  RegisterComponentParams,
-  useHouseComponents,
-} from '@/hooks/useHouseComponents';
 import { useSimulationProgression } from '@/hooks/useSimulationProgression';
 import { FormattedHeatLoss } from '@/types/heatLoss';
-import {
-  HeatLossPerComponent,
-  HouseComponentType,
-} from '@/types/houseComponent';
-import { Material } from '@/types/material';
+import { HeatLossPerComponent } from '@/types/houseComponent';
 import { SimulationProgression, SimulationStatus } from '@/types/simulation';
 import { SlidingWindow } from '@/types/temperatures';
 import { FormattedTime, TimeUnit, TimeUnitType } from '@/types/time';
@@ -39,6 +30,7 @@ import {
   TemperatureIterator,
   initSlidingWindow,
 } from '../models/TemperatureIterator';
+import { useHouseComponents } from './HouseComponentsContext';
 
 type SimulationContextType = {
   status: SimulationStatus;
@@ -50,9 +42,7 @@ type SimulationContextType = {
   progression: SimulationProgression;
   period: SlidingWindow['period'];
   duration: FormattedTime;
-  materials: Map<HouseComponentType, Material>;
   startSimulation: () => void;
-  registerComponent: (params: RegisterComponentParams) => void;
 };
 
 const SimulationContext = createContext<SimulationContextType | null>(null);
@@ -88,15 +78,10 @@ export const SimulationProvider = ({
 
   // TODO: These parameters will be changed by the user
   const indoorTemperature = SIMULATION_INDOOR_TEMPERATURE_CELCIUS;
-  const materials: Map<HouseComponentType, Material> = useMemo(
-    () => new Map([[HouseComponentType.Wall, SIMULATION_DEFAULT_MATERIAL]]),
-    [],
-  );
+
   const pricekWh = SIMULATION_PRICE_KWH;
 
-  const { houseComponents, registerComponent } = useHouseComponents({
-    materials,
-  });
+  const { houseComponents } = useHouseComponents();
 
   const { heatLosses, totalHeatLoss } = useHeatLoss({
     houseComponents,
@@ -158,7 +143,6 @@ export const SimulationProvider = ({
       period: currentWindow.period,
       progression,
       duration: simulationDuration,
-      materials,
       status: simulationStatus,
       heatLosses,
       totalHeatLoss: formatHeatLossRate(totalHeatLoss),
@@ -168,17 +152,14 @@ export const SimulationProvider = ({
           totalHeatLoss / powerConversionFactors.KiloWatt,
       }),
       startSimulation,
-      registerComponent,
     }),
     [
       currentWindow.mean,
       currentWindow.period,
       heatLosses,
       indoorTemperature,
-      materials,
       pricekWh,
       progression,
-      registerComponent,
       simulationDuration,
       simulationStatus,
       startSimulation,

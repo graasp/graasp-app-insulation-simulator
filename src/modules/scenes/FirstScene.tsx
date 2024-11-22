@@ -6,6 +6,7 @@ import { OrbitControls } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 
 import { SIMULATION_CSV_FILE, SIMULATION_FRAME_MS } from '@/config/simulation';
+import { HouseComponentsProvider } from '@/context/HouseComponentsContext';
 import { SeasonProvider } from '@/context/SeasonContext';
 import { SimulationProvider, useSimulation } from '@/context/SimulationContext';
 import { SimulationStatus } from '@/types/simulation';
@@ -69,14 +70,16 @@ const FirstSceneComponent = (): JSX.Element => {
 };
 
 const FirstScene = (): JSX.Element => (
-  <SimulationProvider
-    csv={SIMULATION_CSV_FILE}
-    simulationFrameMS={SIMULATION_FRAME_MS}
-  >
-    <SeasonProvider>
-      <FirstSceneComponent />
-    </SeasonProvider>
-  </SimulationProvider>
+  <HouseComponentsProvider>
+    <SimulationProvider
+      csv={SIMULATION_CSV_FILE}
+      simulationFrameMS={SIMULATION_FRAME_MS}
+    >
+      <SeasonProvider>
+        <FirstSceneComponent />
+      </SeasonProvider>
+    </SimulationProvider>
+  </HouseComponentsProvider>
 );
 
 export default FirstScene;

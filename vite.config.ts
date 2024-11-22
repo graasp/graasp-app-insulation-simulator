@@ -62,6 +62,7 @@ export default ({ mode }: { mode: string }): UserConfigExport => {
     resolve: {
       alias: {
         '@': resolve(__dirname, 'src'),
+        '@models': resolve(__dirname, 'public/models'),
       },
     },
   });

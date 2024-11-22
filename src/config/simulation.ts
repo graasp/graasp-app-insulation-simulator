@@ -8,7 +8,6 @@ export const SIMULATION_CSV_FILE = {
 };
 
 export const SIMULATION_INDOOR_TEMPERATURE_CELCIUS = 22;
-export const SIMULATION_AREA_M_SQUARE = 100;
 export const SIMULATION_PRICE_KWH = 0.22;
 export const SIMULATION_DEFAULT_MATERIAL = {
   price: 0,

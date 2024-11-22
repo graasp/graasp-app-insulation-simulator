@@ -19,7 +19,8 @@
     "types": ["vite/client", "cypress"],
     "baseUrl": "./src",
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@models/*": ["public/models/*"]
     }
   },
   "include": ["src"],

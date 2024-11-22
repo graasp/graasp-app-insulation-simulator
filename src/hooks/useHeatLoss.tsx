@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { Material } from '@/types/material';
+import { HeatLossPerComponent, HouseComponents } from '@/types/houseComponent';
 import { TimeUnitType } from '@/types/time';
 import {
   calculateHeatLossConstantFactor,
@@ -8,63 +8,84 @@ import {
 } from '@/utils/heatLoss';
 
 type Props = {
-  material: Material;
-  area: number;
+  houseComponents: HouseComponents;
   indoorTemperature: number;
   measurementFrequency: TimeUnitType;
   temperatures: number[];
 };
 
 type UseHeatLossReturnType = {
-  heatLoss: number;
+  heatLosses: HeatLossPerComponent;
   totalHeatLoss: number;
 };
 
 export const useHeatLoss = ({
-  material,
-  area,
+  houseComponents,
   indoorTemperature,
   measurementFrequency,
   temperatures,
 }: Props): UseHeatLossReturnType => {
-  const [heatLoss, setHeatLoss] = useState(0);
+  const [heatLossPerComponent, setHeatLossPerComponent] =
+    useState<HeatLossPerComponent>({});
   const [totalHeatLoss, setTotalHeatLoss] = useState(0);
 
-  const heatLossConstantFactor = useMemo(
+  // Compute the constant factors per house's components
+  const heatLossConstantFactors = useMemo(
     () =>
-      calculateHeatLossConstantFactor({
-        area,
-        thermalConductivity: material.thermalConductivity,
-        materialThickness: material.thickness,
-      }),
-    [area, material.thermalConductivity, material.thickness],
+      Array.from(houseComponents.entries()).reduce<HeatLossPerComponent>(
+        (acc, [id, c]) => ({
+          ...acc,
+          [id]: calculateHeatLossConstantFactor({
+            area: c.area,
+            thermalConductivity: c.material.thermalConductivity,
+            materialThickness: c.material.thickness,
+          }),
+        }),
+        {},
+      ),
+    [houseComponents],
   );
 
   useEffect(() => {
     if (!temperatures) {
-      setHeatLoss(0);
+      setHeatLossPerComponent({});
       setTotalHeatLoss(0);
       return;
     }
 
-    const newHeatLoss = sumHeatLossRate({
-      temperatures,
-      constantFactor: heatLossConstantFactor,
-      indoorTemperature,
-      timeUnit: measurementFrequency,
-    });
+    const newHeatLossPerComponent = Object.entries(
+      heatLossConstantFactors,
+    ).reduce<HeatLossPerComponent>(
+      (acc, [componentId, heatLossConstantFactor]) => ({
+        ...acc,
+        [componentId]: sumHeatLossRate({
+          temperatures,
+          constantFactor: heatLossConstantFactor,
+          indoorTemperature,
+          timeUnit: measurementFrequency,
+        }),
+      }),
+      {},
+    );
 
-    setHeatLoss(newHeatLoss);
-    setTotalHeatLoss((prevT) => prevT + newHeatLoss);
+    setHeatLossPerComponent(newHeatLossPerComponent);
+    setTotalHeatLoss(
+      (prevT) =>
+        prevT +
+        Object.values(newHeatLossPerComponent).reduce(
+          (acc, heatLoss) => acc + heatLoss,
+          0,
+        ),
+    );
   }, [
     measurementFrequency,
-    heatLossConstantFactor,
     temperatures,
     indoorTemperature,
+    heatLossConstantFactors,
   ]);
 
   return {
-    heatLoss,
+    heatLosses: heatLossPerComponent,
     totalHeatLoss,
   };
 };

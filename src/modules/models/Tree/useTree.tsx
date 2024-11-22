@@ -1,14 +1,12 @@
+import GLB_FILE_PATH from '@models/Tree.glb?url';
 import { useGLTF } from '@react-three/drei';
 import { Mesh, MeshStandardMaterial } from 'three';
 import { GLTF } from 'three-stdlib';
 
-import { MODELS_3D_ROOT_PATH } from '@/config/models';
 import { useSeason } from '@/context/SeasonContext';
 import { useSmoothTransitionColor } from '@/hooks/useSmoothTransitionColor';
 import { Season, Seasons } from '@/types/seasons';
 import { fromRGB } from '@/utils/colors';
-
-const GLB_FILE_PATH = `${MODELS_3D_ROOT_PATH}/Tree.glb`;
 
 const COLORS_BY_SEASON = {
   [Seasons.Summer]: fromRGB({ r: 0.174, g: 0.187, b: 0.097 }),

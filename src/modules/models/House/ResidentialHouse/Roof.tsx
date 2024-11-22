@@ -1,0 +1,62 @@
+import { GLTFResult } from './useResidentialHouse';
+
+const RoofWindows = ({
+  nodes,
+  materials,
+}: {
+  nodes: GLTFResult['nodes'];
+  materials: GLTFResult['materials'];
+}): JSX.Element => (
+  <>
+    <group position={[0.4, 0.952, -4.05]} rotation={[-Math.PI, 0, -Math.PI]}>
+      <mesh
+        geometry={nodes.RoofWindowBack_1.geometry}
+        material={materials.Roof}
+      />
+      <mesh
+        geometry={nodes.RoofWindowBack_2.geometry}
+        material={materials.Window}
+      />
+      <mesh
+        geometry={nodes.RoofWindowBack_3.geometry}
+        material={materials.Wood}
+      />
+    </group>
+    <group position={[-0.4, 0.952, 4.05]}>
+      <mesh
+        geometry={nodes.RoofWindowFront_1.geometry}
+        material={materials.Roof}
+      />
+      <mesh
+        geometry={nodes.RoofWindowFront_2.geometry}
+        material={materials.Window}
+      />
+      <mesh
+        geometry={nodes.RoofWindowFront_3.geometry}
+        material={materials.Wood}
+      />
+    </group>
+  </>
+);
+
+export const Roof = ({
+  nodes,
+  materials,
+}: {
+  nodes: GLTFResult['nodes'];
+  materials: GLTFResult['materials'];
+}): JSX.Element => (
+  <mesh
+    geometry={nodes.RoofGroup.geometry}
+    material={materials.Wall}
+    position={[0, 3.45, 0]}
+    rotation={[-Math.PI, 0, -Math.PI]}
+  >
+    <group rotation={[-Math.PI / 2, 0, Math.PI]}>
+      <mesh geometry={nodes.Roof_1.geometry} material={materials.Roof} />
+      <mesh geometry={nodes.Roof_2.geometry} material={materials.Wood} />
+    </group>
+
+    <RoofWindows nodes={nodes} materials={materials} />
+  </mesh>
+);

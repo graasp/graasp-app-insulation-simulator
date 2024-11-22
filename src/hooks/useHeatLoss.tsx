@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
-import { HeatLossPerComponent, HouseComponents } from '@/types/houseComponent';
+import { HouseComponents } from '@/models/HouseComponents';
+import { HeatLossPerComponent } from '@/types/houseComponent';
 import { TimeUnitType } from '@/types/time';
 import {
   calculateHeatLossConstantFactor,
@@ -32,13 +33,12 @@ export const useHeatLoss = ({
   // Compute the constant factors per house's components
   const heatLossConstantFactors = useMemo(
     () =>
-      Array.from(houseComponents.entries()).reduce<HeatLossPerComponent>(
-        (acc, [id, c]) => ({
+      houseComponents.getAll().reduce<HeatLossPerComponent>(
+        (acc, c) => ({
           ...acc,
-          [id]: calculateHeatLossConstantFactor({
-            area: c.area,
-            thermalConductivity: c.material.thermalConductivity,
-            materialThickness: c.material.thickness,
+          [c.id]: calculateHeatLossConstantFactor({
+            area: c.actualArea,
+            materials: c.materials,
           }),
         }),
         {},

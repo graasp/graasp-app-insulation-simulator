@@ -1,34 +1,45 @@
 import { FormattedHeatLoss, HeatLossUnit } from '@/types/heatLoss';
+import { Material } from '@/types/material';
 import { TimeUnitType } from '@/types/time';
+import { NonEmptyArray } from '@/types/utils';
 
 import { timeConversionFactors } from './time';
 
 /**
- * Calculates the constant factor for the rate of heat loss through a solid material.
+ * Calculates the overall heat transfer coefficient (U-value) for a composite material.
+ *  The U-value represents the rate of heat transfer through a unit area of a structure divided by the temperature difference across that structure.
  *
- * @param thermalConductivity - Thermal conductivity of the material (W/m·K).
- * @param area - Area through which heat is being lost (m²).
- * @param materialThickness - Thickness of the material (m).
- * @returns The heat loss constant factor (W/K).
- * @throws Will throw an error if thermal conductivity or material thickness is non-positive.
+ * @param area - Surface area through which heat is transferred (m²).
+ * @param materials - Array of material objects, each with thermal conductivity and thickness.
+ * @returns The overall heat transfer coefficient (U-value) in W/m²K.
+ * @throws Will throw an error if any material has non-positive thermal conductivity or thickness.
  */
 export const calculateHeatLossConstantFactor = ({
-  thermalConductivity,
   area,
-  materialThickness,
+  materials,
 }: {
-  thermalConductivity: number;
   area: number;
-  materialThickness: number;
+  materials: NonEmptyArray<Omit<Material, 'price'>>;
 }): number => {
-  if (thermalConductivity <= 0) {
+  if (materials.some((m) => m.thermalConductivity <= 0)) {
     throw new Error('The thermal conductivity (k) must be greater than 0.');
   }
-  if (materialThickness <= 0) {
+  if (materials.some((m) => m.thickness <= 0)) {
     throw new Error("The material's thickness (d) must be greater than 0.");
   }
 
-  return (thermalConductivity * area) / materialThickness;
+  // Calculate the total thermal resistance (R-value) of the composite material.
+  const totalThermalResistance = materials.reduce(
+    (acc, material) => acc + material.thickness / material.thermalConductivity,
+    0,
+  );
+
+  // Handle case where thermal resistance is zero to avoid division by zero.
+  if (totalThermalResistance === 0) {
+    return 0;
+  }
+
+  return area / totalThermalResistance;
 };
 
 /**

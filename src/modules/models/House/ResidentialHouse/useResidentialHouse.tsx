@@ -1,14 +1,9 @@
 import GLB_FILE_PATH from '@models/ResidentialHouse.glb?url';
 import { useGLTF } from '@react-three/drei';
-import {
-  BufferGeometry,
-  Mesh,
-  MeshStandardMaterial,
-  Vector2,
-  Vector3,
-} from 'three';
+import { BufferGeometry, Mesh, MeshStandardMaterial, Vector3 } from 'three';
 import { GLTF } from 'three-stdlib';
 
+import { Size } from '@/types/houseComponent';
 import { fromRGB } from '@/utils/colors';
 
 const COLORS = {
@@ -54,17 +49,18 @@ type UseResidentialHouse = {
   materials: GLTFResult['materials'];
 };
 
-export const getComponentSize = (geometry: BufferGeometry): Vector2 => {
+export const getComponentSize = (geometry: BufferGeometry): Size => {
   const size = new Vector3();
   geometry.boundingBox?.getSize(size);
 
-  // We only want the height and width of the component, not the thickness.
-  const [width, height] = size
-    .toArray()
-    .sort((a, b) => b - a)
-    .slice(0, 2);
+  const { x, y: height, z } = size;
 
-  return new Vector2(width, height);
+  // We only want the height and width of the component, not the thickness.
+  // Because it depends on the axes, the thickness can be x or z.
+  // As the width is always greater than the thickness, we always take the larger size.
+  const width = Math.max(x, z);
+
+  return { width, height };
 };
 
 export const useResidentialHouse = (): UseResidentialHouse => {

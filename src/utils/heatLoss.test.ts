@@ -13,60 +13,82 @@ import { timeConversionFactors } from './time';
 describe('Heat Loss Utils', () => {
   describe('calculateHeatLossConstantFactor', () => {
     it('should calculate the correct heat loss constant factor', () => {
-      const thermalConductivity = 0.2; // W/m·K
       const area = 10; // m²
+      const thermalConductivity = 0.2; // W/m·K
       const materialThickness = 0.5; // m
       const expectedFactor = (thermalConductivity * area) / materialThickness;
 
       const result = calculateHeatLossConstantFactor({
-        thermalConductivity,
         area,
-        materialThickness,
+        materials: [{ thickness: materialThickness, thermalConductivity }],
+      });
+
+      expect(result).toBe(expectedFactor);
+    });
+
+    it('should calculate the correct heat loss constant factor if multiple materials', () => {
+      // This is an example with a double pane window
+      const area = 2;
+      const airMaterial = {
+        thermalConductivity: 0.024,
+        thickness: 0.005,
+      };
+      const windowMaterial = {
+        thermalConductivity: 0.8,
+        thickness: 0.005,
+      };
+
+      const expectedFactor =
+        area /
+        ((2 * windowMaterial.thickness) / windowMaterial.thermalConductivity +
+          airMaterial.thickness / airMaterial.thermalConductivity);
+
+      const result = calculateHeatLossConstantFactor({
+        area,
+        materials: [windowMaterial, airMaterial, windowMaterial],
       });
 
       expect(result).toBe(expectedFactor);
     });
 
     it('should throw an error if thermal conductivity is non-positive', () => {
-      const thermalConductivity = 0;
       const area = 10;
+      const thermalConductivity = 0;
       const materialThickness = 0.5;
 
       expect(() =>
         calculateHeatLossConstantFactor({
-          thermalConductivity,
           area,
-          materialThickness,
+          materials: [{ thickness: materialThickness, thermalConductivity }],
         }),
       ).toThrowError('The thermal conductivity (k) must be greater than 0.');
 
       expect(() =>
         calculateHeatLossConstantFactor({
-          thermalConductivity: -1,
           area,
-          materialThickness,
+          materials: [
+            { thickness: materialThickness, thermalConductivity: -1 },
+          ],
         }),
       ).toThrowError('The thermal conductivity (k) must be greater than 0.');
     });
 
     it('should throw an error if material thickness is non-positive', () => {
-      const thermalConductivity = 0.2;
       const area = 10;
+      const thermalConductivity = 0.2;
       const materialThickness = 0;
 
       expect(() =>
         calculateHeatLossConstantFactor({
-          thermalConductivity,
           area,
-          materialThickness,
+          materials: [{ thickness: materialThickness, thermalConductivity }],
         }),
       ).toThrowError("The material's thickness (d) must be greater than 0.");
 
       expect(() =>
         calculateHeatLossConstantFactor({
-          thermalConductivity,
           area,
-          materialThickness: -1,
+          materials: [{ thickness: -1, thermalConductivity }],
         }),
       ).toThrowError("The material's thickness (d) must be greater than 0.");
     });

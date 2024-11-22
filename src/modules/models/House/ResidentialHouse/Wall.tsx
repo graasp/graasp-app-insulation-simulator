@@ -1,5 +1,6 @@
 import { memo, useEffect } from 'react';
 
+import { useHouseComponents } from '@/context/HouseComponentsContext';
 import { useSimulation } from '@/context/SimulationContext';
 import { HouseComponentType } from '@/types/houseComponent';
 import { WallProps } from '@/types/wall';
@@ -23,12 +24,13 @@ const WallComponent = ({
   hasWindows?: boolean;
   wallProps: WallProps;
 }): JSX.Element => {
-  const { registerComponent, heatLosses } = useSimulation();
+  const { heatLosses } = useSimulation();
+  const { registerComponent } = useHouseComponents();
   const heatLoss = heatLosses[id] ?? 0;
 
   useEffect(() => {
     registerComponent({
-      id,
+      componentId: id,
       size: getComponentSize(nodes[wallProps.geometryKey].geometry),
       componentType: HouseComponentType.Wall,
     });
@@ -57,8 +59,10 @@ const WallComponent = ({
         />
       )}
       {hasWindows &&
-        wallProps.windows.positions.map((pos) => (
+        wallProps.windows.positions.map((pos, idx) => (
           <WindowFrame
+            wallId={id}
+            windowIdx={idx}
             key={pos.toString()}
             nodes={nodes}
             materials={materials}

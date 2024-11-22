@@ -38,7 +38,7 @@ type Props = JSX.IntrinsicElements['group'] & {
 const MIN_HEATLOSS = 0;
 const MAX_HEATLOSS = 5 * powerConversionFactors.KiloWatt;
 const MIN_SCALE = 0.8;
-const MAX_SCALE = 1.6;
+const MAX_SCALE = 1.2;
 
 const ARRAY_COLOR = new Color('red');
 const TEXT_COLOR = 'white';

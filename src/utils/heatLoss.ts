@@ -1,5 +1,5 @@
+import { BuildingMaterial } from '@/models/BuildingMaterial';
 import { FormattedHeatLoss, HeatLossUnit } from '@/types/heatLoss';
-import { Material } from '@/types/material';
 import { TimeUnitType } from '@/types/time';
 import { NonEmptyArray } from '@/types/utils';
 
@@ -19,7 +19,9 @@ export const calculateHeatLossConstantFactor = ({
   materials,
 }: {
   area: number;
-  materials: NonEmptyArray<Omit<Material, 'price'>>;
+  materials: NonEmptyArray<
+    Pick<BuildingMaterial, 'thermalConductivity' | 'thickness'>
+  >;
 }): number => {
   if (materials.some((m) => m.thermalConductivity <= 0)) {
     throw new Error('The thermal conductivity (k) must be greater than 0.');
@@ -44,7 +46,6 @@ export const calculateHeatLossConstantFactor = ({
 
 /**
  * Calculates the rate of heat loss based on the constant factor and temperature difference.
- * TODO: confirm that negative heat loss (so we should cool the house) are negligated
  * When a heat loss negative is, the rate of heat loss returned is 0.
  *
  * @param constantFactor - The heat loss constant factor (W/K).

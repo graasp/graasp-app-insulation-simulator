@@ -1,9 +1,12 @@
 import { Flower, Leaf, Snowflake, Sun } from 'lucide-react';
 
+import { useHouseComponents } from '@/context/HouseComponentsContext';
 import { useSeason } from '@/context/SeasonContext';
 import { useSimulation } from '@/context/SimulationContext';
 import { FormattedHeatLoss } from '@/types/heatLoss';
+import { HouseComponent } from '@/types/houseComponent';
 import { Season, Seasons } from '@/types/seasons';
+import { formatComponentSize } from '@/utils/formatComponentSize';
 import { formatHeatLossRate } from '@/utils/heatLoss';
 
 type IconBySeasonType = { [s in Season]: JSX.Element };
@@ -18,6 +21,7 @@ const iconsBySeason: IconBySeasonType = {
 type UseSimulationInformationsReturnType = {
   heatLoss: FormattedHeatLoss;
   seasonIcon: JSX.Element;
+  formattedWallSize: React.ReactNode;
 };
 
 export const useSimulationInformations =
@@ -26,6 +30,12 @@ export const useSimulationInformations =
 
     const { heatLosses } = useSimulation();
 
+    const { houseComponentsConfigurator } = useHouseComponents();
+
+    const wallComponent = houseComponentsConfigurator.getFirstOfType(
+      HouseComponent.Wall,
+    );
+
     const heatLoss = formatHeatLossRate(
       Object.values(heatLosses).reduce((acc, heat) => acc + heat, 0),
     );
@@ -33,5 +43,10 @@ export const useSimulationInformations =
     return {
       heatLoss,
       seasonIcon: iconsBySeason[season],
+      formattedWallSize: wallComponent
+        ? formatComponentSize({
+            componentSize: wallComponent.size,
+          })
+        : '-',
     };
   };

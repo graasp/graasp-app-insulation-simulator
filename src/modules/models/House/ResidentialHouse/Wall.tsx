@@ -2,7 +2,8 @@ import { memo, useEffect } from 'react';
 
 import { useHouseComponents } from '@/context/HouseComponentsContext';
 import { useSimulation } from '@/context/SimulationContext';
-import { HouseComponentType } from '@/types/houseComponent';
+import { useWallMaterial } from '@/hooks/useWallMaterial';
+import { HouseComponent } from '@/types/houseComponent';
 import { WallProps } from '@/types/wall';
 
 import { HeatLossArrow } from '../../HeatLossArrow/HeatLossArrow';
@@ -28,12 +29,15 @@ const WallComponent = ({
   const { registerComponent } = useHouseComponents();
   const heatLoss = heatLosses[id] ?? 0;
 
+  const material = useWallMaterial({ wallMaterial: materials.Wall });
+
   useEffect(() => {
     registerComponent({
       componentId: id,
       size: getComponentSize(nodes[wallProps.geometryKey].geometry),
-      componentType: HouseComponentType.Wall,
+      componentType: HouseComponent.Wall,
     });
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -42,7 +46,7 @@ const WallComponent = ({
       {/* The wall Mesh */}
       <mesh
         geometry={nodes[wallProps.geometryKey].geometry}
-        material={materials.Wall}
+        material={material}
       />
       <HeatLossArrow
         rotation={wallProps.arrow.rotation}

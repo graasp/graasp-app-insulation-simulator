@@ -25,7 +25,8 @@ export const SimulationInformations = (): JSX.Element => {
     electricityCost,
   } = useSimulation();
 
-  const { seasonIcon, heatLoss } = useSimulationInformations();
+  const { seasonIcon, heatLoss, formattedWallSize } =
+    useSimulationInformations();
 
   return (
     <Stack
@@ -97,10 +98,10 @@ export const SimulationInformations = (): JSX.Element => {
 
           <Stack direction="row" alignItems="center" spacing={1}>
             <House />
-            <Typography>House Walls</Typography>
-            <Typography>
-              8.1 x 2.85 m<sup>2</sup>
-            </Typography>
+            <Stack direction="row" alignItems="baseline" spacing={1}>
+              <Typography>House Walls</Typography>
+              <Typography>{formattedWallSize}</Typography>
+            </Stack>
           </Stack>
         </Stack>
       </Stack>

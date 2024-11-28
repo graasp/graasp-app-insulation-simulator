@@ -81,10 +81,10 @@ export const SimulationProvider = ({
 
   const pricekWh = SIMULATION_PRICE_KWH;
 
-  const { houseComponents } = useHouseComponents();
+  const { houseComponentsConfigurator } = useHouseComponents();
 
   const { heatLosses, totalHeatLoss } = useHeatLoss({
-    houseComponents,
+    houseComponentsConfigurator,
     indoorTemperature,
     measurementFrequency: csv.measurementFrequency,
     temperatures: currentWindow.temperatures,

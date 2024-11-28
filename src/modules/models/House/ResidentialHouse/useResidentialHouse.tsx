@@ -4,13 +4,6 @@ import { BufferGeometry, Mesh, MeshStandardMaterial, Vector3 } from 'three';
 import { GLTF } from 'three-stdlib';
 
 import { Size } from '@/types/houseComponent';
-import { fromRGB } from '@/utils/colors';
-
-const COLORS = {
-  aerogel: fromRGB({ r: 1, g: 0.815, b: 0.624 }),
-  brick: fromRGB({ r: 0.644, g: 0.456, b: 0.262 }),
-  wood: fromRGB({ r: 0.527, g: 0.527, b: 0.527 }),
-};
 
 /**
  * This type has been generated with the command `npx gltfjsx`.
@@ -49,11 +42,14 @@ type UseResidentialHouse = {
   materials: GLTFResult['materials'];
 };
 
-export const getComponentSize = (geometry: BufferGeometry): Size => {
+export const getComponentSize = (
+  geometry: BufferGeometry,
+  scale: Vector3 = new Vector3(1, 1, 1),
+): Size => {
   const size = new Vector3();
   geometry.boundingBox?.getSize(size);
 
-  const { x, y: height, z } = size;
+  const { x, y: height, z } = size.multiply(scale);
 
   // We only want the height and width of the component, not the thickness.
   // Because it depends on the axes, the thickness can be x or z.
@@ -65,8 +61,6 @@ export const getComponentSize = (geometry: BufferGeometry): Size => {
 
 export const useResidentialHouse = (): UseResidentialHouse => {
   const { nodes, materials } = useGLTF(GLB_FILE_PATH) as GLTFResult;
-
-  materials.Wall.color = COLORS.aerogel;
 
   return {
     nodes,

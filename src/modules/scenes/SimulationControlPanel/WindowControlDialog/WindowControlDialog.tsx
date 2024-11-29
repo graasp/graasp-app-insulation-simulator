@@ -22,6 +22,7 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
+import { BuildingMaterialKeys } from '@/config/buildingMaterials';
 import { useHouseComponents } from '@/context/HouseComponentsContext';
 import {
   WindowSizeType,
@@ -44,6 +45,7 @@ export const WindowControlDialog = ({
     keyPrefix: 'HOUSE_CONTROL_PANEL.WINDOW_DIALOG',
   });
   const { t: tInsulations } = useTranslation('INSULATIONS');
+  const { t: tMaterials } = useTranslation('MATERIALS');
 
   const { changeWindowSize, windowSize } = useWindowSize();
   const { houseComponentsConfigurator } = useHouseComponents();
@@ -120,7 +122,9 @@ export const WindowControlDialog = ({
                 <TableBody>
                   {windowComponent.buildingMaterials.map((material, idx) => (
                     <TableRow key={`${material.name}-${idx}`}>
-                      <TableCell component="th">{material.name}</TableCell>
+                      <TableCell component="th">
+                        {tMaterials(material.name as BuildingMaterialKeys)}
+                      </TableCell>
                       <TableCell align="center">
                         {material.thickness * 100} cm
                       </TableCell>

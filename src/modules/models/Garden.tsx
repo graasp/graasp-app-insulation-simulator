@@ -13,7 +13,8 @@ const COLORS_BY_SEASON = {
 };
 
 const SIZE_IN_METERS = 16;
-const HEIGHT_IN_METERS = 0.8;
+const HEIGHT_IN_METERS = 1;
+const RADIUS_IN_METERS = 0.3;
 
 type Props = {
   position: Vector3;
@@ -30,6 +31,7 @@ export const Garden = ({ position }: Props): JSX.Element => {
       scale={[SIZE_IN_METERS, HEIGHT_IN_METERS, SIZE_IN_METERS]}
       position={position}
       material={material}
+      radius={RADIUS_IN_METERS}
     />
   );
 };

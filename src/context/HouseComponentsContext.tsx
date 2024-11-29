@@ -156,7 +156,7 @@ export const HouseComponentsProvider = ({ children }: Props): ReactNode => {
 
       const insulationName =
         component.insulationName as keyof (typeof HouseInsulationPerComponent)[T];
-      const currMaterials = HOUSE_INSULATIONS[componentType][insulationName];
+      const currMaterials = component.buildingMaterials;
 
       if (!currMaterials?.length) {
         throw new Error(

@@ -21,6 +21,7 @@ const App = (): JSX.Element => {
     }
   }, [context]);
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const renderContent = (): JSX.Element => {
     switch (context.context) {
       case Context.Builder:
@@ -35,7 +36,11 @@ const App = (): JSX.Element => {
     }
   };
 
-  return <SettingsProvider>{renderContent()}</SettingsProvider>;
+  return (
+    <SettingsProvider>
+      <PlayerView />
+    </SettingsProvider>
+  );
 };
 
 export default App;

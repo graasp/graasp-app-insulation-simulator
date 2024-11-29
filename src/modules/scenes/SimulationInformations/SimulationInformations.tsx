@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import { Divider, Stack, Typography } from '@mui/material';
 
 import {
@@ -15,6 +17,8 @@ import { useSimulation } from '@/context/SimulationContext';
 import { useSimulationInformations } from './useSimulationInformations';
 
 export const SimulationInformations = (): JSX.Element => {
+  const { t: tSeasons } = useTranslation('SEASONS');
+  const { t: tInformations } = useTranslation('SIMULATION_INFORMATIONS');
   const { season } = useSeason();
 
   const {
@@ -49,24 +53,24 @@ export const SimulationInformations = (): JSX.Element => {
         <Stack pl={2} spacing={1}>
           <Stack direction="row" alignItems="center" spacing={1}>
             {seasonIcon}
-            <Typography>{season}</Typography>
+            <Typography>{tSeasons(season)}</Typography>
           </Stack>
 
           <Stack direction="row" alignItems="center" spacing={1}>
             <ThermometerSun />
-            <Typography>Outdoor</Typography>
+            <Typography>{tInformations('CURRENT_PERIOD.OUTDOOR')}</Typography>
             <Typography>{outdoorTemperature} °C</Typography>
           </Stack>
 
           <Stack direction="row" alignItems="center" spacing={1}>
             <Thermometer />
-            <Typography>Indoor</Typography>
+            <Typography>{tInformations('CURRENT_PERIOD.INDOOR')}</Typography>
             <Typography>{indoorTemperature} °C</Typography>
           </Stack>
 
           <Stack direction="row" alignItems="center" spacing={1}>
             <Heater />
-            <Typography>Heat Loss</Typography>
+            <Typography>{tInformations('CURRENT_PERIOD.HEAT_LOSS')}</Typography>
             <Typography>
               {heatLoss.value} {heatLoss.unit}
             </Typography>
@@ -78,13 +82,13 @@ export const SimulationInformations = (): JSX.Element => {
 
       <Stack spacing={1} direction="column">
         <Stack direction="row" alignItems="center" spacing={1}>
-          Total
+          {tInformations('TOTAL.TITLE')}
         </Stack>
 
         <Stack pl={2} spacing={1}>
           <Stack direction="row" alignItems="center" spacing={1}>
             <Heater />
-            <Typography>Heat Loss</Typography>
+            <Typography>{tInformations('TOTAL.HEAT_LOSS')}</Typography>
             <Typography>
               {totalHeatLoss.value} {totalHeatLoss.unit}
             </Typography>
@@ -92,14 +96,14 @@ export const SimulationInformations = (): JSX.Element => {
 
           <Stack direction="row" alignItems="center" spacing={1}>
             <Plug />
-            <Typography>Electricity Cost</Typography>
+            <Typography>{tInformations('TOTAL.ELECTRICITY_COST')}</Typography>
             <Typography>{electricityCost} CHF</Typography>
           </Stack>
 
           <Stack direction="row" alignItems="center" spacing={1}>
             <House />
             <Stack direction="row" alignItems="baseline" spacing={1}>
-              <Typography>House Walls</Typography>
+              <Typography>{tInformations('TOTAL.HOUSE_WALL_SIZE')}</Typography>
               <Typography>{formattedWallSize}</Typography>
             </Stack>
           </Stack>

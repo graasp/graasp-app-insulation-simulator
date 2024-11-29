@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
+import { HouseInsulation } from '@/config/houseInsulations';
 import { useHouseComponents } from '@/context/HouseComponentsContext';
 import { BuildingMaterial } from '@/models/BuildingMaterial';
 import { HouseComponent } from '@/types/houseComponent';
@@ -11,6 +12,7 @@ type UseMaterialControlDialogReturnType = {
   handleThicknessChange: (materialName: string, newThickness: number) => void;
   handlePriceChange: (materialName: string, newPrice: number) => void;
   wallMaterials?: NonEmptyArray<BuildingMaterial>;
+  wallInsulation?: HouseInsulation;
 };
 
 export const useMaterialControlDialog =
@@ -24,6 +26,7 @@ export const useMaterialControlDialog =
       [houseComponentsConfigurator],
     );
     const wallMaterials = wallComponents?.buildingMaterials;
+    const wallInsulation = wallComponents?.insulationName;
 
     useEffect(() => {
       if (
@@ -63,6 +66,7 @@ export const useMaterialControlDialog =
     return {
       currTab,
       wallMaterials,
+      wallInsulation,
       updateTab: (tab) => setCurrTab(tab),
       handleThicknessChange,
       handlePriceChange,

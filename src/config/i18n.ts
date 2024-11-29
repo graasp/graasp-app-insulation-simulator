@@ -6,7 +6,7 @@ import en from '../langs/en.json';
 import fr from '../langs/fr.json';
 
 export const DEFAULT_LANGUAGE = 'en';
-export const defaultNS = 'translations';
+export const defaultNS = 'common';
 export const resources = {
   en,
   fr,
@@ -27,7 +27,6 @@ i18n.use(initReactI18next).init({
   debug: import.meta.env.DEV,
   ns: [defaultNS],
   defaultNS,
-  keySeparator: false,
   interpolation: {
     escapeValue: false,
     formatSeparator: ',',

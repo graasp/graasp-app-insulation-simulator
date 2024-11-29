@@ -8,19 +8,19 @@ export const BUILDING_MATERIALS = {
     thickness: 0.16,
   }),
   FiberGlass: BuildingMaterial.create({
-    name: 'Fiber Glass',
+    name: 'FiberGlass',
     price: 3_000,
     thermalConductivity: 0.115,
     thickness: 0.16,
   }),
   XPSFoam: BuildingMaterial.create({
-    name: 'XPS Foam',
+    name: 'XPSFoam',
     price: 10,
     thermalConductivity: 0.024,
     thickness: 0.16,
   }),
   MineralWool: BuildingMaterial.create({
-    name: 'Mineral Wool',
+    name: 'MineralWool',
     price: 7,
     thermalConductivity: 0.03,
     thickness: 0.16,
@@ -32,7 +32,7 @@ export const BUILDING_MATERIALS = {
     thickness: 0.2,
   }),
   WindowGlass: BuildingMaterial.create({
-    name: 'Window Glass',
+    name: 'WindowGlass',
     price: 150,
     thermalConductivity: 0.8,
     thickness: 0.004,
@@ -50,3 +50,5 @@ export const BUILDING_MATERIALS = {
     thickness: 0.2,
   }),
 } as const;
+
+export type BuildingMaterialKeys = keyof typeof BUILDING_MATERIALS;

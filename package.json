@@ -53,6 +53,9 @@
     "hooks:uninstall": "husky uninstall",
     "pre-commit": "yarn prettier:check && yarn lint",
     "cypress:open": "env-cmd -f ./.env.test cypress open",
+    "playwright": "playwright test --project chromium",
+    "playwright:ui": "playwright test --ui",
+    "unittest": "vitest",
     "test": "concurrently -k -s first \"yarn start:test\" \"yarn test:ci\" ",
     "test:ci": "env-cmd -f ./.env.test cypress run --browser chrome --headless && nyc report --reporter=text --reporter=text-summary",
     "cov:report": "open ./coverage/lcov-report/index.html"
@@ -94,6 +97,7 @@
     "husky": "9.1.6",
     "nock": "^13.5.3",
     "nyc": "17.1.0",
+    "playwright-test-coverage": "^1.2.12",
     "prettier": "3.3.3",
     "three-stdlib": "2.33.0",
     "uuid": "9.0.1",

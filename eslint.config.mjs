@@ -31,6 +31,7 @@ export default [
       '**/.nyc_output',
       '**/.yarn',
       '**/commitlint.config.cjs',
+      'playwright-report/**/*',
     ],
   },
   ...fixupConfigRules(

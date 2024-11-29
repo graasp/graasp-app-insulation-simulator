@@ -73,9 +73,11 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  // webServer: {
-  //   command: 'npm run start',
-  //   url: 'http://127.0.0.1:3000',
-  //   reuseExistingServer: !process.env.CI,
-  // },
+  webServer: {
+    command: 'yarn start:test --no-open',
+    url: `http://localhost:${process.env.VITE_PORT || 4001}`,
+    stdout: 'ignore',
+    stderr: 'ignore',
+    reuseExistingServer: true,
+  },
 });

@@ -41,3 +41,8 @@ yarn-debug.log*
 cypress/screenshots/
 cypress/videos/
 cypress/downloads/
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/

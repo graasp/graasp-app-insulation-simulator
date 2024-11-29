@@ -23,15 +23,19 @@ const FirstSceneComponent = (): JSX.Element => {
   const { startSimulation, status } = useSimulation();
 
   return (
-    <Stack sx={{ background: '#fafaff' }} height="100vh" direction="row">
-      <Stack alignItems="center" flexGrow={4}>
+    <Stack
+      sx={{ background: '#fafaff' }}
+      height="100%"
+      direction={{ xs: 'column-reverse', md: 'row' }}
+      justifyContent="center"
+    >
+      <Stack justifyContent="center" alignItems="center" flexGrow={4}>
         <SimulationInformations />
 
         <Canvas
-          style={{ height: '400px' }}
+          style={{ height: '370px', width: '375px' }}
           camera={{ position: [10, 1, -15], fov: 60 }}
         >
-          <color attach="background" args={[0xfafaff]} />
           {/* Ambient Light for overall illumination */}
           <ambientLight intensity={1.5} />
           {/* Main Sunlight Simulation */}

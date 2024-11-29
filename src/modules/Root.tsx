@@ -69,7 +69,8 @@ const theme = createTheme({
 
 const RootDiv = styled('div')({
   flexGrow: 1,
-  height: '100%',
+  height: '100vh',
+  background: '#fafaff',
 });
 
 const Root: FC = () => {

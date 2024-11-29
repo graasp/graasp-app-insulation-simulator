@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import {
   FormControl,
   FormHelperText,
@@ -38,6 +40,11 @@ export const WindowControlDialog = ({
   open,
   handleClose,
 }: Props): JSX.Element | null => {
+  const { t } = useTranslation('SIMULATION_CONTROL_PANEL', {
+    keyPrefix: 'HOUSE_CONTROL_PANEL.WINDOW_DIALOG',
+  });
+  const { t: tInsulations } = useTranslation('INSULATIONS');
+
   const { changeWindowSize, windowSize } = useWindowSize();
   const { houseComponentsConfigurator } = useHouseComponents();
   const windowComponent = houseComponentsConfigurator.getFirstOfType(
@@ -47,6 +54,8 @@ export const WindowControlDialog = ({
   if (!windowComponent) {
     return null;
   }
+
+  const windowInsulation = tInsulations(windowComponent.insulationName);
 
   const handleSizeChange = (newSize: string): void => {
     changeWindowSize(newSize as WindowSizeType);
@@ -59,27 +68,31 @@ export const WindowControlDialog = ({
       aria-labelledby="alert-dialog-title-window"
       aria-describedby="alert-dialog-description-window"
     >
-      <DialogTitle id="alert-dialog-title-window">House Windows</DialogTitle>
+      <DialogTitle id="alert-dialog-title-window">
+        {t('TITLE', { window_insulation: windowInsulation })}
+      </DialogTitle>
       <DialogContent>
         <DialogContentText id="alert-dialog-description-window">
           <Stack spacing={2} pt={1}>
             <FormControl fullWidth>
-              <InputLabel id="window-size-select-label">Window Size</InputLabel>
+              <InputLabel id="window-size-select-label">
+                {t('SIZE_LABEL')}
+              </InputLabel>
               <Select
                 labelId="window-suze-select-label"
                 id="window-size-select"
-                label="Window Size"
+                label={t('SIZE_LABEL')}
                 defaultValue={windowSize}
                 onChange={(v) => handleSizeChange(v.target.value)}
               >
                 {WindowSizes.map((s) => (
                   <MenuItem key={s} value={s}>
-                    {s}
+                    {t(s as WindowSizeType)}
                   </MenuItem>
                 ))}
               </Select>
               <FormHelperText>
-                Dimensions:{' '}
+                {t('CURRENT_SIZE_LABEL')}{' '}
                 {formatComponentSize({ componentSize: windowComponent.size })}
               </FormHelperText>
             </FormControl>
@@ -87,13 +100,21 @@ export const WindowControlDialog = ({
             <TableContainer component={Paper}>
               <Table>
                 <caption>
-                  Composition of the {windowComponent.insulationName} Windows
+                  {t('WINDOW_COPOSITION_TABLE.LABEL', {
+                    window_insulation: windowInsulation,
+                  })}
                 </caption>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Tickness</TableCell>
-                    <TableCell>Thermal Conductivity</TableCell>
+                    <TableCell>
+                      {t('WINDOW_COPOSITION_TABLE.NAME_HEADER')}
+                    </TableCell>
+                    <TableCell>
+                      {t('WINDOW_COPOSITION_TABLE.THICKNESS_HEADER')}
+                    </TableCell>
+                    <TableCell>
+                      {t('WINDOW_COPOSITION_TABLE.THERMAL_CONDUCTIVITY_HEADER')}
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -115,7 +136,7 @@ export const WindowControlDialog = ({
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Close</Button>
+        <Button onClick={handleClose}>{t('CLOSE_BUTTON')}</Button>
       </DialogActions>
     </Dialog>
   );

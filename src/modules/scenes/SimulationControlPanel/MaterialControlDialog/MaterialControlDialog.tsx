@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import { TabContext, TabList, TabPanel } from '@mui/lab';
 import {
   FormControl,
@@ -14,6 +16,8 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
+import { BuildingMaterialKeys } from '@/config/buildingMaterials';
+
 import { FormControlValidator } from './FormControlValidator';
 import { useMaterialControlDialog } from './useMaterialControlDialog';
 
@@ -26,13 +30,22 @@ export const MaterialControlDialog = ({
   open,
   handleClose,
 }: Props): JSX.Element => {
+  const { t } = useTranslation('SIMULATION_CONTROL_PANEL', {
+    keyPrefix: 'HOUSE_CONTROL_PANEL.MATERIAL_DIALOG',
+  });
+  const { t: tMaterials } = useTranslation('MATERIALS');
+  const { t: tInsulations } = useTranslation('INSULATIONS');
+
   const {
     currTab,
     updateTab,
     wallMaterials,
+    wallInsulation,
     handleThicknessChange,
     handlePriceChange,
   } = useMaterialControlDialog();
+
+  const insulationName = wallInsulation ? tInsulations(wallInsulation) : '';
 
   return (
     <Dialog
@@ -42,7 +55,7 @@ export const MaterialControlDialog = ({
       aria-describedby="alert-dialog-description-material"
     >
       <DialogTitle id="alert-dialog-title-material">
-        House Wall Materials
+        {t('TITLE', { insulation: insulationName })}
       </DialogTitle>
       <DialogContent>
         <DialogContentText id="alert-dialog-description-material">
@@ -50,7 +63,11 @@ export const MaterialControlDialog = ({
             <Stack sx={{ borderBottom: 1, borderColor: 'divider' }}>
               <TabList onChange={(_, v) => updateTab(v)}>
                 {wallMaterials?.map((w) => (
-                  <Tab key={w.name} label={w.name} value={w.name} />
+                  <Tab
+                    key={w.name}
+                    label={tMaterials(w.name as BuildingMaterialKeys)}
+                    value={w.name}
+                  />
                 ))}
               </TabList>
             </Stack>
@@ -59,7 +76,7 @@ export const MaterialControlDialog = ({
               <TabPanel key={w.name} value={w.name}>
                 <Stack spacing={2}>
                   <FormControlValidator
-                    label="Price"
+                    label={t('PRICE_LABEL')}
                     value={String(w.price)}
                     onChange={(newValue) =>
                       handlePriceChange(w.name, Number.parseFloat(newValue))
@@ -79,7 +96,7 @@ export const MaterialControlDialog = ({
                   />
 
                   <FormControlValidator
-                    label="Thickness"
+                    label={t('THICKNESS_LABEL')}
                     value={String(w.thickness * 100)}
                     onChange={(newValue) =>
                       handleThicknessChange(
@@ -107,13 +124,13 @@ export const MaterialControlDialog = ({
 
                   <FormControl fullWidth>
                     <InputLabel htmlFor="outlined-adornment-thermal-conductivity">
-                      Thermal Conductivity
+                      {t('THERMAL_CONDUCTIVITY_LABEL')}
                     </InputLabel>
                     <OutlinedInput
                       id="outlined-adornment-thermal-conductivity"
                       disabled
                       value={w.thermalConductivity}
-                      label="Thermal Conductivity"
+                      label={t('THERMAL_CONDUCTIVITY_LABEL')}
                       endAdornment={
                         <InputAdornment position="end">W/m·K</InputAdornment>
                       }
@@ -126,7 +143,7 @@ export const MaterialControlDialog = ({
         </DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>Close</Button>
+        <Button onClick={handleClose}>{t('CLOSE_BUTTON')}</Button>
       </DialogActions>
     </Dialog>
   );

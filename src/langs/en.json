@@ -1,6 +1,5 @@
 {
-  "translations": {
-    "Welcome to the Graasp App Starter Kit": "Welcome to the Graasp App Starter Kit",
+  "DATES": {
     "YEARS_one": "{{count}} year",
     "YEARS_other": "{{count}} years",
     "MONTHS_one": "{{count}} month",
@@ -10,21 +9,91 @@
     "DAYS_one": "{{count}} day",
     "DAYS_other": "{{count}} days",
     "HOURS_one": "{{count}} hour",
-    "HOURS_other": "{{count}} hours",
-    "ERROR_BOUNDARY": {
-      "FALLBACK": {
-        "MESSAGE_TITLE": "Sorry, something went wrong with this application",
-        "MESSAGE_FEEDBACK": "Our team has been notified. If you would like to help, please, tell us what happened below.",
-        "ERROR_DETAILS": "Details of the error",
-        "NAME_LABEL": "Name",
-        "NAME_HELPER": "Provide your name (optional)",
-        "EMAIL_LABEL": "Email",
-        "EMAIL_HELPER": "Provide your email (optional)",
-        "COMMENT_LABEL": "Comment",
-        "COMMENT_HELPER": "Tell us what happened (optional)",
-        "THANKS_FOR_FEEDBACK": "Thank you for your feedback!",
-        "SEND": "Send your feedback"
+    "HOURS_other": "{{count}} hours"
+  },
+  "SEASONS": {
+    "Winter": "Winter",
+    "Spring": "Spring",
+    "Summer": "Summer",
+    "Autumn": "Autumn"
+  },
+  "SIMULATION_INFORMATIONS": {
+    "CURRENT_PERIOD": {
+      "OUTDOOR": "Outdoor",
+      "INDOOR": "Indoor",
+      "HEAT_LOSS": "Heat Loss"
+    },
+    "TOTAL": {
+      "TITLE": "Total",
+      "HEAT_LOSS": "Heat Loss",
+      "ELECTRICITY_COST": "Electricity Cost",
+      "HOUSE_WALL_SIZE": "House Wall"
+    }
+  },
+  "SIMULATION_CONTROL_PANEL": {
+    "HOUSE_CONTROL_PANEL": {
+      "TITLE": "House",
+      "WALL_INSULATION_SELECT_LABEL": "Wall Insulation",
+      "WINDOW_INSULATION_SELECT_LABEL": "Windows Insulation",
+      "MATERIAL_DIALOG": {
+        "TITLE": "Configure the {{insulation}} insulation",
+        "PRICE_LABEL": "Price",
+        "THICKNESS_LABEL": "Thickness",
+        "THERMAL_CONDUCTIVITY_LABEL": "Thermal Conductivity",
+        "CLOSE_BUTTON": "Close"
+      },
+
+      "WINDOW_DIALOG": {
+        "TITLE": "Configure the {{window_insulation}} windows",
+        "SIZE_LABEL": "Window Size",
+        "CURRENT_SIZE_LABEL": "Dimensions",
+        "Small": "Small",
+        "Medium": "Medium",
+        "Large": "Large",
+        "WINDOW_COPOSITION_TABLE": {
+          "LABEL": "Composition of the {{window_insulation}} windows",
+          "NAME_HEADER": "Name",
+          "THICKNESS_HEADER": "Thickness",
+          "THERMAL_CONDUCTIVITY_HEADER": "Thermal Conductivity"
+        },
+        "CLOSE_BUTTON": "Close"
       }
+    }
+  },
+  "INSULATIONS": {
+    "Brick": "Brick",
+    "Aerogel": "Aerogel",
+    "Fiberglass": "Fiberglass",
+    "XPSFoam": "XPS Foam",
+    "MineralWool": "Mineral Wool",
+    "Wood": "Wood",
+    "SinglePane": "Single Pane",
+    "DoublePane": "Double Pane",
+    "TriplePane": "Triple Pane"
+  },
+  "MATERIALS": {
+    "Aerogel": "Aerogel",
+    "FiberGlass": "Fiberglass",
+    "XPSFoam": "XPS Foam",
+    "MineralWool": "Mineral Wool",
+    "Brick": "Brick",
+    "WindowGlass": "Window Glass",
+    "Argon": "Argon",
+    "Wood": "Wood"
+  },
+  "ERROR_BOUNDARY": {
+    "FALLBACK": {
+      "MESSAGE_TITLE": "Sorry, something went wrong with this application",
+      "MESSAGE_FEEDBACK": "Our team has been notified. If you would like to help, please, tell us what happened below.",
+      "ERROR_DETAILS": "Details of the error",
+      "NAME_LABEL": "Name",
+      "NAME_HELPER": "Provide your name (optional)",
+      "EMAIL_LABEL": "Email",
+      "EMAIL_HELPER": "Provide your email (optional)",
+      "COMMENT_LABEL": "Comment",
+      "COMMENT_HELPER": "Tell us what happened (optional)",
+      "THANKS_FOR_FEEDBACK": "Thank you for your feedback!",
+      "SEND": "Send your feedback"
     }
   }
 }

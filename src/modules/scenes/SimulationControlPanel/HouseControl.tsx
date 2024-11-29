@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 import {
   FormControl,
   IconButton,
@@ -25,7 +27,17 @@ import { MaterialControlDialog } from './MaterialControlDialog/MaterialControlDi
 import { WindowControlDialog } from './WindowControlDialog/WindowControlDialog';
 
 export const HouseControl = (): JSX.Element => {
+  const { t } = useTranslation('SIMULATION_CONTROL_PANEL');
+  const { t: tInsulations } = useTranslation('INSULATIONS');
   const { changeComponentInsulation } = useHouseComponents();
+
+  const wallInsulations = Object.keys(
+    HOUSE_INSULATIONS.Wall,
+  ) as (keyof typeof HOUSE_INSULATIONS.Wall)[];
+
+  const windowInsulations = Object.keys(
+    HOUSE_INSULATIONS.Window,
+  ) as (keyof typeof HOUSE_INSULATIONS.Window)[];
 
   const {
     open: openMaterials,
@@ -67,19 +79,21 @@ export const HouseControl = (): JSX.Element => {
       <Stack spacing={2}>
         <Stack direction="row" alignItems="center" spacing={1}>
           <FormControl fullWidth>
-            <InputLabel id="wall-material-select-label">Material</InputLabel>
+            <InputLabel id="wall-material-select-label">
+              {t('HOUSE_CONTROL_PANEL.WALL_INSULATION_SELECT_LABEL')}
+            </InputLabel>
             <Select
               labelId="wall-material-select-label"
               id="wall-material-select"
-              label="Material"
+              label={t('HOUSE_CONTROL_PANEL.WALL_INSULATION_SELECT_LABEL')}
               defaultValue={
                 SIMULATION_DEFAULT_WALL_COMPONENT_INSULATION.insulationName
               }
               onChange={(v) => handleInsulationChange(v.target.value)}
             >
-              {Object.keys(HOUSE_INSULATIONS.Wall).map((k) => (
+              {wallInsulations.map((k) => (
                 <MenuItem key={k} value={k}>
-                  {k}
+                  {tInsulations(k)}
                 </MenuItem>
               ))}
             </Select>
@@ -97,20 +111,20 @@ export const HouseControl = (): JSX.Element => {
         <Stack direction="row" alignItems="center" spacing={1}>
           <FormControl fullWidth>
             <InputLabel id="window-insulation-select-label">
-              Window Insulation
+              {t('HOUSE_CONTROL_PANEL.WINDOW_INSULATION_SELECT_LABEL')}
             </InputLabel>
             <Select
               labelId="window-insulation-select-label"
               id="window-insulation-select"
-              label="Window Insulation"
+              label={t('HOUSE_CONTROL_PANEL.WINDOW_INSULATION_SELECT_LABEL')}
               defaultValue={
                 SIMULATION_DEFAULT_WINDOW_COMPONENT_INSULATION.insulationName
               }
               onChange={(v) => handleWindowChange(v.target.value)}
             >
-              {Object.keys(HOUSE_INSULATIONS.Window).map((k) => (
+              {windowInsulations.map((k) => (
                 <MenuItem key={k} value={k}>
-                  {k}
+                  {tInsulations(k)}
                 </MenuItem>
               ))}
             </Select>

@@ -81,7 +81,7 @@ export const WindowControlDialog = ({
                 {t('SIZE_LABEL')}
               </InputLabel>
               <Select
-                labelId="window-suze-select-label"
+                labelId="window-size-select-label"
                 id="window-size-select"
                 label={t('SIZE_LABEL')}
                 defaultValue={windowSize}

@@ -126,7 +126,14 @@ export const FormControlValidator = ({
           ) : undefined
         }
       />
-      {error && <FormHelperText error>{error}</FormHelperText>}
+      {error && (
+        <FormHelperText
+          data-testid={`error-${label.toLowerCase()}-${error.toLowerCase()}`}
+          error
+        >
+          {error}
+        </FormHelperText>
+      )}
     </FormControl>
   );
 };

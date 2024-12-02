@@ -6,7 +6,7 @@ const {
   VITE_GA_MEASUREMENT_ID,
   VITE_ENABLE_MOCK_API,
   VITE_API_HOST,
-} = window.Cypress ? Cypress.env() : import.meta.env;
+} = import.meta.env;
 
 export const MOCK_API = VITE_ENABLE_MOCK_API === 'true';
 export const GA_MEASUREMENT_ID = VITE_GA_MEASUREMENT_ID;

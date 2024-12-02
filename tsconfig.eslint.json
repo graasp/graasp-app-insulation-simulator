@@ -3,11 +3,9 @@
   "include": [
     "vite.config.ts",
     "eslint.config.mjs",
-    "cypress.config.ts",
     "playwright.config.ts",
     "src/**/*.tsx",
     "src/**/*.ts",
-    "tests/**/*.ts",
-    "cypress/**/*.ts"
+    "tests/**/*.ts"
   ]
 }

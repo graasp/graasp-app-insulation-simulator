@@ -37,11 +37,7 @@ yarn-debug.log*
 .vscode/*
 !.vscode/settings.json
 
-# cypress
-cypress/screenshots/
-cypress/videos/
-cypress/downloads/
-node_modules/
+# Playwright
 /test-results/
 /playwright-report/
 /blob-report/

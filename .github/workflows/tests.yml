@@ -25,8 +25,6 @@ jobs:
 
       - name: Yarn Install and Cache
         uses: graasp/graasp-deploy/.github/actions/yarn-install-and-cache@v1
-        with:
-          cypress: true
 
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
@@ -60,8 +58,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: cypress-screenshots
-          path: cypress/screenshots
+          name: playwright-report
+          path: playwright-report
 
       - name: coverage report
         run: npx nyc report --reporter=text-summary

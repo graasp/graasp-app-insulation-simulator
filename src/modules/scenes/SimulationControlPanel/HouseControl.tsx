@@ -29,7 +29,8 @@ import { WindowControlDialog } from './WindowControlDialog/WindowControlDialog';
 export const HouseControl = (): JSX.Element => {
   const { t } = useTranslation('SIMULATION_CONTROL_PANEL');
   const { t: tInsulations } = useTranslation('INSULATIONS');
-  const { changeComponentInsulation } = useHouseComponents();
+  const { changeComponentInsulation, numberOfFloors, updateNumberOfFloors } =
+    useHouseComponents();
 
   const wallInsulations = Object.keys(
     HOUSE_INSULATIONS.Wall,
@@ -64,6 +65,12 @@ export const HouseControl = (): JSX.Element => {
       newInsulation:
         newValue as keyof typeof HouseInsulationPerComponent.Window,
     });
+  };
+
+  const handleNumberOfFloorsChange = (floors: number | string): void => {
+    updateNumberOfFloors(
+      typeof floors === 'number' ? floors : Number.parseInt(floors, 10),
+    );
   };
 
   return (
@@ -138,6 +145,28 @@ export const HouseControl = (): JSX.Element => {
             <SlidersHorizontal />
           </IconButton>
         </Stack>
+
+        <FormControl fullWidth>
+          <InputLabel id="house-size-select-label">
+            {t('HOUSE_CONTROL_PANEL.HOUSE_SIZE.LABEL')}
+          </InputLabel>
+          <Select
+            labelId="house-size-select-label"
+            id="house-size-select"
+            label={t('HOUSE_CONTROL_PANEL.HOUSE_SIZE.LABEL')}
+            value={numberOfFloors}
+            onChange={(e) => handleNumberOfFloorsChange(e.target.value)}
+            type="number"
+          >
+            {Array.from(Array(2)).map((_, idx) => (
+              <MenuItem key={idx} value={idx + 1}>
+                {t('HOUSE_CONTROL_PANEL.HOUSE_SIZE.N_FLOORS', {
+                  count: idx + 1,
+                })}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       </Stack>
     </>
   );

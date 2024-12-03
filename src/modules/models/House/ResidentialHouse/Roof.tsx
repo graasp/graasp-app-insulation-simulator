@@ -1,5 +1,7 @@
+import { useHouseComponents } from '@/context/HouseComponentsContext';
 import { useWallMaterial } from '@/hooks/useWallMaterial';
 import { useWindowMaterial } from '@/hooks/useWindowMaterial';
+import { HouseComponent } from '@/types/houseComponent';
 
 import { GLTFResult } from './useResidentialHouse';
 
@@ -51,17 +53,30 @@ const RoofWindows = ({
 export const Roof = ({
   nodes,
   materials,
+  nFloors,
 }: {
   nodes: GLTFResult['nodes'];
   materials: GLTFResult['materials'];
+  nFloors: number;
 }): JSX.Element => {
   const wallMaterial = useWallMaterial({ wallMaterial: materials.Wall });
+  const { houseComponentsConfigurator } = useHouseComponents();
+
+  if (nFloors <= 0) {
+    throw new Error('The house must at least have one floor!');
+  }
+
+  const wallHeight =
+    houseComponentsConfigurator.getFirstOfType(HouseComponent.Wall)?.size
+      .height ?? 0;
+
+  const offsetY = wallHeight * (nFloors - 1);
 
   return (
     <mesh
       geometry={nodes.RoofGroup.geometry}
       material={wallMaterial}
-      position={[0, 3.45, 0]}
+      position={[0, 3.45 + offsetY, 0]}
       rotation={[-Math.PI, 0, -Math.PI]}
     >
       <group rotation={[-Math.PI / 2, 0, Math.PI]}>

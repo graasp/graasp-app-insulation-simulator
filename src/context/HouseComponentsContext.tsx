@@ -30,8 +30,8 @@ export type RegisterComponentParams = {
 
 type HouseComponentsContextType = {
   houseComponentsConfigurator: HouseComponentsConfigurator;
+  numberOfFloors: number;
   registerComponent: (params: RegisterComponentParams) => void;
-
   changeComponentInsulation: <
     T extends HouseComponent,
     K extends keyof (typeof HouseInsulationPerComponent)[T],
@@ -42,7 +42,6 @@ type HouseComponentsContextType = {
     componentType: T;
     newInsulation: K;
   }) => void;
-
   updateCompositionOfInsulation: <T extends HouseComponent>({
     componentType,
     materialProps,
@@ -50,6 +49,7 @@ type HouseComponentsContextType = {
     componentType: T;
     materialProps: { name: string } & FromBuildingMaterial;
   }) => void;
+  updateNumberOfFloors: (floors: number) => void;
 };
 
 const HouseComponentsContext = createContext<HouseComponentsContextType | null>(
@@ -72,6 +72,8 @@ export const HouseComponentsProvider = ({ children }: Props): ReactNode => {
     useState<HouseComponentsConfigurator>(() =>
       HouseComponentsConfigurator.create(),
     );
+
+  const [numberOfFloors, setNumberOfFloors] = useState(1);
 
   const registerComponent = useCallback(
     ({
@@ -185,19 +187,30 @@ export const HouseComponentsProvider = ({ children }: Props): ReactNode => {
     [houseComponentsConfigurator],
   );
 
+  const updateNumberOfFloors = useCallback((floors: number) => {
+    if (floors < 1 || floors > 2) {
+      throw new Error('The number of floors must be between [1, 2]');
+    }
+
+    setNumberOfFloors(floors);
+  }, []);
+
   const contextValue = useMemo(
     () => ({
       houseComponentsConfigurator,
+      numberOfFloors,
       registerComponent,
-
       changeComponentInsulation,
       updateCompositionOfInsulation,
+      updateNumberOfFloors,
     }),
     [
       houseComponentsConfigurator,
+      numberOfFloors,
       registerComponent,
       changeComponentInsulation,
       updateCompositionOfInsulation,
+      updateNumberOfFloors,
     ],
   );
 

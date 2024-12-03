@@ -13,7 +13,7 @@ export const SimulationControlPanel = (): JSX.Element => {
   const { t } = useTranslation('SIMULATION_CONTROL_PANEL');
 
   return (
-    <>
+    <div>
       <Accordion defaultExpanded>
         <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
@@ -52,6 +52,6 @@ export const SimulationControlPanel = (): JSX.Element => {
           <TemperatureControl />
         </AccordionDetails>
       </Accordion>
-    </>
+    </div>
   );
 };

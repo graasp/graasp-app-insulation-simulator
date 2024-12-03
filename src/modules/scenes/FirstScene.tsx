@@ -1,12 +1,15 @@
 import PauseIcon from '@mui/icons-material/Pause';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import { Fab, Stack } from '@mui/material';
+import { Fab, Stack, useMediaQuery, useTheme } from '@mui/material';
 
 import { OrbitControls } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 
 import { SIMULATION_CSV_FILE, SIMULATION_FRAME_MS } from '@/config/simulation';
-import { HouseComponentsProvider } from '@/context/HouseComponentsContext';
+import {
+  HouseComponentsProvider,
+  useHouseComponents,
+} from '@/context/HouseComponentsContext';
 import { SeasonProvider } from '@/context/SeasonContext';
 import { SimulationProvider, useSimulation } from '@/context/SimulationContext';
 import { WindowSizeProvider } from '@/context/WindowSizeContext';
@@ -21,6 +24,10 @@ import { SimulationInformations } from './SimulationInformations/SimulationInfor
 
 const FirstSceneComponent = (): JSX.Element => {
   const { startSimulation, status } = useSimulation();
+  const { numberOfFloors } = useHouseComponents();
+
+  const theme = useTheme();
+  const matches = useMediaQuery(theme.breakpoints.up('sm'));
 
   return (
     <Stack
@@ -29,34 +36,39 @@ const FirstSceneComponent = (): JSX.Element => {
       direction={{ xs: 'column-reverse', md: 'row' }}
       justifyContent="center"
     >
-      <Stack justifyContent="center" alignItems="center" flexGrow={4}>
+      <Stack justifyContent="space-between" alignItems="center" flexGrow={4}>
         <SimulationInformations />
 
         <Canvas
-          style={{ height: '370px', width: '375px' }}
-          camera={{ position: [10, 1, -15], fov: 60 }}
+          style={{
+            height: matches ? '500px' : '375px',
+            width: matches ? '500px' : '375px',
+          }}
+          camera={{ position: [0, 0, -35.5], fov: 30 }}
         >
-          {/* Ambient Light for overall illumination */}
-          <ambientLight intensity={1.5} />
-          {/* Main Sunlight Simulation */}
-          <directionalLight
-            position={[6, 30, -10]}
-            intensity={2.5}
-            color={0xffffff}
-          />
-          <OrbitControls
-            enableDamping
-            dampingFactor={0.05}
-            minPolarAngle={Math.PI / 2.5} // Minimum angle
-            maxPolarAngle={Math.PI / 2.5} // Maximum angle
-            enableZoom={false}
-            maxDistance={150}
-            enablePan={false}
-          />
-          <ResidentialHouse position={[0, 0, 0]} />
-          <Garden position={[0, -0.5, 0]} />
-          <Tree position={[6, 0, -4]} />
-          <Forest position={[6.5, 0, 3]} />
+          <group position={[0, -2, 0]}>
+            {/* Ambient Light for overall illumination */}
+            <ambientLight intensity={1.5} />
+            {/* Main Sunlight Simulation */}
+            <directionalLight
+              position={[6, 30, -10]}
+              intensity={2.5}
+              color={0xffffff}
+            />
+            <OrbitControls
+              enableDamping
+              dampingFactor={0.05}
+              minPolarAngle={Math.PI / 2.5} // Minimum angle
+              maxPolarAngle={Math.PI / 2.5} // Maximum angle
+              enableZoom={false}
+              maxDistance={150}
+              enablePan={false}
+            />
+            <ResidentialHouse position={[0, 0, 0]} nFloors={numberOfFloors} />
+            <Garden position={[0, -0.5, 0]} />
+            <Tree position={[6, 0, -4]} />
+            <Forest position={[6.5, 0, 3]} />
+          </group>
         </Canvas>
 
         <Stack mt={2}>

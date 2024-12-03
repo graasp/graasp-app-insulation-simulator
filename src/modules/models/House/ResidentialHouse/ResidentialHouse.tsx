@@ -9,9 +9,13 @@ import { Floor } from './Floor';
 import { Roof } from './Roof';
 import { useResidentialHouse } from './useResidentialHouse';
 
-type Props = JSX.IntrinsicElements['group'] & { displayAxesHelper?: boolean };
+type Props = JSX.IntrinsicElements['group'] & {
+  nFloors?: number;
+  displayAxesHelper?: boolean;
+};
 
 export const ResidentialHouse = ({
+  nFloors = 1,
   displayAxesHelper = false,
   ...props
 }: Props): JSX.Element => {
@@ -20,9 +24,11 @@ export const ResidentialHouse = ({
   return (
     <group {...props} dispose={null}>
       {displayAxesHelper && <axesHelper args={[50]} />}
+      <Roof nodes={nodes} materials={materials} nFloors={nFloors} />
+      {[...Array.from(Array(nFloors))].map((_, i) => (
+        <Floor key={i} nodes={nodes} materials={materials} floor={i} />
+      ))}
       <BaseHome nodes={nodes} materials={materials} />
-      <Roof nodes={nodes} materials={materials} />
-      <Floor nodes={nodes} materials={materials} />
     </group>
   );
 };

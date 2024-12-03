@@ -37,6 +37,7 @@ type SimulationContextType = {
   heatLosses: HeatLossPerComponent;
   totalHeatLoss: FormattedHeatLoss;
   electricityCost: number;
+  setPricekWh: (newPrice: number) => void;
   indoorTemperature: number;
   outdoorTemperature: number;
   progression: SimulationProgression;
@@ -79,7 +80,7 @@ export const SimulationProvider = ({
   // TODO: These parameters will be changed by the user
   const indoorTemperature = SIMULATION_INDOOR_TEMPERATURE_CELCIUS;
 
-  const pricekWh = SIMULATION_PRICE_KWH;
+  const [pricekWh, setPricekWh] = useState(SIMULATION_PRICE_KWH);
 
   const { houseComponentsConfigurator } = useHouseComponents();
 
@@ -151,6 +152,7 @@ export const SimulationProvider = ({
         totalEnergyConsumptionkWh:
           totalHeatLoss / powerConversionFactors.KiloWatt,
       }),
+      setPricekWh,
       startSimulation,
     }),
     [

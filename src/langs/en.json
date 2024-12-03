@@ -58,6 +58,10 @@
         },
         "CLOSE_BUTTON": "Close"
       }
+    },
+    "ELECTRICITY_CONTROL_PANEL": {
+      "TITLE": "Electricity Cost",
+      "ELECTRICITY_COST_LABEL": "Wall Insulation"
     }
   },
   "INSULATIONS": {

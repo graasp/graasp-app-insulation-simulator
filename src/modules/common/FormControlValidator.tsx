@@ -119,7 +119,7 @@ export const FormControlValidator = ({
         label={label}
         value={controlledValue}
         onChange={(e) => handleValueChange(e.target.value)}
-        type={inputType}
+        type={inputType ?? (validationRules?.isNumber ? 'number' : undefined)}
         endAdornment={
           unit ? (
             <InputAdornment position="end">{unit}</InputAdornment>

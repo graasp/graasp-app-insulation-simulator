@@ -134,7 +134,7 @@ export const FormControlValidator = ({
       />
       {error && (
         <FormHelperText
-          data-testid={`error-${label.toLowerCase()}-${error.toLowerCase()}`}
+          data-testid={`error-${label.toLowerCase().replace(/ /g, '-')}-${error.toLowerCase()}`}
           error
         >
           {t(error as FormErrorKeys, {

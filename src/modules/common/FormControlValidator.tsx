@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 import {
   FormControl,
@@ -14,6 +15,8 @@ const FORM_ERROR_KEYS = {
   Min: 'Min',
   Max: 'Max',
 } as const;
+
+type FormErrorKeys = keyof typeof FORM_ERROR_KEYS;
 
 export type ValidationRule = {
   test: (value: string) => boolean;
@@ -70,7 +73,7 @@ const ValidationRulesFactory = (
 
   if (max !== undefined) {
     rules.push({
-      test: (v: string) => Number.parseFloat(v) < max,
+      test: (v: string) => Number.parseFloat(v) <= max,
       message: FORM_ERROR_KEYS.Max,
     });
   }
@@ -90,6 +93,9 @@ export const FormControlValidator = ({
   inputType,
   unit,
 }: FormControlValidatorProps): JSX.Element => {
+  const { t } = useTranslation('ERROR_BOUNDARY', {
+    keyPrefix: 'INPUT_VALIDATOR',
+  });
   const [controlledValue, setControlledValue] = useState<string>(String(value));
   const [error, setError] = useState<string | undefined>();
   const rules = useMemo(
@@ -131,7 +137,10 @@ export const FormControlValidator = ({
           data-testid={`error-${label.toLowerCase()}-${error.toLowerCase()}`}
           error
         >
-          {error}
+          {t(error as FormErrorKeys, {
+            min: validationRules?.min,
+            max: validationRules?.max,
+          })}
         </FormHelperText>
       )}
     </FormControl>

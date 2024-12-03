@@ -24,7 +24,7 @@ export const ElectricityCostControl = (): JSX.Element => {
       onChange={(value) => handleElectricityCostChange(value)}
       validationRules={{
         min: 1e-3,
-        max: 10,
+        max: 2,
         required: true,
         isNumber: true,
       }}

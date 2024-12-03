@@ -67,7 +67,7 @@
       "TITLE": "Temperatures",
       "INDOOR_TEMPERATURE_LABEL": "Indoor Temperature",
       "OUTDOOR_TEMPERATURE_LABEL": "Outdoor Temperature",
-      "OUTDOOR_TEMPERATURE_OVERRIDE_LABEL": "Outdoor Temperature"
+      "OUTDOOR_TEMPERATURE_OVERRIDE_LABEL": "Override Temperature"
     }
   },
   "INSULATIONS": {

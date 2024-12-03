@@ -7,7 +7,7 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 
 import { ElectricityCostControl } from './ElectricityCostControl';
 import { HouseControl } from './HouseControl';
-import { TemperatureControl } from './TemperatureControl';
+import { TemperatureControl } from './TemperatureControl/TemperatureControl';
 
 export const SimulationControlPanel = (): JSX.Element => {
   const { t } = useTranslation('SIMULATION_CONTROL_PANEL');

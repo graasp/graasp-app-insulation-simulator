@@ -12,6 +12,8 @@ export class HousePage {
 
   readonly indoorTemperatureInfo: Locator;
 
+  readonly outdoorTemperatureInfo: Locator;
+
   constructor(page: Page) {
     this.page = page;
     this.electricityCost = this.page.getByRole('spinbutton', {
@@ -19,6 +21,9 @@ export class HousePage {
     });
     this.indoorTemperatureInfo = this.page.getByTestId(
       'simulation-info-indoor-temperature',
+    );
+    this.outdoorTemperatureInfo = this.page.getByTestId(
+      'simulation-info-outdoor-temperature',
     );
   }
 
@@ -62,15 +67,39 @@ export class HousePage {
     await expect(this.electricityCost).toHaveValue(newElectricityCost);
   }
 
-  async setIndoorTemperature(percentage: number): Promise<string> {
-    const slider = this.page.getByTestId('indoor-temperature-slider');
-    const sliderLabel = this.page.getByTestId('indoor-temperature-label');
+  private async setTemperature(
+    id: string,
+    percentage: number,
+    shouldChanged: boolean = true,
+  ): Promise<string> {
+    const slider = this.page.getByTestId(`${id}-temperature-slider`);
+    const sliderLabel = this.page.getByTestId(`${id}-temperature-label`);
     const currValue = (await sliderLabel.textContent()) ?? '';
 
     await changeSlider(this.page, slider, percentage);
-    await expect(sliderLabel).not.toHaveText(currValue);
+
+    if (shouldChanged) {
+      await expect(sliderLabel).not.toHaveText(currValue);
+    } else {
+      await expect(sliderLabel).toHaveText(currValue);
+    }
 
     return (await sliderLabel.textContent()) ?? '';
+  }
+
+  async setIndoorTemperature(percentage: number): Promise<string> {
+    return this.setTemperature('indoor', percentage);
+  }
+
+  async setOutdoorTemperature(
+    percentage: number,
+    { shouldHaveChanged }: { shouldHaveChanged: boolean },
+  ): Promise<string> {
+    return this.setTemperature('outdoor', percentage, shouldHaveChanged);
+  }
+
+  async setOverrideOutdoorTemperature(checked: boolean): Promise<void> {
+    this.page.getByLabel('Override Temperature').setChecked(checked);
   }
 
   async checkErrorIsVisible(

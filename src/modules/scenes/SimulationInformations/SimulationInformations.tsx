@@ -60,7 +60,7 @@ export const SimulationInformations = (): JSX.Element => {
             <ThermometerSun />
             <Typography>{tInformations('CURRENT_PERIOD.OUTDOOR')}</Typography>
             <Typography data-testid="simulation-info-outdoor-temperature">
-              {outdoorTemperature} °C
+              {outdoorTemperature.value} °C
             </Typography>
           </Stack>
 

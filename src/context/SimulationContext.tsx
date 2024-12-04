@@ -11,6 +11,7 @@ import {
 
 import {
   SIMULATION_INDOOR_TEMPERATURE_CELCIUS,
+  SIMULATION_OUTDOOR_TEMPERATURE_CELCIUS,
   SIMULATION_PRICE_KWH,
 } from '@/config/simulation';
 import { useHeatLoss } from '@/hooks/useHeatLoss';
@@ -32,6 +33,8 @@ import {
 } from '../models/TemperatureIterator';
 import { useHouseComponents } from './HouseComponentsContext';
 
+type OutdoorTemperature = { override: boolean; value: number };
+
 type SimulationContextType = {
   status: SimulationStatus;
   heatLosses: HeatLossPerComponent;
@@ -40,7 +43,9 @@ type SimulationContextType = {
   setPricekWh: (newPrice: number) => void;
   indoorTemperature: number;
   updateIndoorTemperature: (newTemperature: number) => void;
-  outdoorTemperature: number;
+  outdoorTemperature: OutdoorTemperature;
+  updateOutdoorTemperature: (props: OutdoorTemperature) => void;
+
   progression: SimulationProgression;
   period: SlidingWindow['period'];
   duration: FormattedTime;
@@ -78,9 +83,14 @@ export const SimulationProvider = ({
     unit: TimeUnit.Hours,
   });
 
-  const [indoorTemperature, setOutdoorTemperature] = useState(
+  const [indoorTemperature, setIndoorTemperature] = useState(
     SIMULATION_INDOOR_TEMPERATURE_CELCIUS.DEFAULT,
   );
+
+  const [outdoorTemperature, setOutdoorTemperature] = useState({
+    override: false,
+    value: SIMULATION_OUTDOOR_TEMPERATURE_CELCIUS.DEFAULT,
+  });
 
   const [pricekWh, setPricekWh] = useState(SIMULATION_PRICE_KWH);
 
@@ -131,6 +141,7 @@ export const SimulationProvider = ({
 
     const intervalId = setInterval(() => {
       if (temperatureIterator.current?.hasMore()) {
+        // TODO: should update this to use the overrided temperature in the calculation
         setCurrentWindow(temperatureIterator.current.getNext());
       } else {
         clearInterval(intervalId);
@@ -139,11 +150,27 @@ export const SimulationProvider = ({
     }, simulationFrameMS);
   }, [simulationFrameMS, simulationStatus]);
 
+  const updateOutdoorTemperature = ({
+    override,
+    value,
+  }: {
+    override: boolean;
+    value: number;
+  }): void => {
+    setOutdoorTemperature({ override, value });
+  };
+
   const contextValue = useMemo(
     () => ({
       indoorTemperature,
-      updateIndoorTemperature: setOutdoorTemperature,
-      outdoorTemperature: currentWindow.mean,
+      updateIndoorTemperature: setIndoorTemperature,
+      outdoorTemperature: {
+        override: outdoorTemperature.override,
+        value: outdoorTemperature.override
+          ? outdoorTemperature.value
+          : currentWindow.mean,
+      },
+      updateOutdoorTemperature,
       period: currentWindow.period,
       progression,
       duration: simulationDuration,
@@ -163,6 +190,8 @@ export const SimulationProvider = ({
       currentWindow.period,
       heatLosses,
       indoorTemperature,
+      outdoorTemperature.override,
+      outdoorTemperature.value,
       pricekWh,
       progression,
       simulationDuration,

@@ -166,7 +166,7 @@ test('thickness should not exceed max value', async ({ page }) => {
   const materialEditor = await housePage.openMaterialEditor();
   await materialEditor.selectTab('Aerogel');
   await materialEditor.setMaterialThickness('25');
-  await materialEditor.setMaterialThickness('100');
+  await materialEditor.setMaterialThickness('101');
 
   await materialEditor.checkErrorIsVisible('thickness', 'Max');
 

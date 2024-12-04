@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test';
+import { Locator, Page, expect } from '@playwright/test';
 
 import { MaterialEditorPage } from './MaterialEditorPage';
 import { WindowEditorPage } from './WindowEditorPage';
@@ -7,8 +7,13 @@ import { WindowEditorPage } from './WindowEditorPage';
 export class HousePage {
   readonly page: Page;
 
+  readonly electricityCost: Locator;
+
   constructor(page: Page) {
     this.page = page;
+    this.electricityCost = this.page.getByRole('spinbutton', {
+      name: 'Electricity Cost',
+    });
   }
 
   async goto(): Promise<void> {
@@ -43,5 +48,19 @@ export class HousePage {
     await button.click();
 
     return new WindowEditorPage(this.page);
+  }
+
+  async setElectricityCost(newElectricityCost: string): Promise<void> {
+    await this.electricityCost.click();
+    await this.electricityCost.fill(newElectricityCost);
+    await expect(this.electricityCost).toHaveValue(newElectricityCost);
+  }
+
+  async checkErrorIsVisible(
+    label: string,
+    type: 'Required' | 'Min' | 'Max',
+  ): Promise<void> {
+    const errorId = `error-${label.toLowerCase()}-${type.toLowerCase()}`;
+    await expect(this.page.getByTestId(errorId)).toBeVisible();
   }
 }

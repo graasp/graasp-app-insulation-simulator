@@ -17,8 +17,8 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
 import { BuildingMaterialKeys } from '@/config/buildingMaterials';
+import { FormControlValidator } from '@/modules/common/FormControlValidator';
 
-import { FormControlValidator } from './FormControlValidator';
 import { useMaterialControlDialog } from './useMaterialControlDialog';
 
 type Props = {

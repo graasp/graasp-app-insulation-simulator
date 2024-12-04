@@ -147,12 +147,12 @@ export const HouseControl = (): JSX.Element => {
         </Stack>
 
         <FormControl fullWidth>
-          <InputLabel id="house-size-select-label">
+          <InputLabel id="house-floors-select-label">
             {t('HOUSE_CONTROL_PANEL.HOUSE_SIZE.LABEL')}
           </InputLabel>
           <Select
-            labelId="house-size-select-label"
-            id="house-size-select"
+            labelId="house-floors-select-label"
+            id="house-floors-select"
             label={t('HOUSE_CONTROL_PANEL.HOUSE_SIZE.LABEL')}
             value={numberOfFloors}
             onChange={(e) => handleNumberOfFloorsChange(e.target.value)}

@@ -59,13 +59,17 @@ export const SimulationInformations = (): JSX.Element => {
           <Stack direction="row" alignItems="center" spacing={1}>
             <ThermometerSun />
             <Typography>{tInformations('CURRENT_PERIOD.OUTDOOR')}</Typography>
-            <Typography>{outdoorTemperature} °C</Typography>
+            <Typography data-testid="simulation-info-outdoor-temperature">
+              {outdoorTemperature} °C
+            </Typography>
           </Stack>
 
           <Stack direction="row" alignItems="center" spacing={1}>
             <Thermometer />
             <Typography>{tInformations('CURRENT_PERIOD.INDOOR')}</Typography>
-            <Typography>{indoorTemperature} °C</Typography>
+            <Typography data-testid="simulation-info-indoor-temperature">
+              {indoorTemperature} °C
+            </Typography>
           </Stack>
 
           <Stack direction="row" alignItems="center" spacing={1}>

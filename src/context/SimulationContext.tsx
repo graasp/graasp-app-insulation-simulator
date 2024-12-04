@@ -39,6 +39,7 @@ type SimulationContextType = {
   electricityCost: number;
   setPricekWh: (newPrice: number) => void;
   indoorTemperature: number;
+  updateIndoorTemperature: (newTemperature: number) => void;
   outdoorTemperature: number;
   progression: SimulationProgression;
   period: SlidingWindow['period'];
@@ -77,8 +78,9 @@ export const SimulationProvider = ({
     unit: TimeUnit.Hours,
   });
 
-  // TODO: These parameters will be changed by the user
-  const indoorTemperature = SIMULATION_INDOOR_TEMPERATURE_CELCIUS;
+  const [indoorTemperature, setOutdoorTemperature] = useState(
+    SIMULATION_INDOOR_TEMPERATURE_CELCIUS.DEFAULT,
+  );
 
   const [pricekWh, setPricekWh] = useState(SIMULATION_PRICE_KWH);
 
@@ -140,6 +142,7 @@ export const SimulationProvider = ({
   const contextValue = useMemo(
     () => ({
       indoorTemperature,
+      updateIndoorTemperature: setOutdoorTemperature,
       outdoorTemperature: currentWindow.mean,
       period: currentWindow.period,
       progression,

@@ -1,5 +1,6 @@
 import { Locator, Page, expect } from '@playwright/test';
 
+import { changeSlider } from '../utils/SliderComponent';
 import { MaterialEditorPage } from './MaterialEditorPage';
 import { WindowEditorPage } from './WindowEditorPage';
 
@@ -9,11 +10,16 @@ export class HousePage {
 
   readonly electricityCost: Locator;
 
+  readonly indoorTemperatureInfo: Locator;
+
   constructor(page: Page) {
     this.page = page;
     this.electricityCost = this.page.getByRole('spinbutton', {
       name: 'Electricity Cost',
     });
+    this.indoorTemperatureInfo = this.page.getByTestId(
+      'simulation-info-indoor-temperature',
+    );
   }
 
   async goto(): Promise<void> {
@@ -54,6 +60,17 @@ export class HousePage {
     await this.electricityCost.click();
     await this.electricityCost.fill(newElectricityCost);
     await expect(this.electricityCost).toHaveValue(newElectricityCost);
+  }
+
+  async setIndoorTemperature(percentage: number): Promise<string> {
+    const slider = this.page.getByTestId('indoor-temperature-slider');
+    const sliderLabel = this.page.getByTestId('indoor-temperature-label');
+    const currValue = (await sliderLabel.textContent()) ?? '';
+
+    await changeSlider(this.page, slider, percentage);
+    await expect(sliderLabel).not.toHaveText(currValue);
+
+    return (await sliderLabel.textContent()) ?? '';
   }
 
   async checkErrorIsVisible(

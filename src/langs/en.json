@@ -62,6 +62,12 @@
     "ELECTRICITY_CONTROL_PANEL": {
       "TITLE": "Electricity Cost",
       "ELECTRICITY_COST_LABEL": "Electricity Cost"
+    },  
+    "TEMPERATURES_CONTROL_PANEL": {
+      "TITLE": "Temperatures",
+      "INDOOR_TEMPERATURE_LABEL": "Indoor Temperature",
+      "OUTDOOR_TEMPERATURE_LABEL": "Outdoor Temperature",
+      "OUTDOOR_TEMPERATURE_OVERRIDE_LABEL": "Outdoor Temperature"
     }
   },
   "INSULATIONS": {

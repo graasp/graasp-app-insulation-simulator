@@ -1,4 +1,4 @@
-name: Cypress UI tests
+name: Tests
 
 on:
   push:
@@ -7,9 +7,17 @@ on:
   merge_group:
   pull_request:
 
+env:
+  VITE_PORT: 3000
+  VITE_API_HOST: http://localhost:3636
+  VITE_GRAASP_APP_KEY: id-1234567890
+  VITE_ENABLE_MOCK_API: true
+  VITE_VERSION: ci-tests
+  CI: true
+
 jobs:
-  cypress-run:
-    concurrency: cypress-${{ github.head_ref || github.ref }}
+  run-tests:
+    concurrency: tests-${{ github.head_ref || github.ref }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -17,45 +25,41 @@ jobs:
 
       - name: Yarn Install and Cache
         uses: graasp/graasp-deploy/.github/actions/yarn-install-and-cache@v1
-        with:
-          cypress: true
+
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
 
       - name: Build App
         run: yarn build:test
         shell: bash
         env:
-          VITE_PORT: 3000
-          VITE_API_HOST: http://localhost:3636
-          VITE_GRAASP_APP_KEY: id-1234567890
-          VITE_ENABLE_MOCK_API: true
-          VITE_VERSION: cypress-tests
+          VITE_PORT: ${{ env.VITE_PORT }}
+          VITE_API_HOST: ${{ env.VITE_API_HOST }}
+          VITE_GRAASP_APP_KEY: ${{ env.VITE_GRAASP_APP_KEY }}
+          VITE_ENABLE_MOCK_API: ${{ env.VITE_ENABLE_MOCK_API }}
+          VITE_VERSION: ${{ env.VITE_VERSION }}
+          CI: ${{ env.CI }}
 
       - name: Vitest Run
-        run: yarn vitest
+        run: yarn unittest
         shell: bash
 
-      - name: Cypress Run
-        uses: cypress-io/github-action@v5
+      - name: Playwright Run
+        run: yarn playwright
+        shell: bash
         env:
-          VITE_PORT: 3000
-          VITE_API_HOST: http://localhost:3636
-          VITE_GRAASP_APP_KEY: id-1234567890
-          VITE_ENABLE_MOCK_API: true
-          VITE_VERSION: cypress-tests
-        with:
-          install: false
-          config: baseUrl=http://localhost:3000
-          start: yarn preview:test
-          browser: chrome
-          quiet: true
-          # point to new cypress@10 config file
-          config-file: cypress.config.ts
+          VITE_PORT: ${{ env.VITE_PORT }}
+          VITE_API_HOST: ${{ env.VITE_API_HOST }}
+          VITE_GRAASP_APP_KEY: ${{ env.VITE_GRAASP_APP_KEY }}
+          VITE_ENABLE_MOCK_API: ${{ env.VITE_ENABLE_MOCK_API }}
+          VITE_VERSION: ${{ env.VITE_VERSION }}
+          CI: ${{ env.CI }}
 
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: cypress-screenshots
-          path: cypress/screenshots
+          name: playwright-report
+          path: playwright-report
 
       - name: coverage report
         run: npx nyc report --reporter=text-summary

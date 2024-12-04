@@ -81,7 +81,7 @@ export const WindowControlDialog = ({
                 {t('SIZE_LABEL')}
               </InputLabel>
               <Select
-                labelId="window-suze-select-label"
+                labelId="window-size-select-label"
                 id="window-size-select"
                 label={t('SIZE_LABEL')}
                 defaultValue={windowSize}
@@ -93,7 +93,9 @@ export const WindowControlDialog = ({
                   </MenuItem>
                 ))}
               </Select>
-              <FormHelperText>
+              <FormHelperText
+                data-testid={`window-size-helper-${windowSize.toLowerCase()}`}
+              >
                 {t('CURRENT_SIZE_LABEL')}{' '}
                 {formatComponentSize({ componentSize: windowComponent.size })}
               </FormHelperText>

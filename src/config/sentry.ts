@@ -18,8 +18,8 @@ export const generateSentryConfig = (): SentryConfigType => {
   const PROD_REPLAY_SAMPLE_RATE = 0.1;
 
   return {
-    // dsn is set only when not running inside cypress
-    dsn: (!window.Cypress && SENTRY_DSN) || '',
+    // dsn is set only when not running inside a test
+    dsn: (!navigator.webdriver && SENTRY_DSN) || '',
     environment: SENTRY_ENV,
     tracesSampleRate: import.meta.env.PROD
       ? PROD_TRACE_SAMPLE_RATE

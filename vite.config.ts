@@ -1,9 +1,10 @@
 /// <reference types="./src/env"/>
 import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
-import { UserConfigExport, defineConfig, loadEnv } from 'vite';
+import { loadEnv } from 'vite';
 import checker from 'vite-plugin-checker';
 import istanbul from 'vite-plugin-istanbul';
+import { UserConfigExport, defineConfig } from 'vitest/config';
 
 // https://vitejs.dev/config/
 export default ({ mode }: { mode: string }): UserConfigExport => {
@@ -20,7 +21,7 @@ export default ({ mode }: { mode: string }): UserConfigExport => {
       port: parseInt(process.env.VITE_PORT, 10) || 4001,
       open: mode !== 'test', // open only when mode is different from test
       watch: {
-        ignored: ['**/coverage/**', '**/cypress/downloads/**'],
+        ignored: ['**/coverage/**'],
       },
     },
     preview: {
@@ -59,6 +60,9 @@ export default ({ mode }: { mode: string }): UserConfigExport => {
         checkProd: true,
       }),
     ],
+    test: {
+      include: ['**/*.test.ts'],
+    },
     resolve: {
       alias: {
         '@': resolve(__dirname, 'src'),

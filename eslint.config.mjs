@@ -31,6 +31,7 @@ export default [
       '**/.nyc_output',
       '**/.yarn',
       '**/commitlint.config.cjs',
+      'playwright-report/**/*',
     ],
   },
   ...fixupConfigRules(
@@ -39,7 +40,6 @@ export default [
       'airbnb-typescript',
       'plugin:import/typescript',
       'prettier',
-      'plugin:cypress/recommended',
       'plugin:react/recommended',
       'plugin:react-hooks/recommended',
       'plugin:@typescript-eslint/recommended',

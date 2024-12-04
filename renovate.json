@@ -6,7 +6,7 @@
   "packageRules": [
     {
       "matchDepTypes": ["devDependencies"],
-      "matchPackagePatterns": ["lint", "prettier", "vite", "cypress", "commitlint", "axios", "concurrently", "env"],
+      "matchPackagePatterns": ["lint", "prettier", "vite", "commitlint", "axios", "concurrently", "env"],
       "automerge": true
     },
     {

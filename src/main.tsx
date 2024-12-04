@@ -20,15 +20,15 @@ Sentry.init({
   ...generateSentryConfig(),
 });
 
-// setup mocked api for cypress or standalone app
+// setup mocked api for playwright or standalone app
+// navigator.webdriver allows to determine if its in playwright if needed
 /* istanbul ignore next */
 if (MOCK_API) {
   mockApi(
     {
       externalUrls: [],
-      dbName: window.Cypress ? 'graasp-app-cypress' : undefined,
-      appContext: window.Cypress ? window.appContext : defaultMockContext,
-      database: window.Cypress ? window.database : buildDatabase(mockMembers),
+      appContext: defaultMockContext,
+      database: buildDatabase(mockMembers),
     },
     MockSolution.ServiceWorker,
   );

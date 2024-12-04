@@ -87,9 +87,7 @@ const Root: FC = () => {
               <QueryClientProvider client={queryClient}>
                 <ToastContainer />
                 <WithLocalContext
-                  defaultValue={
-                    window.Cypress ? window.appContext : mockContext
-                  }
+                  defaultValue={mockContext}
                   LoadingComponent={<Loader />}
                   useGetLocalContext={hooks.useGetLocalContext}
                   useAutoResize={hooks.useAutoResize}

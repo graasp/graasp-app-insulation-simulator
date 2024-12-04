@@ -1,3 +1,6 @@
+import { useHouseComponents } from '@/context/HouseComponentsContext';
+import { HouseComponent } from '@/types/houseComponent';
+
 import { Wall } from './Wall';
 import { GLTFResult } from './useResidentialHouse';
 import { useWallGeometries } from './useWallGeometries';
@@ -5,35 +8,50 @@ import { useWallGeometries } from './useWallGeometries';
 export const Floor = ({
   nodes,
   materials,
+  floor,
 }: {
   nodes: GLTFResult['nodes'];
   materials: GLTFResult['materials'];
+  floor: number;
 }): JSX.Element => {
   const { wallGeometries } = useWallGeometries();
+  const { houseComponentsConfigurator } = useHouseComponents();
+
+  if (floor < 0) {
+    throw new Error('The floor number can be < 0!');
+  }
+
+  const wallHeight =
+    houseComponentsConfigurator.getFirstOfType(HouseComponent.Wall)?.size
+      .height ?? 0;
+
+  const offSetY = wallHeight * floor;
+
   return (
-    <group position={[0, 0.6, 0]}>
+    <group position={[0, 0.6 + offSetY, 0]}>
       <Wall
-        id="FrontWall"
+        id={`FrontWall-${floor}`}
         nodes={nodes}
         materials={materials}
         wallProps={wallGeometries.Front}
-        hasDoor
+        hasDoor={floor === 0}
+        hasWindows={floor !== 0}
       />
       <Wall
-        id="BackWall"
+        id={`BackWall-${floor}`}
         nodes={nodes}
         materials={materials}
         wallProps={wallGeometries.Back}
       />
       <Wall
-        id="LeftWall"
+        id={`LeftWall-${floor}`}
         nodes={nodes}
         materials={materials}
         wallProps={wallGeometries.Left}
         hasWindows
       />
       <Wall
-        id="RightWall"
+        id={`RightWall-${floor}`}
         nodes={nodes}
         materials={materials}
         wallProps={wallGeometries.Right}

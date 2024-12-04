@@ -31,20 +31,23 @@ export class HousePage {
     await this.page.goto('/');
   }
 
-  async selectWindowInsulation(newInsulation: string): Promise<void> {
-    await this.page.getByLabel('Windows Insulation').click();
-    await this.page.getByRole('option', { name: newInsulation }).click();
+  private async updateSelect(
+    selectLabel: string,
+    selectOption: string,
+  ): Promise<void> {
+    await this.page.getByLabel(selectLabel).click();
+    await this.page.getByRole('option', { name: selectOption }).click();
     await expect(
-      this.page.getByRole('combobox', { name: 'Windows Insulation' }),
-    ).toHaveText(newInsulation);
+      this.page.getByRole('combobox', { name: selectLabel }),
+    ).toHaveText(selectOption);
+  }
+
+  async selectWindowInsulation(newInsulation: string): Promise<void> {
+    await this.updateSelect('Windows Insulation', newInsulation);
   }
 
   async selectWallInsulation(newInsulation: string): Promise<void> {
-    await this.page.getByLabel('Wall Insulation').click();
-    await this.page.getByRole('option', { name: newInsulation }).click();
-    await expect(
-      this.page.getByRole('combobox', { name: 'Wall Insulation' }),
-    ).toHaveText(newInsulation);
+    await this.updateSelect('Wall Insulation', newInsulation);
   }
 
   async openMaterialEditor(): Promise<MaterialEditorPage> {
@@ -91,6 +94,11 @@ export class HousePage {
     return this.setTemperature('indoor', percentage);
   }
 
+  async selectNumberOfFloors(nthFloor: number): Promise<void> {
+    const floorText = `${nthFloor} floor${nthFloor > 1 ? 's' : ''}`;
+    await this.updateSelect('Number of floors', floorText);
+  }
+
   async setOutdoorTemperature(
     percentage: number,
     { shouldHaveChanged }: { shouldHaveChanged: boolean },
@@ -99,7 +107,7 @@ export class HousePage {
   }
 
   async setOverrideOutdoorTemperature(checked: boolean): Promise<void> {
-    this.page.getByLabel('Override Temperature').setChecked(checked);
+    await this.page.getByLabel('Override Temperature').setChecked(checked);
   }
 
   async checkErrorIsVisible(

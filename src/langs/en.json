@@ -42,7 +42,6 @@
         "THERMAL_CONDUCTIVITY_LABEL": "Thermal Conductivity",
         "CLOSE_BUTTON": "Close"
       },
-
       "WINDOW_DIALOG": {
         "TITLE": "Configure the {{window_insulation}} windows",
         "SIZE_LABEL": "Window Size",
@@ -57,6 +56,11 @@
           "THERMAL_CONDUCTIVITY_HEADER": "Thermal Conductivity"
         },
         "CLOSE_BUTTON": "Close"
+      },
+      "HOUSE_SIZE": {
+        "LABEL": "Number of floors",
+        "N_FLOORS_one": "{{count}} floor",
+        "N_FLOORS_other": "{{count}} floors"
       }
     },
     "ELECTRICITY_CONTROL_PANEL": {

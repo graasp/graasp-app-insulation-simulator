@@ -26,7 +26,7 @@ const WallComponent = ({
   wallProps: WallProps;
 }): JSX.Element => {
   const { heatLosses } = useSimulation();
-  const { registerComponent } = useHouseComponents();
+  const { registerComponent, unregisterComponent } = useHouseComponents();
   const heatLoss = heatLosses[id] ?? 0;
 
   const material = useWallMaterial({ wallMaterial: materials.Wall });
@@ -38,6 +38,7 @@ const WallComponent = ({
       componentType: HouseComponent.Wall,
     });
 
+    return () => unregisterComponent({ componentId: id });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

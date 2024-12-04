@@ -25,7 +25,7 @@ export const WindowFrame = ({
 }: Props): JSX.Element => {
   const id = `${wallId}-Window-${windowIdx}`;
   const { heatLosses } = useSimulation();
-  const { registerComponent } = useHouseComponents();
+  const { registerComponent, unregisterComponent } = useHouseComponents();
   const { frameMaterial } = useWindowMaterial({
     windowMaterial: materials.Wood,
   });
@@ -41,6 +41,8 @@ export const WindowFrame = ({
       size: getComponentSize(nodes.WindowFrame_2.geometry, windowScaleSize),
       componentType: HouseComponent.Window,
     });
+
+    return () => unregisterComponent({ componentId: id });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [windowScaleSize]);
 

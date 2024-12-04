@@ -9,6 +9,11 @@ type HouseComponentInsulationResult = HouseComponentInsulation & {
   houseComponentId: string;
 };
 
+// Helpful aliases
+type ComponentId = string;
+type ChildrenId = string;
+type ParentId = string;
+
 /**
  * Manages a tree-like structure of house component insulations, ensuring immutability for efficient React updates.
  */
@@ -16,27 +21,27 @@ export class HouseComponentsConfigurator {
   /**
    * A map storing all house component insulations, keyed by their unique ID.
    */
-  private readonly components: Map<string, HouseComponentInsulation> =
+  private readonly components: Map<ComponentId, HouseComponentInsulation> =
     new Map();
 
   /**
    * A map storing the parent ID of each component.
    * It is useful to know which wall the window is associated with.
    */
-  private readonly parentComponentIds: Map<string, string> = new Map();
+  private readonly componentParents: Map<ChildrenId, ParentId> = new Map();
 
   /**
    * Private constructor; instances should be created using the `create()` factory method.
    * This allows to abstract the internal structure of the Class and to faciliate the instantiation of immutable object.
    * @param initialComponents  An optional initial set of components.
-   * @param initialParentComponentIds An optional initial set of parent-child relationships.
+   * @param initialComponentParents An optional initial set of child-parent relationships.
    */
   private constructor(
     initialComponents?: Map<string, HouseComponentInsulation>,
-    initialParentComponentIds?: Map<string, string>,
+    initialComponentParents?: Map<string, string>,
   ) {
     this.components = initialComponents || new Map();
-    this.parentComponentIds = initialParentComponentIds || new Map();
+    this.componentParents = initialComponentParents || new Map();
   }
 
   public static create(): HouseComponentsConfigurator {
@@ -67,9 +72,9 @@ export class HouseComponentsConfigurator {
     const newComponents = new Map(this.components);
     newComponents.set(componentId, component);
 
-    const newParentComponentIds = new Map(this.parentComponentIds);
+    const newComponentParents = new Map(this.componentParents);
 
-    const currentParentId = newParentComponentIds.get(componentId);
+    const currentParentId = newComponentParents.get(componentId);
 
     if (currentParentId && currentParentId !== parentId) {
       throw new Error(
@@ -78,15 +83,67 @@ export class HouseComponentsConfigurator {
     }
 
     if (parentId) {
-      newParentComponentIds.set(componentId, parentId);
+      newComponentParents.set(componentId, parentId);
     } else {
-      newParentComponentIds.delete(componentId);
+      newComponentParents.delete(componentId);
     }
 
-    return new HouseComponentsConfigurator(
-      newComponents,
-      newParentComponentIds,
-    );
+    return new HouseComponentsConfigurator(newComponents, newComponentParents);
+  }
+
+  /**
+   * Creates a new `HouseComponentsConfigurator` instance with a specific component and its children removed. The original instance remains unchanged.  This method is designed to support immutable updates in React applications.
+   * @param componentId The unique ID of the component.
+   * @returns A new `HouseComponentsConfigurator` instance with the component added or updated.
+   */
+  public cloneWithout({
+    componentId,
+  }: {
+    componentId: string;
+  }): HouseComponentsConfigurator {
+    const newComponents = new Map(this.components);
+    newComponents.delete(componentId);
+
+    const newComponentParents = new Map(this.componentParents);
+    newComponentParents.delete(componentId);
+
+    this.removeComponent({
+      componentId,
+      components: newComponents,
+      componentParents: newComponentParents,
+    });
+
+    return new HouseComponentsConfigurator(newComponents, newComponentParents);
+  }
+
+  /**
+   * Recursively removes a component and its children from the provided component and parent maps.
+   *
+   * @param componentId - The ID of the component to remove.
+   * @param components - The map of components.
+   * @param componentParents - The map of child-parent relationships.
+   */
+  private removeComponent({
+    componentId,
+    components,
+    componentParents,
+  }: {
+    componentId: string;
+    components: Map<ComponentId, HouseComponentInsulation>;
+    componentParents: Map<ChildrenId, ParentId>;
+  }): void {
+    Array.from(componentParents.entries()).forEach(([childId, parentId]) => {
+      if (parentId === componentId) {
+        componentParents.delete(childId);
+        components.delete(childId);
+
+        this.removeComponent({
+          componentId: childId,
+          componentParents,
+          components,
+        });
+      }
+    });
   }
 
   /**
@@ -130,17 +187,17 @@ export class HouseComponentsConfigurator {
 
     return new HouseComponentsConfigurator(
       new Map(newComponents),
-      new Map(this.parentComponentIds),
+      new Map(this.componentParents),
     );
   }
 
   /**
-   * Retrieves all child components of a given parent component.
+   * Retrieves all children components of a given parent component.
    * @param parentId The ID of the parent component.
    * @returns An array of child components.  Returns an empty array if no children are found or the parent doesn't exist.
    */
   private getChildren(parentId: string): HouseComponentInsulation[] {
-    return Array.from(this.parentComponentIds.entries())
+    return Array.from(this.componentParents.entries())
       .filter(([_, v]) => v === parentId)
       .map(([k, _]) => this.components.get(k))
       .filter((c): c is HouseComponentInsulation => Boolean(c));
@@ -160,6 +217,7 @@ export class HouseComponentsConfigurator {
     }
 
     const children = this.getChildren(componentId);
+
     const totalChildrenArea = children.reduce(
       (acc, comp) => acc + comp.actualArea,
       0,

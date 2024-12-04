@@ -77,6 +77,49 @@ describe('HouseComponentsConfigurator', () => {
     );
   });
 
+  it('should remove component', () => {
+    const houseComponents = HouseComponentsConfigurator.create()
+      .cloneWith({
+        componentId: 'wall1',
+        component: WALL_COMPONENT_INSULATION,
+      })
+      .cloneWith({
+        parentId: 'wall1',
+        componentId: 'window1',
+        component: WINDOW_COMPONENT_INSULATION,
+      })
+      .cloneWithout({ componentId: 'window1' });
+
+    expect(houseComponents.getAll().length).eq(1);
+    expect(houseComponents.getAll()[0].houseComponentId).eq('wall1');
+  });
+
+  it('should remove component and its children', () => {
+    const houseComponents = HouseComponentsConfigurator.create()
+      .cloneWith({
+        componentId: 'wall1',
+        component: WALL_COMPONENT_INSULATION,
+      })
+      .cloneWith({
+        parentId: 'wall1',
+        componentId: 'window1',
+        component: WINDOW_COMPONENT_INSULATION,
+      })
+      .cloneWith({
+        parentId: 'wall1',
+        componentId: 'window2',
+        component: WINDOW_COMPONENT_INSULATION,
+      })
+      .cloneWith({
+        parentId: 'window2',
+        componentId: 'window3',
+        component: WINDOW_COMPONENT_INSULATION,
+      })
+      .cloneWithout({ componentId: 'wall1' });
+
+    expect(houseComponents.getAll().length).eq(0);
+  });
+
   it('should get a component', () => {
     const houseComponents = HouseComponentsConfigurator.create()
       .cloneWith({ componentId: 'wall1', component: WALL_COMPONENT_INSULATION })

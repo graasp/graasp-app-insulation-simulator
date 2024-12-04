@@ -32,6 +32,9 @@ type HouseComponentsContextType = {
   houseComponentsConfigurator: HouseComponentsConfigurator;
   numberOfFloors: number;
   registerComponent: (params: RegisterComponentParams) => void;
+  unregisterComponent: ({
+    componentId,
+  }: Pick<RegisterComponentParams, 'componentId'>) => void;
   changeComponentInsulation: <
     T extends HouseComponent,
     K extends keyof (typeof HouseInsulationPerComponent)[T],
@@ -107,6 +110,15 @@ export const HouseComponentsProvider = ({ children }: Props): ReactNode => {
       );
     },
     [houseComponentsConfigurator],
+  );
+
+  const unregisterComponent = useCallback(
+    ({ componentId }: Pick<RegisterComponentParams, 'componentId'>): void => {
+      setHouseComponentsConfigurator((curr) =>
+        curr.cloneWithout({ componentId }),
+      );
+    },
+    [],
   );
 
   const changeComponentInsulation = useCallback(
@@ -200,6 +212,7 @@ export const HouseComponentsProvider = ({ children }: Props): ReactNode => {
       houseComponentsConfigurator,
       numberOfFloors,
       registerComponent,
+      unregisterComponent,
       changeComponentInsulation,
       updateCompositionOfInsulation,
       updateNumberOfFloors,
@@ -208,6 +221,7 @@ export const HouseComponentsProvider = ({ children }: Props): ReactNode => {
       houseComponentsConfigurator,
       numberOfFloors,
       registerComponent,
+      unregisterComponent,
       changeComponentInsulation,
       updateCompositionOfInsulation,
       updateNumberOfFloors,

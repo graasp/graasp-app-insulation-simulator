@@ -58,9 +58,9 @@
         "CLOSE_BUTTON": "Close"
       },
       "HOUSE_SIZE": {
-        "LABEL": "House's size",
-        "N_FLOORS_one": "{{count}} Floor",
-        "N_FLOORS_other": "{{count}} Floors"
+        "LABEL": "Number of floors",
+        "N_FLOORS_one": "{{count}} floor",
+        "N_FLOORS_other": "{{count}} floors"
       }
     },
     "ELECTRICITY_CONTROL_PANEL": {

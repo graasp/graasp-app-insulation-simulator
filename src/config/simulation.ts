@@ -13,7 +13,11 @@ export const SIMULATION_CSV_FILE = {
   measurementFrequency: TimeUnit.Days,
 };
 
-export const SIMULATION_INDOOR_TEMPERATURE_CELCIUS = 22;
+export const SIMULATION_INDOOR_TEMPERATURE_CELCIUS = {
+  DEFAULT: 22,
+  MIN: 5,
+  MAX: 35,
+};
 export const SIMULATION_PRICE_KWH = 0.22;
 
 export const SIMULATION_DEFAULT_WALL_COMPONENT_INSULATION: Pick<

@@ -7,6 +7,7 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 
 import { ElectricityCostControl } from './ElectricityCostControl';
 import { HouseControl } from './HouseControl';
+import { TemperatureControl } from './TemperatureControl';
 
 export const SimulationControlPanel = (): JSX.Element => {
   const { t } = useTranslation('SIMULATION_CONTROL_PANEL');
@@ -36,6 +37,19 @@ export const SimulationControlPanel = (): JSX.Element => {
         </AccordionSummary>
         <AccordionDetails>
           <ElectricityCostControl />
+        </AccordionDetails>
+      </Accordion>
+
+      <Accordion defaultExpanded>
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          aria-controls="panel-temperature-content"
+          id="panel-temperature-header"
+        >
+          {t('TEMPERATURES_CONTROL_PANEL.TITLE')}
+        </AccordionSummary>
+        <AccordionDetails>
+          <TemperatureControl />
         </AccordionDetails>
       </Accordion>
     </>

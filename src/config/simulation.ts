@@ -8,10 +8,16 @@ import {
 
 export const SIMULATION_FRAME_MS = 150;
 export const SIMULATION_SLIDING_WINDOW = { window: 2, unit: TimeUnit.Days };
-export const SIMULATION_CSV_FILE = {
-  path: 'temperatures/predictions_1_year.csv',
-  measurementFrequency: TimeUnit.Days,
-};
+export const SIMULATION_CSV_FILES = {
+  1: {
+    path: 'temperatures/predictions_1_year.csv',
+    measurementFrequency: TimeUnit.Days,
+  },
+  25: {
+    path: 'temperatures/predictions_25_year.csv',
+    measurementFrequency: TimeUnit.Days,
+  },
+} as const;
 
 export const SIMULATION_INDOOR_TEMPERATURE_CELCIUS = {
   DEFAULT: 22,

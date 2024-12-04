@@ -5,7 +5,7 @@ import { Fab, Stack, useMediaQuery, useTheme } from '@mui/material';
 import { OrbitControls } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 
-import { SIMULATION_CSV_FILE, SIMULATION_FRAME_MS } from '@/config/simulation';
+import { SIMULATION_FRAME_MS } from '@/config/simulation';
 import {
   HouseComponentsProvider,
   useHouseComponents,
@@ -27,7 +27,7 @@ const FirstSceneComponent = (): JSX.Element => {
   const { numberOfFloors } = useHouseComponents();
 
   const theme = useTheme();
-  const matches = useMediaQuery(theme.breakpoints.up('sm'));
+  const md = useMediaQuery(theme.breakpoints.up('sm'));
 
   return (
     <Stack
@@ -41,8 +41,8 @@ const FirstSceneComponent = (): JSX.Element => {
 
         <Canvas
           style={{
-            height: matches ? '500px' : '375px',
-            width: matches ? '500px' : '375px',
+            height: md ? '500px' : '375px',
+            width: md ? '500px' : '375px',
           }}
           camera={{ position: [0, 0, -35.5], fov: 30 }}
         >
@@ -73,9 +73,13 @@ const FirstSceneComponent = (): JSX.Element => {
 
         <Stack mt={2}>
           <Fab
+            data-testid="simulation-control-button"
             color="primary"
             onClick={startSimulation}
-            disabled={status === SimulationStatus.RUNNING}
+            disabled={
+              status === SimulationStatus.RUNNING ||
+              status === SimulationStatus.LOADING
+            }
           >
             {status === SimulationStatus.RUNNING ? (
               <PauseIcon />
@@ -95,10 +99,7 @@ const FirstSceneComponent = (): JSX.Element => {
 
 const FirstScene = (): JSX.Element => (
   <HouseComponentsProvider>
-    <SimulationProvider
-      csv={SIMULATION_CSV_FILE}
-      simulationFrameMS={SIMULATION_FRAME_MS}
-    >
+    <SimulationProvider simulationFrameMS={SIMULATION_FRAME_MS}>
       <SeasonProvider>
         <WindowSizeProvider>
           <FirstSceneComponent />

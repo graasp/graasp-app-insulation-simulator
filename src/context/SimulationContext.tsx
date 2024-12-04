@@ -10,6 +10,7 @@ import {
 } from 'react';
 
 import {
+  SIMULATION_CSV_FILES,
   SIMULATION_INDOOR_TEMPERATURE_CELCIUS,
   SIMULATION_OUTDOOR_TEMPERATURE_CELCIUS,
   SIMULATION_PRICE_KWH,
@@ -20,7 +21,7 @@ import { FormattedHeatLoss } from '@/types/heatLoss';
 import { HeatLossPerComponent } from '@/types/houseComponent';
 import { SimulationProgression, SimulationStatus } from '@/types/simulation';
 import { SlidingWindow } from '@/types/temperatures';
-import { FormattedTime, TimeUnit, TimeUnitType } from '@/types/time';
+import { FormattedTime, TimeUnit } from '@/types/time';
 import { undefinedContextErrorFactory } from '@/utils/context';
 import { electricityCost } from '@/utils/electricity';
 import { formatHeatLossRate, powerConversionFactors } from '@/utils/heatLoss';
@@ -45,10 +46,12 @@ type SimulationContextType = {
   updateIndoorTemperature: (newTemperature: number) => void;
   outdoorTemperature: OutdoorTemperature;
   updateOutdoorTemperature: (props: OutdoorTemperature) => void;
-
   progression: SimulationProgression;
   period: SlidingWindow['period'];
   duration: FormattedTime;
+  updateSimulationDuration: (
+    duration: Pick<FormattedTime, 'value'> & { unit: typeof TimeUnit.Years },
+  ) => void;
   startSimulation: () => void;
 };
 
@@ -56,31 +59,26 @@ const SimulationContext = createContext<SimulationContextType | null>(null);
 
 type Props = {
   children: ReactNode;
-  /**
-   *
-   * @param path The file path of the CSV containing the temperatures.
-   * @param measurementFrequency - The time unit corresponding to the frequency of the temperature measurements.
-   *                               Indicates whether the temperatures are recorded once per hour, once per day, etc.
-   */
-  csv: { path: string; measurementFrequency: TimeUnitType };
   simulationFrameMS: number;
 };
 
 export const SimulationProvider = ({
   children,
-  csv,
   simulationFrameMS,
 }: Props): ReactNode => {
+  const temperatureIterator = useRef<TemperatureIterator>();
+
   const [simulationStatus, setSimulationStatus] = useState<SimulationStatus>(
     SimulationStatus.IDLE,
   );
-  const temperatureIterator = useRef<TemperatureIterator>();
+
   const [currentWindow, setCurrentWindow] = useState<SlidingWindow>(
     initSlidingWindow(0),
   );
+
   const [simulationDuration, setSimulationDuration] = useState<FormattedTime>({
-    value: 0,
-    unit: TimeUnit.Hours,
+    value: 1,
+    unit: TimeUnit.Years,
   });
 
   const [indoorTemperature, setIndoorTemperature] = useState(
@@ -93,6 +91,17 @@ export const SimulationProvider = ({
   });
 
   const [pricekWh, setPricekWh] = useState(SIMULATION_PRICE_KWH);
+
+  const csv =
+    SIMULATION_CSV_FILES[
+      simulationDuration.value as keyof typeof SIMULATION_CSV_FILES
+    ];
+
+  if (!csv) {
+    throw new Error(
+      `The CSV was not found for the duration of ${simulationDuration.value}`,
+    );
+  }
 
   const { houseComponentsConfigurator } = useHouseComponents();
 
@@ -174,6 +183,11 @@ export const SimulationProvider = ({
       period: currentWindow.period,
       progression,
       duration: simulationDuration,
+      updateSimulationDuration: (
+        duration: Pick<FormattedTime, 'value'> & {
+          unit: typeof TimeUnit.Years;
+        },
+      ) => setSimulationDuration(duration),
       status: simulationStatus,
       heatLosses,
       totalHeatLoss: formatHeatLossRate(totalHeatLoss),

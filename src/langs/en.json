@@ -31,6 +31,10 @@
     }
   },
   "SIMULATION_CONTROL_PANEL": {
+    "DURATION_CONTROL_PANEL": {
+      "TITLE": "Simulation",
+      "LABEL": "Duration of Simulation"
+    },
     "HOUSE_CONTROL_PANEL": {
       "TITLE": "House",
       "WALL_INSULATION_SELECT_LABEL": "Wall Insulation",

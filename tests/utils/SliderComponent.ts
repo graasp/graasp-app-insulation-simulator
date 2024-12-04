@@ -5,7 +5,8 @@ export const changeSlider = async (
   slider: Locator,
   targetPercentage: number,
 ): Promise<void> => {
-  await expect(slider).toBeVisible();
+  await slider.scrollIntoViewIfNeeded();
+  await expect(slider).toBeInViewport();
 
   const sliderBoundingBox = await slider.boundingBox();
 

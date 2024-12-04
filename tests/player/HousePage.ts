@@ -14,6 +14,10 @@ export class HousePage {
 
   readonly outdoorTemperatureInfo: Locator;
 
+  readonly simulationDuration: Locator;
+
+  readonly simulationControlButton: Locator;
+
   constructor(page: Page) {
     this.page = page;
     this.electricityCost = this.page.getByRole('spinbutton', {
@@ -24,6 +28,10 @@ export class HousePage {
     );
     this.outdoorTemperatureInfo = this.page.getByTestId(
       'simulation-info-outdoor-temperature',
+    );
+    this.simulationDuration = this.page.getByLabel('Duration of Simulation');
+    this.simulationControlButton = this.page.getByTestId(
+      'simulation-control-button',
     );
   }
 
@@ -108,6 +116,13 @@ export class HousePage {
 
   async setOverrideOutdoorTemperature(checked: boolean): Promise<void> {
     await this.page.getByLabel('Override Temperature').setChecked(checked);
+  }
+
+  async setSimulationDuration(duration: number): Promise<void> {
+    await this.updateSelect(
+      'Duration of Simulation',
+      `${duration} year${duration > 1 ? 's' : ''}`,
+    );
   }
 
   async checkErrorIsVisible(

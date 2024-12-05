@@ -1,5 +1,45 @@
 # Changelog
 
+## 1.0.0 (2024-12-05)
+
+
+### Features
+
+* add indoor temperature setting ([#75](https://github.com/graasp/graasp-app-insulation-simulator/issues/75)) ([1a9d17d](https://github.com/graasp/graasp-app-insulation-simulator/commit/1a9d17d58f26b222ac1bc563beadb16d474aaa6e))
+* add outdoor temperature setting ([#76](https://github.com/graasp/graasp-app-insulation-simulator/issues/76)) ([57a1fe7](https://github.com/graasp/graasp-app-insulation-simulator/commit/57a1fe713c82b2888a016141642229da3524a5fd))
+* add playwright tests ([#64](https://github.com/graasp/graasp-app-insulation-simulator/issues/64)) ([f86b37e](https://github.com/graasp/graasp-app-insulation-simulator/commit/f86b37ecb8b9261df6056f76195fa331bf30db26))
+* add three.js and the first 3D scene ([#6](https://github.com/graasp/graasp-app-insulation-simulator/issues/6)) ([123d5ba](https://github.com/graasp/graasp-app-insulation-simulator/commit/123d5ba471706ef22795286214a7c1245b947950))
+* add translations ([#60](https://github.com/graasp/graasp-app-insulation-simulator/issues/60)) ([ff828b0](https://github.com/graasp/graasp-app-insulation-simulator/commit/ff828b066031c30bf48d8088087b536e48690d76))
+* allow to pause the simulation ([#80](https://github.com/graasp/graasp-app-insulation-simulator/issues/80)) ([8be0ad0](https://github.com/graasp/graasp-app-insulation-simulator/commit/8be0ad019a119895efade0b0b8783142088dcb5e))
+* allow users to change the insulation of walls and windows ([#57](https://github.com/graasp/graasp-app-insulation-simulator/issues/57)) ([a8bd1df](https://github.com/graasp/graasp-app-insulation-simulator/commit/a8bd1df3afbbe15bf34cf80f445e5ad8dec272dd))
+* configure electricity cost ([#73](https://github.com/graasp/graasp-app-insulation-simulator/issues/73)) ([8ec348c](https://github.com/graasp/graasp-app-insulation-simulator/commit/8ec348c8458ddd977e399febee0c035c68d5c604))
+* configure house size ([#77](https://github.com/graasp/graasp-app-insulation-simulator/issues/77)) ([b1236f6](https://github.com/graasp/graasp-app-insulation-simulator/commit/b1236f68426ca4f6c761deeb99d92a01695fadaf))
+* configure simulation duration ([#78](https://github.com/graasp/graasp-app-insulation-simulator/issues/78)) ([70709c8](https://github.com/graasp/graasp-app-insulation-simulator/commit/70709c88c8c0bd61ac399c02f7f0c0d8d4300acf))
+* display the heat loss rate with arrows ([#47](https://github.com/graasp/graasp-app-insulation-simulator/issues/47)) ([b1ebce1](https://github.com/graasp/graasp-app-insulation-simulator/commit/b1ebce1446a1e4f5ddf3ea69f9ccb0f8dda044fd))
+* import temperatures and implement the simulation engine ([#36](https://github.com/graasp/graasp-app-insulation-simulator/issues/36)) ([b6d9af7](https://github.com/graasp/graasp-app-insulation-simulator/commit/b6d9af7b3c273ea567b1debbd1d31c755c9022eb))
+* improve the responsiveness of the app ([#62](https://github.com/graasp/graasp-app-insulation-simulator/issues/62)) ([d50539d](https://github.com/graasp/graasp-app-insulation-simulator/commit/d50539de7799ed4abfc862bea2481adf70aca9b5))
+* include the windows in the heat loss rate ([#55](https://github.com/graasp/graasp-app-insulation-simulator/issues/55)) ([f6270d8](https://github.com/graasp/graasp-app-insulation-simulator/commit/f6270d8e88135ff667be3d4dcbc272e1d32b2df3))
+* smoothly change colours ([#43](https://github.com/graasp/graasp-app-insulation-simulator/issues/43)) ([8550e7e](https://github.com/graasp/graasp-app-insulation-simulator/commit/8550e7e14fb58de6e61fb2ca2647cbeb3fcbbff1))
+* translate the materials in the window table ([#63](https://github.com/graasp/graasp-app-insulation-simulator/issues/63)) ([a42b66b](https://github.com/graasp/graasp-app-insulation-simulator/commit/a42b66b10b8a4d3951f3a5c056d47fc582683edf))
+
+
+### Bug Fixes
+
+* **deps:** update dependency @react-three/drei to v9.114.6 ([#15](https://github.com/graasp/graasp-app-insulation-simulator/issues/15)) ([c80d1ec](https://github.com/graasp/graasp-app-insulation-simulator/commit/c80d1ec7d3a77b7b8e796af42ba2d6ae6b09b892))
+* **deps:** update dependency @react-three/drei to v9.115.0 ([#39](https://github.com/graasp/graasp-app-insulation-simulator/issues/39)) ([9e2b713](https://github.com/graasp/graasp-app-insulation-simulator/commit/9e2b71378d5de7fa8ca9b652437a09404a663ad2))
+* **deps:** update dependency @sentry/react to v7.119.2 ([#1](https://github.com/graasp/graasp-app-insulation-simulator/issues/1)) ([e348480](https://github.com/graasp/graasp-app-insulation-simulator/commit/e34848066004dc83a0911ab100fa197564b87b1a))
+* **deps:** update dependency @types/node to v20.16.13 ([#2](https://github.com/graasp/graasp-app-insulation-simulator/issues/2)) ([5712a14](https://github.com/graasp/graasp-app-insulation-simulator/commit/5712a14518eb608f9cc29dfd3557808905957146))
+* **deps:** update dependency @types/node to v20.16.14 ([#28](https://github.com/graasp/graasp-app-insulation-simulator/issues/28)) ([1a9c440](https://github.com/graasp/graasp-app-insulation-simulator/commit/1a9c44031ec06fd2b16736a8a0eda34d28f131e6))
+* **deps:** update dependency @types/node to v20.16.15 ([#33](https://github.com/graasp/graasp-app-insulation-simulator/issues/33)) ([d502c29](https://github.com/graasp/graasp-app-insulation-simulator/commit/d502c2954943e553d94a5057a195b6eca3fb3944))
+* **deps:** update dependency @types/node to v20.17.1 ([#35](https://github.com/graasp/graasp-app-insulation-simulator/issues/35)) ([8f024e4](https://github.com/graasp/graasp-app-insulation-simulator/commit/8f024e4caa31270a5b3954120bd3a05e096f312a))
+* **deps:** update dependency @types/react to v18.3.12 ([#34](https://github.com/graasp/graasp-app-insulation-simulator/issues/34)) ([8fbf3fa](https://github.com/graasp/graasp-app-insulation-simulator/commit/8fbf3fa3a1db1c8a29aee769d8a8c3ad0c7021f1))
+* **deps:** update dependency i18next to v23.15.2 ([#4](https://github.com/graasp/graasp-app-insulation-simulator/issues/4)) ([8cd5848](https://github.com/graasp/graasp-app-insulation-simulator/commit/8cd584819f8f9d5596f1fffe688637b3b91bfb63))
+* **deps:** update dependency i18next to v23.16.2 ([#16](https://github.com/graasp/graasp-app-insulation-simulator/issues/16)) ([c632438](https://github.com/graasp/graasp-app-insulation-simulator/commit/c632438946fd5590d7ee99eae8cc29991db733a5))
+* **deps:** update dependency i18next to v23.16.4 ([#38](https://github.com/graasp/graasp-app-insulation-simulator/issues/38)) ([ff2bf64](https://github.com/graasp/graasp-app-insulation-simulator/commit/ff2bf644ac8c0dc4f6509b76f2ca587b92f4d335))
+* **deps:** update dependency react-toastify to v10.0.6 ([#5](https://github.com/graasp/graasp-app-insulation-simulator/issues/5)) ([49265ff](https://github.com/graasp/graasp-app-insulation-simulator/commit/49265ff0d848324cf51230a84f4e8afa5b990a9a))
+* **deps:** update dependency typescript to v5.6.3 ([#7](https://github.com/graasp/graasp-app-insulation-simulator/issues/7)) ([e23a8af](https://github.com/graasp/graasp-app-insulation-simulator/commit/e23a8af341c9a4aca8a232d5878e99a46e96ce04))
+* **deps:** update react monorepo ([#9](https://github.com/graasp/graasp-app-insulation-simulator/issues/9)) ([fc15764](https://github.com/graasp/graasp-app-insulation-simulator/commit/fc15764db4196c30c12f6dbd0047570ece694936))
+
 ## [1.2.7](https://github.com/graasp/graasp-app-starter-ts-vite/compare/v1.2.6...v1.2.7) (2024-09-26)
 
 

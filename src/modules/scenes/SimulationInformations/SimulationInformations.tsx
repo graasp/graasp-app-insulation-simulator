@@ -47,7 +47,9 @@ export const SimulationInformations = (): JSX.Element => {
       <Stack spacing={1} direction="column">
         <Stack direction="row" alignItems="center" spacing={1}>
           <CalendarRange />
-          <Typography>{period.from.toLocaleDateString()}</Typography>
+          <Typography data-testid="simulation-info-date">
+            {period.to.toLocaleDateString()}
+          </Typography>
         </Stack>
 
         <Stack pl={2} spacing={1}>
@@ -75,7 +77,7 @@ export const SimulationInformations = (): JSX.Element => {
           <Stack direction="row" alignItems="center" spacing={1}>
             <Heater />
             <Typography>{tInformations('CURRENT_PERIOD.HEAT_LOSS')}</Typography>
-            <Typography>
+            <Typography data-testid="simulation-info-heatloss">
               {heatLoss.value} {heatLoss.unit}
             </Typography>
           </Stack>
@@ -93,7 +95,7 @@ export const SimulationInformations = (): JSX.Element => {
           <Stack direction="row" alignItems="center" spacing={1}>
             <Heater />
             <Typography>{tInformations('TOTAL.HEAT_LOSS')}</Typography>
-            <Typography>
+            <Typography data-testid="simulation-info-tot-heatloss">
               {totalHeatLoss.value} {totalHeatLoss.unit}
             </Typography>
           </Stack>
@@ -101,7 +103,9 @@ export const SimulationInformations = (): JSX.Element => {
           <Stack direction="row" alignItems="center" spacing={1}>
             <Plug />
             <Typography>{tInformations('TOTAL.ELECTRICITY_COST')}</Typography>
-            <Typography>{electricityCost} CHF</Typography>
+            <Typography data-testid="simulation-info-tot-electricity-cost">
+              {electricityCost} CHF
+            </Typography>
           </Stack>
 
           <Stack direction="row" alignItems="center" spacing={1}>

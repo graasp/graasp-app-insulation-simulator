@@ -31,7 +31,9 @@ export default defineConfig({
     baseURL: `http://localhost:${process.env.VITE_PORT || 4001}`,
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
+    trace: 'on',
+
+    screenshot: 'only-on-failure',
   },
 
   /* Configure projects for major browsers */

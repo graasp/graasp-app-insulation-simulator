@@ -54,6 +54,7 @@
     "pre-commit": "yarn prettier:check && yarn lint",
     "playwright": "playwright test --project chromium",
     "playwright:ui": "playwright test --ui",
+    "playwright:trace": "playwright show-trace",
     "unittest": "vitest",
     "cov:report": "open ./coverage/lcov-report/index.html"
   },

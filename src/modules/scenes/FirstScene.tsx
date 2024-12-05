@@ -23,7 +23,7 @@ import { SimulationControlPanel } from './SimulationControlPanel/SimulationContr
 import { SimulationInformations } from './SimulationInformations/SimulationInformations';
 
 const FirstSceneComponent = (): JSX.Element => {
-  const { startSimulation, status } = useSimulation();
+  const { startSimulation, pauseSimulation, status } = useSimulation();
   const { numberOfFloors } = useHouseComponents();
 
   const theme = useTheme();
@@ -73,12 +73,12 @@ const FirstSceneComponent = (): JSX.Element => {
 
         <Stack mt={2}>
           <Fab
-            data-testid="simulation-control-button"
+            data-testid={`simulation-control-button-${status === SimulationStatus.RUNNING ? 'pause' : 'start'}`}
             color="primary"
-            onClick={startSimulation}
-            disabled={
-              status === SimulationStatus.RUNNING ||
-              status === SimulationStatus.LOADING
+            onClick={
+              status === SimulationStatus.RUNNING
+                ? pauseSimulation
+                : startSimulation
             }
           >
             {status === SimulationStatus.RUNNING ? (

@@ -5,5 +5,3 @@ export enum SimulationStatus {
   PAUSED,
   FINISHED,
 }
-
-export type SimulationProgression = { progress: number; timeLeft: number };

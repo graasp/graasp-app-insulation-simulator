@@ -16,8 +16,8 @@ type Props = {
 };
 
 type UseHeatLossReturnType = {
-  heatLosses: HeatLossPerComponent;
-  totalHeatLoss: number;
+  heatLossPerComponent: HeatLossPerComponent;
+  heatLoss: number;
 };
 
 export const useHeatLoss = ({
@@ -28,7 +28,6 @@ export const useHeatLoss = ({
 }: Props): UseHeatLossReturnType => {
   const [heatLossPerComponent, setHeatLossPerComponent] =
     useState<HeatLossPerComponent>({});
-  const [totalHeatLoss, setTotalHeatLoss] = useState(0);
 
   // Compute the constant factors per house's components
   const heatLossConstantFactors = useMemo(
@@ -49,7 +48,6 @@ export const useHeatLoss = ({
   useEffect(() => {
     if (!temperatures) {
       setHeatLossPerComponent({});
-      setTotalHeatLoss(0);
       return;
     }
 
@@ -69,14 +67,6 @@ export const useHeatLoss = ({
     );
 
     setHeatLossPerComponent(newHeatLossPerComponent);
-    setTotalHeatLoss(
-      (prevT) =>
-        prevT +
-        Object.values(newHeatLossPerComponent).reduce(
-          (acc, heatLoss) => acc + heatLoss,
-          0,
-        ),
-    );
   }, [
     measurementFrequency,
     temperatures,
@@ -85,7 +75,10 @@ export const useHeatLoss = ({
   ]);
 
   return {
-    heatLosses: heatLossPerComponent,
-    totalHeatLoss,
+    heatLossPerComponent,
+    heatLoss: Object.values(heatLossPerComponent).reduce(
+      (acc, heatLoss) => acc + heatLoss,
+      0,
+    ),
   };
 };

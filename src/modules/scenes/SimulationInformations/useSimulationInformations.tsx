@@ -28,7 +28,7 @@ export const useSimulationInformations =
   (): UseSimulationInformationsReturnType => {
     const { season } = useSeason();
 
-    const { heatLosses } = useSimulation();
+    const { heatLossPerComponent } = useSimulation();
 
     const { houseComponentsConfigurator } = useHouseComponents();
 
@@ -37,7 +37,7 @@ export const useSimulationInformations =
     );
 
     const heatLoss = formatHeatLossRate(
-      Object.values(heatLosses).reduce((acc, heat) => acc + heat, 0),
+      Object.values(heatLossPerComponent).reduce((acc, heat) => acc + heat, 0),
     );
 
     return {

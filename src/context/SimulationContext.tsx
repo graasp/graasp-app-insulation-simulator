@@ -53,6 +53,7 @@ type SimulationContextType = {
     duration: Pick<FormattedTime, 'value'> & { unit: typeof TimeUnit.Years },
   ) => void;
   startSimulation: () => void;
+  pauseSimulation: () => void;
 };
 
 const SimulationContext = createContext<SimulationContextType | null>(null);
@@ -133,6 +134,8 @@ export const SimulationProvider = ({
     });
   }, [csv.measurementFrequency, csv.path]);
 
+  const intervalId = useRef<NodeJS.Timeout | null>(null);
+
   const startSimulation = useCallback((): void => {
     if (
       simulationStatus === SimulationStatus.RUNNING ||
@@ -145,19 +148,28 @@ export const SimulationProvider = ({
       throw new Error('The temperatures are not loaded!');
     }
 
+    if (simulationStatus !== SimulationStatus.PAUSED) {
+      temperatureIterator.current.reset();
+    }
     setSimulationStatus(SimulationStatus.RUNNING);
-    temperatureIterator.current.reset();
 
-    const intervalId = setInterval(() => {
+    intervalId.current = setInterval(() => {
       if (temperatureIterator.current?.hasMore()) {
         // TODO: should update this to use the overrided temperature in the calculation
         setCurrentWindow(temperatureIterator.current.getNext());
-      } else {
-        clearInterval(intervalId);
+      } else if (intervalId.current) {
+        clearInterval(intervalId.current);
         setSimulationStatus(SimulationStatus.FINISHED);
       }
     }, simulationFrameMS);
   }, [simulationFrameMS, simulationStatus]);
+
+  const pauseSimulation = useCallback((): void => {
+    if (simulationStatus === SimulationStatus.RUNNING && intervalId.current) {
+      clearInterval(intervalId.current);
+      setSimulationStatus(SimulationStatus.PAUSED);
+    }
+  }, [simulationStatus]);
 
   const updateOutdoorTemperature = ({
     override,
@@ -198,6 +210,7 @@ export const SimulationProvider = ({
       }),
       setPricekWh,
       startSimulation,
+      pauseSimulation,
     }),
     [
       currentWindow.mean,
@@ -206,6 +219,7 @@ export const SimulationProvider = ({
       indoorTemperature,
       outdoorTemperature.override,
       outdoorTemperature.value,
+      pauseSimulation,
       pricekWh,
       progression,
       simulationDuration,

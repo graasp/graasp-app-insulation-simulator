@@ -2,37 +2,23 @@ import { Locator, Page, expect } from '@playwright/test';
 
 import { changeSlider } from '../utils/SliderComponent';
 import { MaterialEditorPage } from './MaterialEditorPage';
+import { SimulationInfoPage } from './SimulationInfoPage';
 import { WindowEditorPage } from './WindowEditorPage';
 
 // Page Object for the house configuration page
 export class HousePage {
-  readonly page: Page;
+  readonly simulationInfo: SimulationInfoPage;
 
   readonly electricityCost: Locator;
 
-  readonly indoorTemperatureInfo: Locator;
-
-  readonly outdoorTemperatureInfo: Locator;
-
   readonly simulationDuration: Locator;
 
-  readonly simulationControlButton: Locator;
-
-  constructor(page: Page) {
-    this.page = page;
+  constructor(readonly page: Page) {
+    this.simulationInfo = new SimulationInfoPage(this.page);
     this.electricityCost = this.page.getByRole('spinbutton', {
       name: 'Electricity Cost',
     });
-    this.indoorTemperatureInfo = this.page.getByTestId(
-      'simulation-info-indoor-temperature',
-    );
-    this.outdoorTemperatureInfo = this.page.getByTestId(
-      'simulation-info-outdoor-temperature',
-    );
     this.simulationDuration = this.page.getByLabel('Duration of Simulation');
-    this.simulationControlButton = this.page.getByTestId(
-      'simulation-control-button',
-    );
   }
 
   async goto(): Promise<void> {
@@ -122,6 +108,28 @@ export class HousePage {
     await this.updateSelect(
       'Duration of Simulation',
       `${duration} year${duration > 1 ? 's' : ''}`,
+    );
+  }
+
+  getSimulationControlButton(action: 'start' | 'pause'): Locator {
+    return this.page.getByTestId(`simulation-control-button-${action}`);
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  private async clickOnButton(button: Locator): Promise<void> {
+    await button.scrollIntoViewIfNeeded();
+    await button.click();
+  }
+
+  async startSimulation(): Promise<void> {
+    await this.clickOnButton(
+      this.page.getByTestId('simulation-control-button-start'),
+    );
+  }
+
+  async pauseSimulation(): Promise<void> {
+    await this.clickOnButton(
+      this.page.getByTestId('simulation-control-button-pause'),
     );
   }
 

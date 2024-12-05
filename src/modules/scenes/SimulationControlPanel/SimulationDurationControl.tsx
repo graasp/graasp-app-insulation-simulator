@@ -19,7 +19,7 @@ export const SimulationDurationControl = (): JSX.Element => {
   const { duration, updateSimulationDuration, status } = useSimulation();
 
   const selectIsDisabled =
-    status === SimulationStatus.LOADING || status === SimulationStatus.RUNNING;
+    status !== SimulationStatus.IDLE && status !== SimulationStatus.FINISHED;
 
   const handleChange = (newDuration: string | number): void => {
     if (selectIsDisabled) {

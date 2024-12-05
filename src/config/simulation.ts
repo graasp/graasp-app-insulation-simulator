@@ -7,7 +7,7 @@ import {
 } from './houseInsulations';
 
 export const SIMULATION_FRAME_MS = 150;
-export const SIMULATION_SLIDING_WINDOW = { window: 2, unit: TimeUnit.Days };
+export const SIMULATION_SLIDING_WINDOW = { window: 1, unit: TimeUnit.Days };
 export const SIMULATION_CSV_FILES = {
   1: {
     path: 'temperatures/predictions_1_year.csv',

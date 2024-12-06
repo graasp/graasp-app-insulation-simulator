@@ -24,7 +24,7 @@ export const SimulationInformations = (): JSX.Element => {
   const {
     indoorTemperature,
     outdoorTemperature,
-    period,
+    date,
     totalHeatLoss,
     electricityCost,
   } = useSimulation();
@@ -48,7 +48,7 @@ export const SimulationInformations = (): JSX.Element => {
         <Stack direction="row" alignItems="center" spacing={1}>
           <CalendarRange />
           <Typography data-testid="simulation-info-date">
-            {period.to.toLocaleDateString()}
+            {date.toLocaleDateString()}
           </Typography>
         </Stack>
 

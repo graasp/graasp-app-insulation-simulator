@@ -101,7 +101,7 @@ export const SimulationProvider = ({
     dispatchHistory({
       type: 'reset',
       outdoorTemperature: {
-        value: temperatures.current[0].temperature,
+        weatherValue: temperatures.current[0].temperature,
       },
     });
   }, []);
@@ -134,12 +134,16 @@ export const SimulationProvider = ({
         setCurrDayIdx((prevIdx) => {
           const nextIdx = prevIdx + 1;
           if (nextIdx < numberOfRows) {
+            const { userOverride, value } = history[prevIdx].outdoorTemperature;
+            const weatherValue = temperatures.current[nextIdx].temperature;
+
             dispatchHistory({
               type: 'add',
               command: history[prevIdx].from({
                 outdoorTemperature: {
-                  ...history[prevIdx].outdoorTemperature,
-                  value: temperatures.current[nextIdx].temperature,
+                  userOverride,
+                  weatherValue: temperatures.current[nextIdx].temperature,
+                  value: userOverride ? value : weatherValue,
                 },
               }),
             });
@@ -211,7 +215,8 @@ export const SimulationProvider = ({
         type: 'updateOutdoorTemperature',
         index: currDayIdx,
         outdoorTemperature: {
-          userValue: override ? value : undefined,
+          userOverride: override,
+          value,
         },
       });
     },

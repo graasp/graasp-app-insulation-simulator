@@ -54,8 +54,7 @@ export class SimulationCommand {
     this.houseConfigurator = houseConfigurator;
     this.heatLoss = new SimulationHeatLoss({
       indoorTemperature,
-      outdoorTemperature:
-        outdoorTemperature.userValue ?? outdoorTemperature.value,
+      outdoorTemperature: outdoorTemperature.value,
       houseConfigurator,
     });
   }
@@ -69,7 +68,7 @@ export class SimulationCommand {
   >): SimulationCommand {
     return new SimulationCommand({
       indoorTemperature: SIMULATION_INDOOR_TEMPERATURE_CELCIUS.DEFAULT,
-      outdoorTemperature: { value: 0 },
+      outdoorTemperature: { userOverride: false, weatherValue: 0, value: 0 },
       numberOfFloors,
       pricekWh: SIMULATION_PRICE_KWH,
       prevTotHeatLoss: 0,

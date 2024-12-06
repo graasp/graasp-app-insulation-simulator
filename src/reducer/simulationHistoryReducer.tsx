@@ -22,7 +22,7 @@ const updateState = (
 type Action =
   | {
       type: 'reset';
-      outdoorTemperature: OutdoorTemperature;
+      outdoorTemperature: Pick<OutdoorTemperature, 'weatherValue'>;
     }
   | {
       type: 'add';
@@ -36,7 +36,7 @@ type Action =
   | {
       type: 'updateOutdoorTemperature';
       index: number;
-      outdoorTemperature: Partial<OutdoorTemperature>;
+      outdoorTemperature: Omit<OutdoorTemperature, 'weatherValue'>;
     }
   | {
       type: 'updateNumberOfFloors';
@@ -63,9 +63,17 @@ export const simulationHistory = (
   switch (type) {
     case 'reset': {
       if (state.length) {
+        const { value, userOverride } =
+          state[state.length - 1].outdoorTemperature;
+        const { weatherValue } = action.outdoorTemperature;
+
         return [
           state[state.length - 1].from({
-            outdoorTemperature: action.outdoorTemperature,
+            outdoorTemperature: {
+              userOverride,
+              weatherValue,
+              value: userOverride ? value : weatherValue,
+            },
             prevTotHeatLoss: 0,
             prevTotPowerCost: 0,
           }),
@@ -95,15 +103,18 @@ export const simulationHistory = (
       return updateState(state, action.index, {
         indoorTemperature: action.indoorTemperature,
       });
-    case 'updateOutdoorTemperature':
+    case 'updateOutdoorTemperature': {
+      const { userOverride, value } = action.outdoorTemperature;
+      const { weatherValue } = state[action.index].outdoorTemperature;
+
       return updateState(state, action.index, {
         outdoorTemperature: {
-          userValue: action.outdoorTemperature.userValue,
-          value:
-            action.outdoorTemperature.value ??
-            state[action.index].outdoorTemperature.value,
+          userOverride,
+          weatherValue,
+          value: userOverride ? value : weatherValue,
         },
       });
+    }
     case 'updateNumberOfFloors':
       return updateState(state, action.index, {
         numberOfFloors: action.numberOfFloors,

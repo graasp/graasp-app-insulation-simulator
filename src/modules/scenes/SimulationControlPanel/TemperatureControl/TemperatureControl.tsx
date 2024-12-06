@@ -28,8 +28,6 @@ export const TemperatureControl = (): JSX.Element => {
   const { MIN: minOutdoorTemperature, MAX: maxOutdoorTemperature } =
     SIMULATION_OUTDOOR_TEMPERATURE_CELCIUS;
 
-  const isValueOverride = Boolean(outdoorTemperature.userValue);
-
   return (
     <Stack spacing={3}>
       <SliderTemperature
@@ -50,16 +48,16 @@ export const TemperatureControl = (): JSX.Element => {
           maxTemperature={maxOutdoorTemperature}
           onChange={(v) =>
             updateOutdoorTemperature({
-              override: isValueOverride,
+              override: outdoorTemperature.userOverride,
               value: v,
             })
           }
-          disabled={!isValueOverride}
+          disabled={!outdoorTemperature.userOverride}
         />
         <FormControlLabel
           control={
             <Checkbox
-              checked={isValueOverride}
+              checked={outdoorTemperature.userOverride}
               onChange={(_, checked) =>
                 updateOutdoorTemperature({
                   override: checked,

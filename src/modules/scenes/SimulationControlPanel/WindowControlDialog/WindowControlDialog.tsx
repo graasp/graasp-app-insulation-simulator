@@ -84,7 +84,7 @@ export const WindowControlDialog = ({
                 labelId="window-size-select-label"
                 id="window-size-select"
                 label={t('SIZE_LABEL')}
-                defaultValue={windowSize}
+                value={windowSize}
                 onChange={(v) => handleSizeChange(v.target.value)}
               >
                 {WindowSizes.map((s) => (

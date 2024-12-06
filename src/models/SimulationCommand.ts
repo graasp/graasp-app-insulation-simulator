@@ -1,30 +1,36 @@
+import {
+  SIMULATION_INDOOR_TEMPERATURE_CELCIUS,
+  SIMULATION_PRICE_KWH,
+} from '@/config/simulation';
+import { OutdoorTemperature } from '@/types/temperatures';
+
 import { HouseComponentsConfigurator } from './HouseComponentsConfigurator';
+import { SimulationHeatLoss } from './SimulationHeatLoss';
 
 type Constructor = {
-  readonly indoorTemperature: number;
-  readonly outdoorTemperature: number;
-  readonly numberOfFloors: number;
-  readonly powerCost: number;
-  readonly heatLoss: number;
-  readonly totalHeatLoss: number;
-  readonly totalElectricityCost: number;
-  readonly houseConfigurator: HouseComponentsConfigurator;
+  indoorTemperature: number;
+  outdoorTemperature: OutdoorTemperature;
+  numberOfFloors: number;
+  pricekWh: number;
+  prevTotHeatLoss: number;
+  prevTotPowerCost: number;
+  houseConfigurator: HouseComponentsConfigurator;
 };
 
 export class SimulationCommand {
   readonly indoorTemperature: number;
 
-  readonly outdoorTemperature: number;
+  readonly outdoorTemperature: OutdoorTemperature;
 
   readonly numberOfFloors: number;
 
-  readonly powerCost: number;
+  readonly pricekWh: number;
 
-  readonly heatLoss: number;
+  readonly heatLoss: SimulationHeatLoss;
 
-  readonly totalHeatLoss: number;
+  readonly prevTotHeatLoss: number;
 
-  readonly totalElectricityCost: number;
+  readonly prevTotPowerCost: number;
 
   readonly houseConfigurator: HouseComponentsConfigurator;
 
@@ -34,19 +40,53 @@ export class SimulationCommand {
     indoorTemperature,
     outdoorTemperature,
     numberOfFloors,
-    powerCost,
-    heatLoss,
-    totalHeatLoss,
-    totalElectricityCost,
+    pricekWh,
+    prevTotHeatLoss,
+    prevTotPowerCost,
     houseConfigurator,
   }: Constructor) {
     this.indoorTemperature = indoorTemperature;
     this.outdoorTemperature = outdoorTemperature;
     this.numberOfFloors = numberOfFloors;
-    this.powerCost = powerCost;
-    this.heatLoss = heatLoss;
-    this.totalHeatLoss = totalHeatLoss;
-    this.totalElectricityCost = totalElectricityCost;
+    this.pricekWh = pricekWh;
+    this.prevTotHeatLoss = prevTotHeatLoss;
+    this.prevTotPowerCost = prevTotPowerCost;
     this.houseConfigurator = houseConfigurator;
+    this.heatLoss = new SimulationHeatLoss({
+      indoorTemperature,
+      outdoorTemperature:
+        outdoorTemperature.userValue ?? outdoorTemperature.value,
+      houseConfigurator,
+    });
+  }
+
+  public static createDefault({
+    numberOfFloors,
+    houseConfigurator,
+  }: Pick<
+    Constructor,
+    'numberOfFloors' | 'houseConfigurator'
+  >): SimulationCommand {
+    return new SimulationCommand({
+      indoorTemperature: SIMULATION_INDOOR_TEMPERATURE_CELCIUS.DEFAULT,
+      outdoorTemperature: { value: 0 },
+      numberOfFloors,
+      pricekWh: SIMULATION_PRICE_KWH,
+      prevTotHeatLoss: 0,
+      prevTotPowerCost: 0,
+      houseConfigurator,
+    });
+  }
+
+  public from(params: Partial<Constructor>): SimulationCommand {
+    return new SimulationCommand({
+      indoorTemperature: params.indoorTemperature ?? this.indoorTemperature,
+      outdoorTemperature: params.outdoorTemperature ?? this.outdoorTemperature,
+      numberOfFloors: params.numberOfFloors ?? this.numberOfFloors,
+      pricekWh: params.pricekWh ?? this.pricekWh,
+      prevTotHeatLoss: params.prevTotHeatLoss ?? this.prevTotHeatLoss,
+      prevTotPowerCost: params.prevTotPowerCost ?? this.prevTotPowerCost,
+      houseConfigurator: params.houseConfigurator ?? this.houseConfigurator,
+    });
   }
 }

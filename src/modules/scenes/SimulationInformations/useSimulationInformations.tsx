@@ -28,7 +28,7 @@ export const useSimulationInformations =
   (): UseSimulationInformationsReturnType => {
     const { season } = useSeason();
 
-    const { heatLossPerComponent } = useSimulation();
+    const { heatLoss } = useSimulation();
 
     const { houseComponentsConfigurator } = useHouseComponents();
 
@@ -36,12 +36,8 @@ export const useSimulationInformations =
       HouseComponent.Wall,
     );
 
-    const heatLoss = formatHeatLossRate(
-      Object.values(heatLossPerComponent).reduce((acc, heat) => acc + heat, 0),
-    );
-
     return {
-      heatLoss,
+      heatLoss: formatHeatLossRate(heatLoss),
       seasonIcon: iconsBySeason[season],
       formattedWallSize: wallComponent
         ? formatComponentSize({

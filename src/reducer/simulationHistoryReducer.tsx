@@ -22,6 +22,7 @@ const updateState = (
 type Action =
   | {
       type: 'reset';
+      outdoorTemperature: OutdoorTemperature;
     }
   | {
       type: 'add';
@@ -60,8 +61,18 @@ export const simulationHistory = (
   const { type } = action;
 
   switch (type) {
-    case 'reset':
+    case 'reset': {
+      if (state.length) {
+        return [
+          state[state.length - 1].from({
+            outdoorTemperature: action.outdoorTemperature,
+            prevTotHeatLoss: 0,
+            prevTotPowerCost: 0,
+          }),
+        ];
+      }
       return [];
+    }
     case 'add': {
       const prev = state[state.length - 1];
       // Calculate the cumulative heat loss.  If this is the first element

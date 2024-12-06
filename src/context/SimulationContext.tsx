@@ -103,29 +103,25 @@ export const SimulationProvider = ({
     SimulationStatus.LOADING, // waiting for the temperatures...
   );
 
-  const outdoorTemperature =
-    currentCommand.outdoorTemperature.userValue ??
-    currentCommand.outdoorTemperature.value;
+  const resetSimulation = useCallback(() => {
+    currDayIdx.current = 0;
+    dispatchHistory({
+      type: 'reset',
+      outdoorTemperature: {
+        value: temperatures.current[0].temperature,
+      },
+    });
+  }, []);
 
   const simulationIntervalId = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     loadTemperaturesFromCSV(csv.path).then((rows) => {
-      // TODO: to simplify? One temperature per day!
       temperatures.current = rows;
-      const numberOfHours =
-        rows.length * timeConversionFactors[csv.measurementFrequency];
-
-      setSimulationDuration(formatHours(numberOfHours));
       setSimulationStatus(SimulationStatus.IDLE);
-
-      dispatchHistory({
-        type: 'updateOutdoorTemperature',
-        index: 0,
-        outdoorTemperature: { value: temperatures.current[0].temperature },
-      });
+      resetSimulation();
     });
-  }, [csv.measurementFrequency, csv.path]);
+  }, [csv.measurementFrequency, csv.path, resetSimulation]);
 
   useEffect(() => {
     dispatchHistory({
@@ -136,6 +132,10 @@ export const SimulationProvider = ({
   }, [houseComponentsConfigurator]);
 
   const startSimulation = useCallback((): void => {
+    if (temperatures.current.length === 0) {
+      throw new Error('The temperatures are not loaded!');
+    }
+
     if (
       simulationStatus === SimulationStatus.RUNNING ||
       simulationStatus === SimulationStatus.LOADING
@@ -143,16 +143,8 @@ export const SimulationProvider = ({
       return;
     }
 
-    if (temperatures.current.length === 0) {
-      throw new Error('The temperatures are not loaded!');
-    }
-
-    if (simulationStatus !== SimulationStatus.PAUSED) {
-      // TODO: to adapt!
-      // reset simulation on restart!
-      // currDayIdx.current = 0;
-      // console.log('resetting');
-      // dispatchHistory({ type: 'reset' });
+    if (simulationStatus === SimulationStatus.FINISHED) {
+      resetSimulation();
     }
 
     setSimulationStatus(SimulationStatus.RUNNING);
@@ -173,8 +165,14 @@ export const SimulationProvider = ({
         clearInterval(simulationIntervalId.current);
         setSimulationStatus(SimulationStatus.FINISHED);
       }
-    }, simulationFrameMS); // TODO: use from constructor!
-  }, [currentCommand, numberOfRows, simulationFrameMS, simulationStatus]);
+    }, simulationFrameMS);
+  }, [
+    currentCommand,
+    numberOfRows,
+    resetSimulation,
+    simulationFrameMS,
+    simulationStatus,
+  ]);
 
   const pauseSimulation = useCallback((): void => {
     if (
@@ -215,6 +213,17 @@ export const SimulationProvider = ({
     });
   }, []);
 
+  const updateSimulationDuration = useCallback(
+    (
+      duration: Pick<FormattedTime, 'value'> & {
+        unit: typeof TimeUnit.Years;
+      },
+    ): void => {
+      setSimulationDuration(duration);
+    },
+    [],
+  );
+
   const contextValue = useMemo(
     () => ({
       indoorTemperature: currentCommand.indoorTemperature,
@@ -223,11 +232,7 @@ export const SimulationProvider = ({
       updateOutdoorTemperature,
       date: new Date(temperatures.current[currDayIdx.current].time),
       duration: simulationDuration,
-      updateSimulationDuration: (
-        duration: Pick<FormattedTime, 'value'> & {
-          unit: typeof TimeUnit.Years;
-        },
-      ) => setSimulationDuration(duration),
+      updateSimulationDuration,
       status: simulationStatus,
       heatLossPerComponent: currentCommand.heatLoss.perComponent,
       heatLoss: currentCommand.heatLoss.global,
@@ -246,20 +251,21 @@ export const SimulationProvider = ({
       pauseSimulation,
     }),
     [
-      currentCommand.heatLoss.global,
-      currentCommand.heatLoss.perComponent,
       currentCommand.indoorTemperature,
       currentCommand.outdoorTemperature,
-      currentCommand.pricekWh,
+      currentCommand.heatLoss.perComponent,
+      currentCommand.heatLoss.global,
       currentCommand.prevTotHeatLoss,
       currentCommand.prevTotPowerCost,
-      simulationDuration,
-      simulationStatus,
-      startSimulation,
-      pauseSimulation,
+      currentCommand.pricekWh,
       updateIndoorTemperature,
       updateOutdoorTemperature,
+      simulationDuration,
+      updateSimulationDuration,
+      simulationStatus,
       updatePricekWh,
+      startSimulation,
+      pauseSimulation,
     ],
   );
 

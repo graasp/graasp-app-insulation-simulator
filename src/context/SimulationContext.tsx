@@ -10,6 +10,8 @@ import {
   useState,
 } from 'react';
 
+import { useDebouncedCallback } from 'use-debounce';
+
 import { SIMULATION_CSV_FILES } from '@/config/simulation';
 import { SimulationCommand } from '@/models/SimulationCommand';
 import { simulationHistory } from '@/reducer/simulationHistoryReducer';
@@ -22,6 +24,7 @@ import { undefinedContextErrorFactory } from '@/utils/context';
 import { electricityCost } from '@/utils/electricity';
 import { formatHeatLossRate, powerConversionFactors } from '@/utils/heatLoss';
 import { loadTemperaturesFromCSV } from '@/utils/temperatures';
+import { timeConversionFactors } from '@/utils/time';
 
 import { useHouseComponents } from './HouseComponentsContext';
 
@@ -41,11 +44,14 @@ type SimulationContextType = {
   }) => void;
   date: Date;
   duration: FormattedTime;
+  numberOfDays: number;
   updateSimulationDuration: (
     duration: Pick<FormattedTime, 'value'> & { unit: typeof TimeUnit.Years },
   ) => void;
   startSimulation: () => void;
   pauseSimulation: () => void;
+  currDayIdx: number;
+  gotToDay: (idx: number) => void;
 };
 
 const SimulationContext = createContext<SimulationContextType | null>(null);
@@ -243,6 +249,30 @@ export const SimulationProvider = ({
     [],
   );
 
+  // The useDebouncedCallback function is used to avoid modifying days too quickly
+  // and creating too many new days.
+  const gotToDay = useDebouncedCallback((idx: number): void => {
+    pauseSimulation();
+    if (idx <= currDayIdx) {
+      dispatchHistory({ type: 'goToPast', idx });
+    } else if (idx < temperatures.current.length) {
+      const { userOverride, value } = history[currDayIdx].outdoorTemperature;
+
+      const outdoorTemperatures = temperatures.current
+        .slice(currDayIdx + 1, idx + 1)
+        .map(({ temperature: weatherValue }) => ({
+          userOverride,
+          weatherValue,
+          value: userOverride ? value : weatherValue,
+        }));
+
+      dispatchHistory({
+        type: 'goToFutur',
+        outdoorTemperatures,
+      });
+    }
+  }, 10);
+
   const contextValue = useMemo(
     () => ({
       indoorTemperature: currentCommand.indoorTemperature,
@@ -251,6 +281,7 @@ export const SimulationProvider = ({
       updateOutdoorTemperature,
       date: new Date(temperatures.current[currDayIdx].time),
       duration: simulationDuration,
+      numberOfDays: simulationDuration.value * 365, // TODO: simplify by setting duration in years...
       updateSimulationDuration,
       status: simulationStatus,
       heatLossPerComponent: currentCommand.heatLoss.perComponent,
@@ -268,6 +299,8 @@ export const SimulationProvider = ({
       setPricekWh: updatePricekWh,
       startSimulation,
       pauseSimulation,
+      currDayIdx,
+      gotToDay,
     }),
     [
       currentCommand.indoorTemperature,
@@ -286,6 +319,7 @@ export const SimulationProvider = ({
       updatePricekWh,
       startSimulation,
       pauseSimulation,
+      gotToDay,
     ],
   );
 

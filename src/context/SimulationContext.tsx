@@ -24,7 +24,6 @@ import { undefinedContextErrorFactory } from '@/utils/context';
 import { electricityCost } from '@/utils/electricity';
 import { formatHeatLossRate, powerConversionFactors } from '@/utils/heatLoss';
 import { loadTemperaturesFromCSV } from '@/utils/temperatures';
-import { timeConversionFactors } from '@/utils/time';
 
 import { useHouseComponents } from './HouseComponentsContext';
 
@@ -199,8 +198,9 @@ export const SimulationProvider = ({
       simulationIntervalId.current
     ) {
       clearInterval(simulationIntervalId.current);
-      setSimulationStatus(SimulationStatus.PAUSED);
     }
+
+    setSimulationStatus(SimulationStatus.PAUSED);
   }, [simulationStatus]);
 
   // Update simulation's current state
@@ -253,6 +253,7 @@ export const SimulationProvider = ({
   // and creating too many new days.
   const gotToDay = useDebouncedCallback((idx: number): void => {
     pauseSimulation();
+
     if (idx <= currDayIdx) {
       dispatchHistory({ type: 'goToPast', idx });
     } else if (idx < temperatures.current.length) {

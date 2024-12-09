@@ -48,16 +48,16 @@ export const TemperatureControl = (): JSX.Element => {
           maxTemperature={maxOutdoorTemperature}
           onChange={(v) =>
             updateOutdoorTemperature({
-              override: outdoorTemperature.override,
+              override: outdoorTemperature.userOverride,
               value: v,
             })
           }
-          disabled={!outdoorTemperature.override}
+          disabled={!outdoorTemperature.userOverride}
         />
         <FormControlLabel
           control={
             <Checkbox
-              checked={outdoorTemperature.override}
+              checked={outdoorTemperature.userOverride}
               onChange={(_, checked) =>
                 updateOutdoorTemperature({
                   override: checked,

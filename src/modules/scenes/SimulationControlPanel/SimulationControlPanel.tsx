@@ -12,7 +12,7 @@ import { SimulationDurationControl } from './SimulationDurationControl';
 import { TemperatureControl } from './TemperatureControl/TemperatureControl';
 
 const AccordionContainer = styled(Accordion, {
-  shouldForwardProp: (prop) => prop !== 'sm',
+  shouldForwardProp: (prop) => prop !== 'md',
 })<{ md: boolean }>(({ md }) => ({
   maxHeight: md ? '95vh' : undefined,
   overflowY: md ? 'auto' : undefined,

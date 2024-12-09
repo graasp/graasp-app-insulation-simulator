@@ -5,49 +5,41 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useReducer,
   useRef,
   useState,
 } from 'react';
 
-import {
-  SIMULATION_CSV_FILES,
-  SIMULATION_INDOOR_TEMPERATURE_CELCIUS,
-  SIMULATION_OUTDOOR_TEMPERATURE_CELCIUS,
-  SIMULATION_PRICE_KWH,
-} from '@/config/simulation';
-import { useHeatLoss } from '@/hooks/useHeatLoss';
-import { useSimulationProgression } from '@/hooks/useSimulationProgression';
+import { SIMULATION_CSV_FILES } from '@/config/simulation';
+import { SimulationCommand } from '@/models/SimulationCommand';
+import { simulationHistory } from '@/reducer/simulationHistoryReducer';
 import { FormattedHeatLoss } from '@/types/heatLoss';
 import { HeatLossPerComponent } from '@/types/houseComponent';
-import { SimulationProgression, SimulationStatus } from '@/types/simulation';
-import { SlidingWindow } from '@/types/temperatures';
+import { SimulationStatus } from '@/types/simulation';
+import { OutdoorTemperature, TemperatureRow } from '@/types/temperatures';
 import { FormattedTime, TimeUnit } from '@/types/time';
 import { undefinedContextErrorFactory } from '@/utils/context';
 import { electricityCost } from '@/utils/electricity';
 import { formatHeatLossRate, powerConversionFactors } from '@/utils/heatLoss';
 import { loadTemperaturesFromCSV } from '@/utils/temperatures';
-import { formatHours, timeConversionFactors } from '@/utils/time';
 
-import {
-  TemperatureIterator,
-  initSlidingWindow,
-} from '../models/TemperatureIterator';
 import { useHouseComponents } from './HouseComponentsContext';
-
-type OutdoorTemperature = { override: boolean; value: number };
 
 type SimulationContextType = {
   status: SimulationStatus;
-  heatLosses: HeatLossPerComponent;
+  heatLossPerComponent: HeatLossPerComponent;
+  heatLoss: number;
   totalHeatLoss: FormattedHeatLoss;
   electricityCost: number;
   setPricekWh: (newPrice: number) => void;
   indoorTemperature: number;
   updateIndoorTemperature: (newTemperature: number) => void;
   outdoorTemperature: OutdoorTemperature;
-  updateOutdoorTemperature: (props: OutdoorTemperature) => void;
-  progression: SimulationProgression;
-  period: SlidingWindow['period'];
+  updateOutdoorTemperature: (props: {
+    override: boolean;
+    value: number;
+  }) => void;
+  date: Date;
   duration: FormattedTime;
   updateSimulationDuration: (
     duration: Pick<FormattedTime, 'value'> & { unit: typeof TimeUnit.Years },
@@ -67,76 +59,120 @@ export const SimulationProvider = ({
   children,
   simulationFrameMS,
 }: Props): ReactNode => {
-  const temperatureIterator = useRef<TemperatureIterator>();
+  // Hooks
+  const { houseComponentsConfigurator, numberOfFloors } = useHouseComponents();
 
-  const [simulationStatus, setSimulationStatus] = useState<SimulationStatus>(
-    SimulationStatus.IDLE,
-  );
+  // Refs
+  const simulationIntervalId = useRef<NodeJS.Timeout | null>(null);
+  const temperatures = useRef<TemperatureRow[]>([
+    {
+      time: new Date().toLocaleString(),
+      temperature: Number.NaN,
+    },
+  ]);
 
-  const [currentWindow, setCurrentWindow] = useState<SlidingWindow>(
-    initSlidingWindow(0),
-  );
-
+  // States
   const [simulationDuration, setSimulationDuration] = useState<FormattedTime>({
     value: 1,
     unit: TimeUnit.Years,
   });
-
-  const [indoorTemperature, setIndoorTemperature] = useState(
-    SIMULATION_INDOOR_TEMPERATURE_CELCIUS.DEFAULT,
+  const [simulationStatus, setSimulationStatus] = useState<SimulationStatus>(
+    SimulationStatus.LOADING, // waiting for the temperatures...
   );
 
-  const [outdoorTemperature, setOutdoorTemperature] = useState({
-    override: false,
-    value: SIMULATION_OUTDOOR_TEMPERATURE_CELCIUS.DEFAULT,
-  });
-
-  const [pricekWh, setPricekWh] = useState(SIMULATION_PRICE_KWH);
-
+  // Computed states
   const csv =
     SIMULATION_CSV_FILES[
       simulationDuration.value as keyof typeof SIMULATION_CSV_FILES
     ];
+  // TODO: accept multiple temperatures per day => TemperatureRow{date, meanTemperature}[]
+  const numberOfRows = temperatures.current.length; // We assume it is one temperature per day for now
+  const [history, dispatchHistory] = useReducer(simulationHistory, [
+    SimulationCommand.createDefault({
+      numberOfFloors,
+      houseConfigurator: houseComponentsConfigurator,
+    }),
+  ]);
+  const currDayIdx = history.length - 1;
+  const currentCommand = history[currDayIdx];
 
-  if (!csv) {
-    throw new Error(
-      `The CSV was not found for the duration of ${simulationDuration.value}`,
-    );
-  }
-
-  const { houseComponentsConfigurator } = useHouseComponents();
-
-  const { heatLosses, totalHeatLoss } = useHeatLoss({
-    houseComponentsConfigurator,
-    indoorTemperature,
-    measurementFrequency: csv.measurementFrequency,
-    temperatures: currentWindow.temperatures,
-  });
-
-  const { progression } = useSimulationProgression({
-    currentWindow,
-    simulationFrameMS,
-  });
-
-  useEffect(() => {
-    setSimulationStatus(() => SimulationStatus.LOADING);
-    loadTemperaturesFromCSV(csv.path).then((rows) => {
-      temperatureIterator.current = new TemperatureIterator({
-        temperatures: rows,
-        measurementFrequency: csv.measurementFrequency,
-      });
-
-      const numberOfHours =
-        rows.length * timeConversionFactors[csv.measurementFrequency];
-
-      setSimulationDuration(formatHours(numberOfHours));
-      setSimulationStatus(SimulationStatus.IDLE);
+  const resetSimulation = useCallback(() => {
+    dispatchHistory({
+      type: 'reset',
+      outdoorTemperature: {
+        weatherValue: temperatures.current[0].temperature,
+      },
     });
-  }, [csv.measurementFrequency, csv.path]);
+  }, []);
 
-  const intervalId = useRef<NodeJS.Timeout | null>(null);
+  // Load CSV
+  useEffect(() => {
+    if (!csv) {
+      throw new Error(
+        `The CSV was not found for the duration of ${simulationDuration.value}`,
+      );
+    }
 
+    loadTemperaturesFromCSV(csv.path).then((rows) => {
+      temperatures.current = rows;
+      setSimulationStatus(SimulationStatus.IDLE);
+      resetSimulation();
+    });
+  }, [
+    csv,
+    csv.measurementFrequency,
+    csv.path,
+    resetSimulation,
+    simulationDuration.value,
+  ]);
+
+  // Handle the simulation's iterations
+  useEffect(() => {
+    if (simulationStatus === SimulationStatus.RUNNING) {
+      simulationIntervalId.current = setInterval(() => {
+        const nextIdx = currDayIdx + 1;
+        if (nextIdx < numberOfRows) {
+          const { userOverride, value } =
+            history[currDayIdx].outdoorTemperature;
+          const weatherValue = temperatures.current[nextIdx].temperature;
+
+          dispatchHistory({
+            type: 'add',
+            command: history[currDayIdx].from({
+              outdoorTemperature: {
+                userOverride,
+                weatherValue: temperatures.current[nextIdx].temperature,
+                value: userOverride ? value : weatherValue,
+              },
+            }),
+          });
+        } else {
+          setSimulationStatus(SimulationStatus.FINISHED);
+        }
+      }, simulationFrameMS);
+    }
+
+    return () => {
+      // Cleanup on unmount or status change
+      if (simulationIntervalId.current) {
+        clearInterval(simulationIntervalId.current);
+      }
+    };
+  }, [
+    simulationStatus,
+    numberOfRows,
+    simulationFrameMS,
+    history,
+    dispatchHistory,
+    currDayIdx,
+  ]);
+
+  // Simulation Status Command
   const startSimulation = useCallback((): void => {
+    if (temperatures.current.length === 0) {
+      throw new Error('The temperatures are not loaded!');
+    }
+
     if (
       simulationStatus === SimulationStatus.RUNNING ||
       simulationStatus === SimulationStatus.LOADING
@@ -144,88 +180,112 @@ export const SimulationProvider = ({
       return;
     }
 
-    if (!temperatureIterator.current) {
-      throw new Error('The temperatures are not loaded!');
+    if (simulationStatus === SimulationStatus.FINISHED) {
+      resetSimulation();
     }
 
-    if (simulationStatus !== SimulationStatus.PAUSED) {
-      temperatureIterator.current.reset();
-    }
     setSimulationStatus(SimulationStatus.RUNNING);
-
-    intervalId.current = setInterval(() => {
-      if (temperatureIterator.current?.hasMore()) {
-        // TODO: should update this to use the overrided temperature in the calculation
-        setCurrentWindow(temperatureIterator.current.getNext());
-      } else if (intervalId.current) {
-        clearInterval(intervalId.current);
-        setSimulationStatus(SimulationStatus.FINISHED);
-      }
-    }, simulationFrameMS);
-  }, [simulationFrameMS, simulationStatus]);
+  }, [resetSimulation, simulationStatus]);
 
   const pauseSimulation = useCallback((): void => {
-    if (simulationStatus === SimulationStatus.RUNNING && intervalId.current) {
-      clearInterval(intervalId.current);
+    if (
+      simulationStatus === SimulationStatus.RUNNING &&
+      simulationIntervalId.current
+    ) {
+      clearInterval(simulationIntervalId.current);
       setSimulationStatus(SimulationStatus.PAUSED);
     }
   }, [simulationStatus]);
 
-  const updateOutdoorTemperature = ({
-    override,
-    value,
-  }: {
-    override: boolean;
-    value: number;
-  }): void => {
-    setOutdoorTemperature({ override, value });
-  };
+  // Update simulation's current state
+  useEffect(() => {
+    dispatchHistory({
+      type: 'updateHouseConfigurator',
+      houseConfigurator: houseComponentsConfigurator,
+    });
+  }, [houseComponentsConfigurator]);
+
+  const updateOutdoorTemperature = useCallback(
+    ({ override, value }: { override: boolean; value: number }): void => {
+      dispatchHistory({
+        type: 'updateOutdoorTemperature',
+        outdoorTemperature: {
+          userOverride: override,
+          value,
+        },
+      });
+    },
+    [],
+  );
+
+  const updateIndoorTemperature = useCallback((value: number): void => {
+    dispatchHistory({
+      type: 'updateIndoorTemperature',
+      indoorTemperature: value,
+    });
+  }, []);
+
+  const updatePricekWh = useCallback((value: number): void => {
+    dispatchHistory({
+      type: 'updatePricekWh',
+      pricekWh: value,
+    });
+  }, []);
+
+  const updateSimulationDuration = useCallback(
+    (
+      duration: Pick<FormattedTime, 'value'> & {
+        unit: typeof TimeUnit.Years;
+      },
+    ): void => {
+      setSimulationDuration(duration);
+    },
+    [],
+  );
 
   const contextValue = useMemo(
     () => ({
-      indoorTemperature,
-      updateIndoorTemperature: setIndoorTemperature,
-      outdoorTemperature: {
-        override: outdoorTemperature.override,
-        value: outdoorTemperature.override
-          ? outdoorTemperature.value
-          : currentWindow.mean,
-      },
+      indoorTemperature: currentCommand.indoorTemperature,
+      updateIndoorTemperature,
+      outdoorTemperature: currentCommand.outdoorTemperature,
       updateOutdoorTemperature,
-      period: currentWindow.period,
-      progression,
+      date: new Date(temperatures.current[currDayIdx].time),
       duration: simulationDuration,
-      updateSimulationDuration: (
-        duration: Pick<FormattedTime, 'value'> & {
-          unit: typeof TimeUnit.Years;
-        },
-      ) => setSimulationDuration(duration),
+      updateSimulationDuration,
       status: simulationStatus,
-      heatLosses,
-      totalHeatLoss: formatHeatLossRate(totalHeatLoss),
-      electricityCost: electricityCost({
-        pricekWh,
-        totalEnergyConsumptionkWh:
-          totalHeatLoss / powerConversionFactors.KiloWatt,
-      }),
-      setPricekWh,
+      heatLossPerComponent: currentCommand.heatLoss.perComponent,
+      heatLoss: currentCommand.heatLoss.global,
+      totalHeatLoss: formatHeatLossRate(
+        currentCommand.prevTotHeatLoss + currentCommand.heatLoss.global,
+      ),
+      electricityCost:
+        currentCommand.prevTotPowerCost +
+        electricityCost({
+          pricekWh: currentCommand.pricekWh,
+          energyConsumptionkWh:
+            currentCommand.heatLoss.global / powerConversionFactors.KiloWatt,
+        }),
+      setPricekWh: updatePricekWh,
       startSimulation,
       pauseSimulation,
     }),
     [
-      currentWindow.mean,
-      currentWindow.period,
-      heatLosses,
-      indoorTemperature,
-      outdoorTemperature.override,
-      outdoorTemperature.value,
-      pauseSimulation,
-      pricekWh,
-      progression,
+      currentCommand.indoorTemperature,
+      currentCommand.outdoorTemperature,
+      currentCommand.heatLoss.perComponent,
+      currentCommand.heatLoss.global,
+      currentCommand.prevTotHeatLoss,
+      currentCommand.prevTotPowerCost,
+      currentCommand.pricekWh,
+      updateIndoorTemperature,
+      updateOutdoorTemperature,
+      currDayIdx,
       simulationDuration,
+      updateSimulationDuration,
       simulationStatus,
+      updatePricekWh,
       startSimulation,
-      totalHeatLoss,
+      pauseSimulation,
     ],
   );
 

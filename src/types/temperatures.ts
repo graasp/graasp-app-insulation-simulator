@@ -1,20 +1,22 @@
-import { TimeUnitType } from './time';
-
 export type TemperatureRow = {
   time: string;
   temperature: number;
 };
 
-export type SlidingWindowOptions = {
-  window: number;
-  unit: TimeUnitType;
-};
+export type OutdoorTemperature = {
+  /**
+   * Indicates whether the user has overridden the temperature from the weather data.
+   */
+  userOverride: boolean;
 
-export type SlidingWindow = {
-  idx: number;
-  mean: number;
-  temperatures: number[];
-  period: { from: Date; to: Date; durationInHours: number };
-  size: number;
-  totalCount: number;
+  /**
+   * The temperature value from the weather data source.
+   */
+  weatherValue: number; // More descriptive name
+
+  /**
+   * The effective outdoor temperature used in the simulation.
+   * This will be the user value if set, otherwise it will be the `weatherValue`.
+   */
+  value: number;
 };

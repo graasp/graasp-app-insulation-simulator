@@ -24,7 +24,7 @@ export const WindowFrame = ({
   ...props
 }: Props): JSX.Element => {
   const id = `${wallId}-Window-${windowIdx}`;
-  const { heatLosses } = useSimulation();
+  const { heatLossPerComponent } = useSimulation();
   const { registerComponent, unregisterComponent } = useHouseComponents();
   const { frameMaterial } = useWindowMaterial({
     windowMaterial: materials.Wood,
@@ -32,7 +32,7 @@ export const WindowFrame = ({
 
   const { windowScaleSize } = useWindowSize();
 
-  const heatLoss = heatLosses[id] ?? 0;
+  const heatLoss = heatLossPerComponent[id] ?? 0;
 
   useEffect(() => {
     registerComponent({

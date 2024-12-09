@@ -18,8 +18,9 @@ type Props = {
 };
 
 export const SeasonProvider = ({ children }: Props): ReactNode => {
-  const { period } = useSimulation();
-  const season = getMostPresentSeason(period.from, period.to);
+  const { date } = useSimulation();
+  // TODO: juste use the date...
+  const season = getMostPresentSeason(date, date);
 
   const contextValue = useMemo(
     () => ({

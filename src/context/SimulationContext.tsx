@@ -10,6 +10,8 @@ import {
   useState,
 } from 'react';
 
+import { useDebouncedCallback } from 'use-debounce';
+
 import { SIMULATION_CSV_FILES } from '@/config/simulation';
 import { SimulationCommand } from '@/models/SimulationCommand';
 import { simulationHistory } from '@/reducer/simulationHistoryReducer';
@@ -31,6 +33,7 @@ type SimulationContextType = {
   heatLoss: number;
   totalHeatLoss: FormattedHeatLoss;
   electricityCost: number;
+  pricekWh: number;
   setPricekWh: (newPrice: number) => void;
   indoorTemperature: number;
   updateIndoorTemperature: (newTemperature: number) => void;
@@ -41,11 +44,15 @@ type SimulationContextType = {
   }) => void;
   date: Date;
   duration: FormattedTime;
+  numberOfDays: number;
   updateSimulationDuration: (
     duration: Pick<FormattedTime, 'value'> & { unit: typeof TimeUnit.Years },
   ) => void;
   startSimulation: () => void;
   pauseSimulation: () => void;
+  currDayIdx: number;
+  gotToDay: (idx: number) => void;
+  getDateOf: (idx: number) => Date;
 };
 
 const SimulationContext = createContext<SimulationContextType | null>(null);
@@ -60,7 +67,11 @@ export const SimulationProvider = ({
   simulationFrameMS,
 }: Props): ReactNode => {
   // Hooks
-  const { houseComponentsConfigurator, numberOfFloors } = useHouseComponents();
+  const {
+    houseComponentsConfigurator,
+    numberOfFloors,
+    replaceHouseComponentsConfigurator,
+  } = useHouseComponents();
 
   // Refs
   const simulationIntervalId = useRef<NodeJS.Timeout | null>(null);
@@ -193,8 +204,9 @@ export const SimulationProvider = ({
       simulationIntervalId.current
     ) {
       clearInterval(simulationIntervalId.current);
-      setSimulationStatus(SimulationStatus.PAUSED);
     }
+
+    setSimulationStatus(SimulationStatus.PAUSED);
   }, [simulationStatus]);
 
   // Update simulation's current state
@@ -243,14 +255,42 @@ export const SimulationProvider = ({
     [],
   );
 
+  // The useDebouncedCallback function is used to avoid modifying days too quickly
+  // and creating too many new days.
+  const gotToDay = useDebouncedCallback((idx: number): void => {
+    pauseSimulation();
+
+    if (idx <= currDayIdx) {
+      replaceHouseComponentsConfigurator(history[idx].houseConfigurator);
+      dispatchHistory({ type: 'goToPast', idx });
+    } else if (idx < temperatures.current.length) {
+      const { userOverride, value } = history[currDayIdx].outdoorTemperature;
+
+      const outdoorTemperatures = temperatures.current
+        .slice(currDayIdx + 1, idx + 1)
+        .map(({ temperature: weatherValue }) => ({
+          userOverride,
+          weatherValue,
+          value: userOverride ? value : weatherValue,
+        }));
+
+      dispatchHistory({
+        type: 'goToFutur',
+        outdoorTemperatures,
+      });
+    }
+  }, 10);
+
   const contextValue = useMemo(
     () => ({
       indoorTemperature: currentCommand.indoorTemperature,
       updateIndoorTemperature,
       outdoorTemperature: currentCommand.outdoorTemperature,
       updateOutdoorTemperature,
-      date: new Date(temperatures.current[currDayIdx].time),
+      date: new Date(temperatures.current[currDayIdx]?.time),
+      getDateOf: (idx: number) => new Date(temperatures.current[idx]?.time),
       duration: simulationDuration,
+      numberOfDays: simulationDuration.value * 365, // TODO: simplify by setting duration in years...
       updateSimulationDuration,
       status: simulationStatus,
       heatLossPerComponent: currentCommand.heatLoss.perComponent,
@@ -265,9 +305,12 @@ export const SimulationProvider = ({
           energyConsumptionkWh:
             currentCommand.heatLoss.global / powerConversionFactors.KiloWatt,
         }),
+      pricekWh: currentCommand.pricekWh,
       setPricekWh: updatePricekWh,
       startSimulation,
       pauseSimulation,
+      currDayIdx,
+      gotToDay,
     }),
     [
       currentCommand.indoorTemperature,
@@ -286,6 +329,7 @@ export const SimulationProvider = ({
       updatePricekWh,
       startSimulation,
       pauseSimulation,
+      gotToDay,
     ],
   );
 

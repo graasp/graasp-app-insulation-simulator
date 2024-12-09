@@ -53,6 +53,9 @@ type HouseComponentsContextType = {
     materialProps: { name: string } & FromBuildingMaterial;
   }) => void;
   updateNumberOfFloors: (floors: number) => void;
+  replaceHouseComponentsConfigurator: (
+    houseComponentsConfigurator: HouseComponentsConfigurator,
+  ) => void;
 };
 
 const HouseComponentsContext = createContext<HouseComponentsContextType | null>(
@@ -207,6 +210,13 @@ export const HouseComponentsProvider = ({ children }: Props): ReactNode => {
     setNumberOfFloors(floors);
   }, []);
 
+  const replaceHouseComponentsConfigurator = useCallback(
+    (newConfigurator: HouseComponentsConfigurator) => {
+      setHouseComponentsConfigurator(newConfigurator);
+    },
+    [],
+  );
+
   const contextValue = useMemo(
     () => ({
       houseComponentsConfigurator,
@@ -216,6 +226,7 @@ export const HouseComponentsProvider = ({ children }: Props): ReactNode => {
       changeComponentInsulation,
       updateCompositionOfInsulation,
       updateNumberOfFloors,
+      replaceHouseComponentsConfigurator,
     }),
     [
       houseComponentsConfigurator,
@@ -225,6 +236,7 @@ export const HouseComponentsProvider = ({ children }: Props): ReactNode => {
       changeComponentInsulation,
       updateCompositionOfInsulation,
       updateNumberOfFloors,
+      replaceHouseComponentsConfigurator,
     ],
   );
 

@@ -24,6 +24,32 @@ const updateState = (
   );
 };
 
+const computePrevTot = (
+  prev: SimulationCommand,
+): {
+  prevTotHeatLoss: number;
+  prevTotPowerCost: number;
+} => {
+  // Calculate the cumulative heat loss.  If this is the first element
+  // (prev is undefined), the total is 0. Otherwise, add the current
+  // element's heat loss to the accumulated heat loss from previous elements.
+  const prevTotHeatLoss =
+    (prev.prevTotHeatLoss ?? 0) + (prev.heatLoss.global ?? 0);
+
+  const prevTotPowerCost =
+    (prev.prevTotPowerCost ?? 0) +
+    electricityCost({
+      pricekWh: prev.pricekWh ?? SIMULATION_PRICE_KWH,
+      energyConsumptionkWh:
+        (prev.heatLoss.global ?? 0) / powerConversionFactors.KiloWatt,
+    });
+
+  return {
+    prevTotHeatLoss,
+    prevTotPowerCost,
+  };
+};
+
 type Action =
   | {
       type: 'reset';
@@ -32,6 +58,14 @@ type Action =
   | {
       type: 'add';
       command: Partial<SimulationCommand>;
+    }
+  | {
+      type: 'goToFutur';
+      outdoorTemperatures: SimulationCommand['outdoorTemperature'][];
+    }
+  | {
+      type: 'goToPast';
+      idx: number;
     }
   | {
       type: 'updateIndoorTemperature';
@@ -84,28 +118,39 @@ export const simulationHistory = (
     }
     case 'add': {
       const prev = state[state.length - 1];
-      // Calculate the cumulative heat loss.  If this is the first element
-      // (prev is undefined), the total is 0. Otherwise, add the current
-      // element's heat loss to the accumulated heat loss from previous elements.
-      const prevTotHeatLoss =
-        (prev.prevTotHeatLoss ?? 0) + (prev?.heatLoss.global ?? 0);
-
-      const prevTotPowerCost =
-        (prev.prevTotPowerCost ?? 0) +
-        electricityCost({
-          pricekWh: prev.pricekWh ?? SIMULATION_PRICE_KWH,
-          energyConsumptionkWh:
-            (prev.heatLoss.global ?? 0) / powerConversionFactors.KiloWatt,
-        });
 
       return [
         ...state,
         prev.from({
           ...action.command,
-          prevTotHeatLoss,
-          prevTotPowerCost,
+          ...computePrevTot(prev),
         }),
       ];
+    }
+    case 'goToFutur': {
+      return CreateNonEmptyArray(
+        action.outdoorTemperatures.reduce<SimulationCommand[]>(
+          (acc, currOutdoor) => {
+            const prev = acc[acc.length - 1];
+
+            return [
+              ...acc,
+              prev.from({
+                ...computePrevTot(prev),
+                outdoorTemperature: currOutdoor,
+              }),
+            ];
+          },
+          [...state],
+        ),
+      );
+    }
+    case 'goToPast': {
+      if (action.idx < 0) {
+        throw new Error('The given index is out of range!');
+      }
+
+      return CreateNonEmptyArray(state.slice(0, action.idx + 1));
     }
     case 'updateIndoorTemperature':
       // always update the current command

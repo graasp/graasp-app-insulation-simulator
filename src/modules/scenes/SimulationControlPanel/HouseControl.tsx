@@ -29,8 +29,12 @@ import { WindowControlDialog } from './WindowControlDialog/WindowControlDialog';
 export const HouseControl = (): JSX.Element => {
   const { t } = useTranslation('SIMULATION_CONTROL_PANEL');
   const { t: tInsulations } = useTranslation('INSULATIONS');
-  const { changeComponentInsulation, numberOfFloors, updateNumberOfFloors } =
-    useHouseComponents();
+  const {
+    houseComponentsConfigurator,
+    changeComponentInsulation,
+    numberOfFloors,
+    updateNumberOfFloors,
+  } = useHouseComponents();
 
   const wallInsulations = Object.keys(
     HOUSE_INSULATIONS.Wall,
@@ -39,6 +43,16 @@ export const HouseControl = (): JSX.Element => {
   const windowInsulations = Object.keys(
     HOUSE_INSULATIONS.Window,
   ) as (keyof typeof HOUSE_INSULATIONS.Window)[];
+
+  const currWallInsulation =
+    houseComponentsConfigurator.getFirstOfType(HouseComponent.Wall)
+      ?.insulationName ??
+    SIMULATION_DEFAULT_WALL_COMPONENT_INSULATION.insulationName;
+
+  const currWindowInsulation =
+    houseComponentsConfigurator.getFirstOfType(HouseComponent.Window)
+      ?.insulationName ??
+    SIMULATION_DEFAULT_WINDOW_COMPONENT_INSULATION.insulationName;
 
   const {
     open: openMaterials,
@@ -93,9 +107,7 @@ export const HouseControl = (): JSX.Element => {
               labelId="wall-material-select-label"
               id="wall-material-select"
               label={t('HOUSE_CONTROL_PANEL.WALL_INSULATION_SELECT_LABEL')}
-              defaultValue={
-                SIMULATION_DEFAULT_WALL_COMPONENT_INSULATION.insulationName
-              }
+              value={currWallInsulation}
               onChange={(v) => handleInsulationChange(v.target.value)}
             >
               {wallInsulations.map((k) => (
@@ -124,9 +136,7 @@ export const HouseControl = (): JSX.Element => {
               labelId="window-insulation-select-label"
               id="window-insulation-select"
               label={t('HOUSE_CONTROL_PANEL.WINDOW_INSULATION_SELECT_LABEL')}
-              defaultValue={
-                SIMULATION_DEFAULT_WINDOW_COMPONENT_INSULATION.insulationName
-              }
+              value={currWindowInsulation}
               onChange={(v) => handleWindowChange(v.target.value)}
             >
               {windowInsulations.map((k) => (

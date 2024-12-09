@@ -15,6 +15,7 @@ import { SimulationProvider, useSimulation } from '@/context/SimulationContext';
 import { WindowSizeProvider } from '@/context/WindowSizeContext';
 import { SimulationStatus } from '@/types/simulation';
 
+import { LabelledSlider } from '../common/LabelledSlider';
 import { Forest } from '../models/Forest';
 import { Garden } from '../models/Garden';
 import { ResidentialHouse } from '../models/House/ResidentialHouse/ResidentialHouse';
@@ -23,11 +24,25 @@ import { SimulationControlPanel } from './SimulationControlPanel/SimulationContr
 import { SimulationInformations } from './SimulationInformations/SimulationInformations';
 
 const FirstSceneComponent = (): JSX.Element => {
-  const { startSimulation, pauseSimulation, status } = useSimulation();
+  const {
+    startSimulation,
+    pauseSimulation,
+    gotToDay,
+    currDayIdx,
+    numberOfDays,
+    status,
+    getDateOf,
+  } = useSimulation();
   const { numberOfFloors } = useHouseComponents();
 
   const theme = useTheme();
   const md = useMediaQuery(theme.breakpoints.up('sm'));
+
+  const handleGoToDay = (idx: number | number[]): void => {
+    if (typeof idx === 'number') {
+      gotToDay(idx);
+    }
+  };
 
   return (
     <Stack
@@ -71,7 +86,16 @@ const FirstSceneComponent = (): JSX.Element => {
           </group>
         </Canvas>
 
-        <Stack mt={2}>
+        <Stack mt={2} alignItems="center" spacing={2}>
+          <LabelledSlider
+            value={currDayIdx}
+            sx={{ minWidth: '350px', maxWidth: '500px' }}
+            onChange={(v) => handleGoToDay(v)}
+            min={0}
+            max={numberOfDays - 1}
+            hideValue
+            formatValue={(v) => getDateOf(v).toLocaleDateString()}
+          />
           <Fab
             data-testid={`simulation-control-button-${status === SimulationStatus.RUNNING ? 'pause' : 'start'}`}
             color="primary"

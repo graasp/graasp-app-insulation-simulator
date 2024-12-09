@@ -33,6 +33,7 @@ type SimulationContextType = {
   heatLoss: number;
   totalHeatLoss: FormattedHeatLoss;
   electricityCost: number;
+  pricekWh: number;
   setPricekWh: (newPrice: number) => void;
   indoorTemperature: number;
   updateIndoorTemperature: (newTemperature: number) => void;
@@ -299,6 +300,7 @@ export const SimulationProvider = ({
           energyConsumptionkWh:
             currentCommand.heatLoss.global / powerConversionFactors.KiloWatt,
         }),
+      pricekWh: currentCommand.pricekWh,
       setPricekWh: updatePricekWh,
       startSimulation,
       pauseSimulation,

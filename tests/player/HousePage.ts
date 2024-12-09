@@ -101,7 +101,9 @@ export class HousePage {
   }
 
   async setOverrideOutdoorTemperature(checked: boolean): Promise<void> {
-    await this.page.getByLabel('Override Temperature').setChecked(checked);
+    const overrideBtn = this.page.getByLabel('Override Temperature');
+    await overrideBtn.scrollIntoViewIfNeeded();
+    await overrideBtn.setChecked(checked);
   }
 
   async setSimulationDuration(duration: number): Promise<void> {

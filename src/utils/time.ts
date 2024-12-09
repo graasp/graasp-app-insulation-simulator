@@ -18,32 +18,6 @@ export const formatHoursToDays = (hours: number): FormattedTime => {
   return { value: hours, unit: TimeUnit.Hours };
 };
 
-export const formatHours = (hours: number): FormattedTime => {
-  const HOURS_IN_YEAR = timeConversionFactors[TimeUnit.Years];
-  const HOURS_IN_MONTH = timeConversionFactors[TimeUnit.Months];
-  const HOURS_IN_WEEK = timeConversionFactors[TimeUnit.Weeks];
-  const HOURS_IN_DAY = timeConversionFactors[TimeUnit.Days];
-
-  if (hours >= HOURS_IN_YEAR) {
-    // Year (approximate - doesn't account for leap years)
-    return { value: Math.round(hours / HOURS_IN_YEAR), unit: TimeUnit.Years };
-  }
-  if (hours >= HOURS_IN_MONTH) {
-    // Month (approximate)
-    return { value: Math.round(hours / HOURS_IN_MONTH), unit: TimeUnit.Months };
-  }
-  if (hours >= HOURS_IN_WEEK) {
-    // Week
-    return { value: Math.round(hours / HOURS_IN_WEEK), unit: TimeUnit.Weeks };
-  }
-  if (hours >= HOURS_IN_DAY) {
-    // Day
-    return { value: Math.round(hours / HOURS_IN_DAY), unit: TimeUnit.Days };
-  }
-  // Hour
-  return { value: hours, unit: TimeUnit.Hours };
-};
-
 export const dateDiffInDays = (from: Date, to: Date): number => {
   const diffInMs = to.getTime() - from.getTime();
   const oneDay = 1000 * 60 * 60 * 24;

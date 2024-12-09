@@ -1,6 +1,6 @@
 import PauseIcon from '@mui/icons-material/Pause';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import { Fab, Slider, Stack, useMediaQuery, useTheme } from '@mui/material';
+import { Fab, Stack, useMediaQuery, useTheme } from '@mui/material';
 
 import { OrbitControls } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
@@ -15,6 +15,7 @@ import { SimulationProvider, useSimulation } from '@/context/SimulationContext';
 import { WindowSizeProvider } from '@/context/WindowSizeContext';
 import { SimulationStatus } from '@/types/simulation';
 
+import { LabelledSlider } from '../common/LabelledSlider';
 import { Forest } from '../models/Forest';
 import { Garden } from '../models/Garden';
 import { ResidentialHouse } from '../models/House/ResidentialHouse/ResidentialHouse';
@@ -30,6 +31,7 @@ const FirstSceneComponent = (): JSX.Element => {
     currDayIdx,
     numberOfDays,
     status,
+    getDateOf,
   } = useSimulation();
   const { numberOfFloors } = useHouseComponents();
 
@@ -85,13 +87,14 @@ const FirstSceneComponent = (): JSX.Element => {
         </Canvas>
 
         <Stack mt={2} alignItems="center" spacing={2}>
-          <Slider
+          <LabelledSlider
             value={currDayIdx}
-            aria-label="Default"
-            valueLabelDisplay="auto"
             sx={{ minWidth: '350px', maxWidth: '500px' }}
-            onChange={(_, v) => handleGoToDay(v)}
+            onChange={(v) => handleGoToDay(v)}
+            min={0}
             max={numberOfDays - 1}
+            hideValue
+            formatValue={(v) => getDateOf(v).toLocaleDateString()}
           />
           <Fab
             data-testid={`simulation-control-button-${status === SimulationStatus.RUNNING ? 'pause' : 'start'}`}

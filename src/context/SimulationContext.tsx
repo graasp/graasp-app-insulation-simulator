@@ -51,6 +51,7 @@ type SimulationContextType = {
   pauseSimulation: () => void;
   currDayIdx: number;
   gotToDay: (idx: number) => void;
+  getDateOf: (idx: number) => Date;
 };
 
 const SimulationContext = createContext<SimulationContextType | null>(null);
@@ -280,7 +281,8 @@ export const SimulationProvider = ({
       updateIndoorTemperature,
       outdoorTemperature: currentCommand.outdoorTemperature,
       updateOutdoorTemperature,
-      date: new Date(temperatures.current[currDayIdx].time),
+      date: new Date(temperatures.current[currDayIdx]?.time),
+      getDateOf: (idx: number) => new Date(temperatures.current[idx]?.time),
       duration: simulationDuration,
       numberOfDays: simulationDuration.value * 365, // TODO: simplify by setting duration in years...
       updateSimulationDuration,

@@ -67,7 +67,11 @@ export const SimulationProvider = ({
   simulationFrameMS,
 }: Props): ReactNode => {
   // Hooks
-  const { houseComponentsConfigurator, numberOfFloors } = useHouseComponents();
+  const {
+    houseComponentsConfigurator,
+    numberOfFloors,
+    replaceHouseComponentsConfigurator,
+  } = useHouseComponents();
 
   // Refs
   const simulationIntervalId = useRef<NodeJS.Timeout | null>(null);
@@ -257,6 +261,7 @@ export const SimulationProvider = ({
     pauseSimulation();
 
     if (idx <= currDayIdx) {
+      replaceHouseComponentsConfigurator(history[idx].houseConfigurator);
       dispatchHistory({ type: 'goToPast', idx });
     } else if (idx < temperatures.current.length) {
       const { userOverride, value } = history[currDayIdx].outdoorTemperature;

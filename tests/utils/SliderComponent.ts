@@ -14,6 +14,9 @@ export const changeSlider = async (
     throw new Error('SliderBoundingBox is null');
   }
 
+  // This is to ensure that the slider is at the very end.
+  const finalPercentage = targetPercentage === 100 ? 110 : targetPercentage;
+
   const startPoint = {
     x: sliderBoundingBox.x,
     y: sliderBoundingBox.y + sliderBoundingBox.height / 2,
@@ -21,7 +24,7 @@ export const changeSlider = async (
 
   // Slide it to some endpoint determined by the target percentage
   const endPoint = {
-    x: sliderBoundingBox.x + (sliderBoundingBox.width * targetPercentage) / 100,
+    x: sliderBoundingBox.x + (sliderBoundingBox.width * finalPercentage) / 100,
     y: startPoint.y,
   };
 

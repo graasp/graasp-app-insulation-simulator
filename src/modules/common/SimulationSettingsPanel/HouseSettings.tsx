@@ -19,18 +19,22 @@ import {
   SIMULATION_DEFAULT_WALL_COMPONENT_INSULATION,
   SIMULATION_DEFAULT_WINDOW_COMPONENT_INSULATION,
 } from '@/config/simulation';
-import { useHouseComponents } from '@/context/HouseComponentsContext';
+import { useSimulation } from '@/context/SimulationContext';
 import { useDialogControl } from '@/hooks/useDialogControl';
 import { HouseComponent } from '@/types/houseComponent';
 
-import { MaterialControlDialog } from './MaterialControlDialog/MaterialControlDialog';
-import { WindowControlDialog } from './WindowControlDialog/WindowControlDialog';
+import { MaterialSettingsDialog } from './MaterialSettingsDialog/MaterialSettingsDialog';
+import { WindowControlSettings } from './WindowControlSettings';
 
-export const HouseControl = (): JSX.Element => {
-  const { t } = useTranslation('SIMULATION_CONTROL_PANEL');
+export const HouseSettings = (): JSX.Element => {
+  const { t } = useTranslation('SIMULATION_SETTINGS_PANEL');
   const { t: tInsulations } = useTranslation('INSULATIONS');
-  const { changeComponentInsulation, numberOfFloors, updateNumberOfFloors } =
-    useHouseComponents();
+  const {
+    houseComponentsConfigurator,
+    changeComponentInsulation,
+    numberOfFloors,
+    updateNumberOfFloors,
+  } = useSimulation();
 
   const wallInsulations = Object.keys(
     HOUSE_INSULATIONS.Wall,
@@ -39,6 +43,16 @@ export const HouseControl = (): JSX.Element => {
   const windowInsulations = Object.keys(
     HOUSE_INSULATIONS.Window,
   ) as (keyof typeof HOUSE_INSULATIONS.Window)[];
+
+  const currWallInsulation =
+    houseComponentsConfigurator.getFirstOfType(HouseComponent.Wall)
+      ?.insulationName ??
+    SIMULATION_DEFAULT_WALL_COMPONENT_INSULATION.insulationName;
+
+  const currWindowInsulation =
+    houseComponentsConfigurator.getFirstOfType(HouseComponent.Window)
+      ?.insulationName ??
+    SIMULATION_DEFAULT_WINDOW_COMPONENT_INSULATION.insulationName;
 
   const {
     open: openMaterials,
@@ -75,11 +89,11 @@ export const HouseControl = (): JSX.Element => {
 
   return (
     <>
-      <MaterialControlDialog
+      <MaterialSettingsDialog
         open={openMaterials}
         handleClose={handleCloseMaterials}
       />
-      <WindowControlDialog
+      <WindowControlSettings
         open={openWindows}
         handleClose={handleCloseWindows}
       />
@@ -87,15 +101,13 @@ export const HouseControl = (): JSX.Element => {
         <Stack direction="row" alignItems="center" spacing={1}>
           <FormControl fullWidth>
             <InputLabel id="wall-material-select-label">
-              {t('HOUSE_CONTROL_PANEL.WALL_INSULATION_SELECT_LABEL')}
+              {t('HOUSE_SETTINGS_PANEL.WALL_INSULATION_SELECT_LABEL')}
             </InputLabel>
             <Select
               labelId="wall-material-select-label"
               id="wall-material-select"
-              label={t('HOUSE_CONTROL_PANEL.WALL_INSULATION_SELECT_LABEL')}
-              defaultValue={
-                SIMULATION_DEFAULT_WALL_COMPONENT_INSULATION.insulationName
-              }
+              label={t('HOUSE_SETTINGS_PANEL.WALL_INSULATION_SELECT_LABEL')}
+              value={currWallInsulation}
               onChange={(v) => handleInsulationChange(v.target.value)}
             >
               {wallInsulations.map((k) => (
@@ -118,15 +130,13 @@ export const HouseControl = (): JSX.Element => {
         <Stack direction="row" alignItems="center" spacing={1}>
           <FormControl fullWidth>
             <InputLabel id="window-insulation-select-label">
-              {t('HOUSE_CONTROL_PANEL.WINDOW_INSULATION_SELECT_LABEL')}
+              {t('HOUSE_SETTINGS_PANEL.WINDOW_INSULATION_SELECT_LABEL')}
             </InputLabel>
             <Select
               labelId="window-insulation-select-label"
               id="window-insulation-select"
-              label={t('HOUSE_CONTROL_PANEL.WINDOW_INSULATION_SELECT_LABEL')}
-              defaultValue={
-                SIMULATION_DEFAULT_WINDOW_COMPONENT_INSULATION.insulationName
-              }
+              label={t('HOUSE_SETTINGS_PANEL.WINDOW_INSULATION_SELECT_LABEL')}
+              value={currWindowInsulation}
               onChange={(v) => handleWindowChange(v.target.value)}
             >
               {windowInsulations.map((k) => (
@@ -148,19 +158,19 @@ export const HouseControl = (): JSX.Element => {
 
         <FormControl fullWidth>
           <InputLabel id="house-floors-select-label">
-            {t('HOUSE_CONTROL_PANEL.HOUSE_SIZE.LABEL')}
+            {t('HOUSE_SETTINGS_PANEL.HOUSE_SIZE.LABEL')}
           </InputLabel>
           <Select
             labelId="house-floors-select-label"
             id="house-floors-select"
-            label={t('HOUSE_CONTROL_PANEL.HOUSE_SIZE.LABEL')}
+            label={t('HOUSE_SETTINGS_PANEL.HOUSE_SIZE.LABEL')}
             value={numberOfFloors}
             onChange={(e) => handleNumberOfFloorsChange(e.target.value)}
             type="number"
           >
             {Array.from(Array(2)).map((_, idx) => (
               <MenuItem key={idx} value={idx + 1}>
-                {t('HOUSE_CONTROL_PANEL.HOUSE_SIZE.N_FLOORS', {
+                {t('HOUSE_SETTINGS_PANEL.HOUSE_SIZE.N_FLOORS', {
                   count: idx + 1,
                 })}
               </MenuItem>

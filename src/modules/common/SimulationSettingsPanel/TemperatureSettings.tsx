@@ -7,12 +7,11 @@ import {
   SIMULATION_OUTDOOR_TEMPERATURE_CELCIUS,
 } from '@/config/simulation';
 import { useSimulation } from '@/context/SimulationContext';
+import { LabelledSlider } from '@/modules/common/LabelledSlider';
 
-import { SliderTemperature } from './SliderTemperature';
-
-export const TemperatureControl = (): JSX.Element => {
-  const { t } = useTranslation('SIMULATION_CONTROL_PANEL', {
-    keyPrefix: 'TEMPERATURES_CONTROL_PANEL',
+export const TemperatureSettings = (): JSX.Element => {
+  const { t } = useTranslation('SIMULATION_SETTINGS_PANEL', {
+    keyPrefix: 'TEMPERATURES_SETTINGS_PANEL',
   });
 
   const {
@@ -28,30 +27,35 @@ export const TemperatureControl = (): JSX.Element => {
   const { MIN: minOutdoorTemperature, MAX: maxOutdoorTemperature } =
     SIMULATION_OUTDOOR_TEMPERATURE_CELCIUS;
 
+  const formatTemperature = (temperature: number): string =>
+    `${temperature} °C`;
+
   return (
     <Stack spacing={3}>
-      <SliderTemperature
+      <LabelledSlider
         dataTestId="indoor-temperature"
         label={t('INDOOR_TEMPERATURE_LABEL')}
         value={indoorTemperature}
-        minTemperature={minIndoorTemperature}
-        maxTemperature={maxIndoorTemperature}
+        min={minIndoorTemperature}
+        max={maxIndoorTemperature}
         onChange={updateIndoorTemperature}
+        formatValue={formatTemperature}
       />
 
       <Stack>
-        <SliderTemperature
+        <LabelledSlider
           dataTestId="outdoor-temperature"
           label={t('OUTDOOR_TEMPERATURE_LABEL')}
           value={outdoorTemperature.value}
-          minTemperature={minOutdoorTemperature}
-          maxTemperature={maxOutdoorTemperature}
+          min={minOutdoorTemperature}
+          max={maxOutdoorTemperature}
           onChange={(v) =>
             updateOutdoorTemperature({
               override: outdoorTemperature.userOverride,
               value: v,
             })
           }
+          formatValue={formatTemperature}
           disabled={!outdoorTemperature.userOverride}
         />
         <FormControlLabel

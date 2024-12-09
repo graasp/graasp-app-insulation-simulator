@@ -19,19 +19,19 @@ import DialogTitle from '@mui/material/DialogTitle';
 import { BuildingMaterialKeys } from '@/config/buildingMaterials';
 import { FormControlValidator } from '@/modules/common/FormControlValidator';
 
-import { useMaterialControlDialog } from './useMaterialControlDialog';
+import { useMaterialSettingsDialog } from './useMaterialSettingsDialog';
 
 type Props = {
   open: boolean;
   handleClose: () => void;
 };
 
-export const MaterialControlDialog = ({
+export const MaterialSettingsDialog = ({
   open,
   handleClose,
 }: Props): JSX.Element => {
-  const { t } = useTranslation('SIMULATION_CONTROL_PANEL', {
-    keyPrefix: 'HOUSE_CONTROL_PANEL.MATERIAL_DIALOG',
+  const { t } = useTranslation('SIMULATION_SETTINGS_PANEL', {
+    keyPrefix: 'HOUSE_SETTINGS_PANEL.MATERIAL_DIALOG',
   });
   const { t: tMaterials } = useTranslation('MATERIALS');
   const { t: tInsulations } = useTranslation('INSULATIONS');
@@ -43,7 +43,7 @@ export const MaterialControlDialog = ({
     wallInsulation,
     handleThicknessChange,
     handlePriceChange,
-  } = useMaterialControlDialog();
+  } = useMaterialSettingsDialog();
 
   const insulationName = wallInsulation ? tInsulations(wallInsulation) : '';
 

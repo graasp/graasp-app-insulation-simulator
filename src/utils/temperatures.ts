@@ -1,6 +1,6 @@
 import Papa from 'papaparse';
 
-import { TemperatureRow } from '@/types/temperatures';
+import { TemperatureRow, UserOutdoorTemperature } from '@/types/temperatures';
 
 /**
  * Loads temperature data from a CSV file and returns it as a promise.
@@ -33,3 +33,11 @@ export const loadTemperaturesFromCSV = (
       },
     });
   });
+
+export const getOutdoorTemperature = ({
+  weather,
+  userTemperature,
+}: {
+  weather: number;
+  userTemperature: UserOutdoorTemperature;
+}): number => (userTemperature.userOverride ? userTemperature.value : weather);

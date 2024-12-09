@@ -10,42 +10,65 @@ import {
   useState,
 } from 'react';
 
+import { Vector3 } from 'three';
+import { useDebouncedCallback } from 'use-debounce';
+
 import { SIMULATION_CSV_FILES } from '@/config/simulation';
-import { SimulationCommand } from '@/models/SimulationCommand';
-import { simulationHistory } from '@/reducer/simulationHistoryReducer';
+import {
+  UseHouseComponentsReturnType,
+  useHouseComponents,
+} from '@/hooks/useHouseComponents';
+import { HouseComponentsConfigurator } from '@/models/HouseComponentsConfigurator';
+import {
+  createDefault,
+  simulationHistory,
+} from '@/reducer/simulationHistoryReducer';
 import { FormattedHeatLoss } from '@/types/heatLoss';
 import { HeatLossPerComponent } from '@/types/houseComponent';
 import { SimulationStatus } from '@/types/simulation';
-import { OutdoorTemperature, TemperatureRow } from '@/types/temperatures';
+import { TemperatureRow, UserOutdoorTemperature } from '@/types/temperatures';
 import { FormattedTime, TimeUnit } from '@/types/time';
+import { WindowScaleSize, WindowSizeType } from '@/types/window';
 import { undefinedContextErrorFactory } from '@/utils/context';
-import { electricityCost } from '@/utils/electricity';
-import { formatHeatLossRate, powerConversionFactors } from '@/utils/heatLoss';
-import { loadTemperaturesFromCSV } from '@/utils/temperatures';
+import { formatHeatLossRate } from '@/utils/heatLoss';
+import {
+  getOutdoorTemperature,
+  loadTemperaturesFromCSV,
+} from '@/utils/temperatures';
 
-import { useHouseComponents } from './HouseComponentsContext';
-
-type SimulationContextType = {
+// TODO: regroup by type like windowSize: { value, update }...
+type SimulationContextType = UseHouseComponentsReturnType & {
   status: SimulationStatus;
   heatLossPerComponent: HeatLossPerComponent;
   heatLoss: number;
   totalHeatLoss: FormattedHeatLoss;
   electricityCost: number;
+  pricekWh: number;
   setPricekWh: (newPrice: number) => void;
   indoorTemperature: number;
   updateIndoorTemperature: (newTemperature: number) => void;
-  outdoorTemperature: OutdoorTemperature;
+  outdoorTemperature: UserOutdoorTemperature;
   updateOutdoorTemperature: (props: {
     override: boolean;
     value: number;
   }) => void;
   date: Date;
   duration: FormattedTime;
+  numberOfDays: number;
   updateSimulationDuration: (
     duration: Pick<FormattedTime, 'value'> & { unit: typeof TimeUnit.Years },
   ) => void;
   startSimulation: () => void;
   pauseSimulation: () => void;
+  currDayIdx: number;
+  gotToDay: (idx: number) => void;
+  getDateOf: (idx: number) => Date;
+  windowScaleSize: Vector3;
+  windowSize: WindowSizeType;
+  updateWindowSize: (newSize: WindowSizeType) => void;
+  numberOfFloors: number;
+  updateNumberOfFloors: (numberOfFloors: number) => void;
+  houseComponentsConfigurator: HouseComponentsConfigurator;
 };
 
 const SimulationContext = createContext<SimulationContextType | null>(null);
@@ -59,9 +82,6 @@ export const SimulationProvider = ({
   children,
   simulationFrameMS,
 }: Props): ReactNode => {
-  // Hooks
-  const { houseComponentsConfigurator, numberOfFloors } = useHouseComponents();
-
   // Refs
   const simulationIntervalId = useRef<NodeJS.Timeout | null>(null);
   const temperatures = useRef<TemperatureRow[]>([
@@ -85,23 +105,28 @@ export const SimulationProvider = ({
     SIMULATION_CSV_FILES[
       simulationDuration.value as keyof typeof SIMULATION_CSV_FILES
     ];
-  // TODO: accept multiple temperatures per day => TemperatureRow{date, meanTemperature}[]
-  const numberOfRows = temperatures.current.length; // We assume it is one temperature per day for now
-  const [history, dispatchHistory] = useReducer(simulationHistory, [
-    SimulationCommand.createDefault({
-      numberOfFloors,
-      houseConfigurator: houseComponentsConfigurator,
-    }),
-  ]);
-  const currDayIdx = history.length - 1;
-  const currentCommand = history[currDayIdx];
+  const numberOfDays = temperatures.current.length; // We assume it is one temperature per day.
+  const [
+    { simulationDays, currentDayIdx, simulationSettings },
+    dispatchHistory,
+  ] = useReducer(simulationHistory, createDefault());
+  const currentDay = simulationDays[currentDayIdx];
+
+  // Hooks
+  const houseComponentsHook = useHouseComponents({
+    houseConfigurator: simulationSettings.houseConfigurator,
+    onChange: (houseConfigurator) => {
+      dispatchHistory({
+        type: 'updateHouseConfigurator',
+        houseConfigurator,
+      });
+    },
+  });
 
   const resetSimulation = useCallback(() => {
     dispatchHistory({
       type: 'reset',
-      outdoorTemperature: {
-        weatherValue: temperatures.current[0].temperature,
-      },
+      temperatureRows: temperatures.current,
     });
   }, []);
 
@@ -115,7 +140,6 @@ export const SimulationProvider = ({
 
     loadTemperaturesFromCSV(csv.path).then((rows) => {
       temperatures.current = rows;
-      setSimulationStatus(SimulationStatus.IDLE);
       resetSimulation();
     });
   }, [
@@ -126,46 +150,15 @@ export const SimulationProvider = ({
     simulationDuration.value,
   ]);
 
-  // Handle the simulation's iterations
   useEffect(() => {
-    if (simulationStatus === SimulationStatus.RUNNING) {
-      simulationIntervalId.current = setInterval(() => {
-        const nextIdx = currDayIdx + 1;
-        if (nextIdx < numberOfRows) {
-          const { userOverride, value } =
-            history[currDayIdx].outdoorTemperature;
-          const weatherValue = temperatures.current[nextIdx].temperature;
-
-          dispatchHistory({
-            type: 'add',
-            command: history[currDayIdx].from({
-              outdoorTemperature: {
-                userOverride,
-                weatherValue: temperatures.current[nextIdx].temperature,
-                value: userOverride ? value : weatherValue,
-              },
-            }),
-          });
-        } else {
-          setSimulationStatus(SimulationStatus.FINISHED);
-        }
-      }, simulationFrameMS);
+    // Only set the status from LOADING to IDLE when the heat loss is computed.
+    if (
+      simulationStatus === SimulationStatus.LOADING &&
+      currentDay.heatLoss?.global
+    ) {
+      setSimulationStatus(SimulationStatus.IDLE);
     }
-
-    return () => {
-      // Cleanup on unmount or status change
-      if (simulationIntervalId.current) {
-        clearInterval(simulationIntervalId.current);
-      }
-    };
-  }, [
-    simulationStatus,
-    numberOfRows,
-    simulationFrameMS,
-    history,
-    dispatchHistory,
-    currDayIdx,
-  ]);
+  }, [currentDay, simulationStatus]);
 
   // Simulation Status Command
   const startSimulation = useCallback((): void => {
@@ -193,17 +186,57 @@ export const SimulationProvider = ({
       simulationIntervalId.current
     ) {
       clearInterval(simulationIntervalId.current);
-      setSimulationStatus(SimulationStatus.PAUSED);
     }
+
+    setSimulationStatus(SimulationStatus.PAUSED);
   }, [simulationStatus]);
 
-  // Update simulation's current state
+  // The useDebouncedCallback function is used to avoid modifying days too quickly
+  // and creating too many new days.
+  const gotToDay = useDebouncedCallback((idx: number): void => {
+    pauseSimulation();
+    dispatchHistory({ type: 'goToDay', dayIdx: idx });
+  }, 10);
+
+  // Handle the simulation's iterations
   useEffect(() => {
+    if (simulationStatus === SimulationStatus.RUNNING) {
+      simulationIntervalId.current = setInterval(() => {
+        const nextIdx = currentDayIdx + 1;
+        if (nextIdx < numberOfDays) {
+          // Go to next day.
+          dispatchHistory({ type: 'goToDay', dayIdx: nextIdx });
+        } else {
+          setSimulationStatus(SimulationStatus.FINISHED);
+        }
+      }, simulationFrameMS);
+    }
+
+    return () => {
+      // Cleanup on unmount or status change
+      if (simulationIntervalId.current) {
+        clearInterval(simulationIntervalId.current);
+      }
+    };
+  }, [
+    simulationStatus,
+    numberOfDays,
+    simulationFrameMS,
+    dispatchHistory,
+    currentDayIdx,
+  ]);
+
+  // Update simulation's current state
+  const updateNumberOfFloors = useCallback((numberOfFloors: number) => {
+    if (numberOfFloors < 1 || numberOfFloors > 2) {
+      throw new Error('The number of floors must be between [1, 2]');
+    }
+
     dispatchHistory({
-      type: 'updateHouseConfigurator',
-      houseConfigurator: houseComponentsConfigurator,
+      type: 'updateNumberOfFloors',
+      numberOfFloors,
     });
-  }, [houseComponentsConfigurator]);
+  }, []);
 
   const updateOutdoorTemperature = useCallback(
     ({ override, value }: { override: boolean; value: number }): void => {
@@ -243,49 +276,75 @@ export const SimulationProvider = ({
     [],
   );
 
+  const updateWindowSize = useCallback((newSize: WindowSizeType): void => {
+    dispatchHistory({
+      type: 'updateWindowSize',
+      windowSize: newSize,
+    });
+  }, []);
+
   const contextValue = useMemo(
     () => ({
-      indoorTemperature: currentCommand.indoorTemperature,
+      indoorTemperature: simulationSettings.indoorTemperature,
       updateIndoorTemperature,
-      outdoorTemperature: currentCommand.outdoorTemperature,
+      outdoorTemperature: {
+        ...simulationSettings.outdoorTemperature,
+        value: getOutdoorTemperature({
+          userTemperature: simulationSettings.outdoorTemperature,
+          weather: currentDay.weatherTemperature,
+        }),
+      },
       updateOutdoorTemperature,
-      date: new Date(temperatures.current[currDayIdx].time),
+      date: new Date(temperatures.current[currentDayIdx]?.time),
+      getDateOf: (idx: number) => new Date(temperatures.current[idx]?.time),
       duration: simulationDuration,
+      numberOfDays,
       updateSimulationDuration,
       status: simulationStatus,
-      heatLossPerComponent: currentCommand.heatLoss.perComponent,
-      heatLoss: currentCommand.heatLoss.global,
-      totalHeatLoss: formatHeatLossRate(
-        currentCommand.prevTotHeatLoss + currentCommand.heatLoss.global,
-      ),
-      electricityCost:
-        currentCommand.prevTotPowerCost +
-        electricityCost({
-          pricekWh: currentCommand.pricekWh,
-          energyConsumptionkWh:
-            currentCommand.heatLoss.global / powerConversionFactors.KiloWatt,
-        }),
+      heatLossPerComponent: currentDay.heatLoss.perComponent ?? 0,
+      heatLoss: currentDay.heatLoss.global,
+      totalHeatLoss: formatHeatLossRate(currentDay.totalHeatLoss),
+      electricityCost: currentDay.totalElectricityCost,
+      pricekWh: simulationSettings.pricekWh,
       setPricekWh: updatePricekWh,
       startSimulation,
       pauseSimulation,
+      currDayIdx: currentDayIdx,
+      gotToDay,
+      windowSize: simulationSettings.windowSize,
+      windowScaleSize: WindowScaleSize[simulationSettings.windowSize],
+      updateWindowSize,
+      numberOfFloors: simulationSettings.numberOfFloors,
+      updateNumberOfFloors,
+      houseComponentsConfigurator: simulationSettings.houseConfigurator,
+      ...houseComponentsHook,
     }),
     [
-      currentCommand.indoorTemperature,
-      currentCommand.outdoorTemperature,
-      currentCommand.heatLoss.perComponent,
-      currentCommand.heatLoss.global,
-      currentCommand.prevTotHeatLoss,
-      currentCommand.prevTotPowerCost,
-      currentCommand.pricekWh,
+      simulationSettings.indoorTemperature,
+      simulationSettings.outdoorTemperature,
+      simulationSettings.pricekWh,
+      simulationSettings.windowSize,
+      simulationSettings.numberOfFloors,
+      simulationSettings.houseConfigurator,
       updateIndoorTemperature,
+      currentDay.weatherTemperature,
+      currentDay.heatLoss.perComponent,
+      currentDay.heatLoss.global,
+      currentDay.totalHeatLoss,
+      currentDay.totalElectricityCost,
       updateOutdoorTemperature,
-      currDayIdx,
+      currentDayIdx,
       simulationDuration,
+      numberOfDays,
       updateSimulationDuration,
       simulationStatus,
       updatePricekWh,
       startSimulation,
       pauseSimulation,
+      gotToDay,
+      updateWindowSize,
+      updateNumberOfFloors,
+      houseComponentsHook,
     ],
   );
 

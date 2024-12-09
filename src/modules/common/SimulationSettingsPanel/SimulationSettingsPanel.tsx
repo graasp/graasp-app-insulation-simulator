@@ -6,10 +6,10 @@ import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
 
-import { ElectricityCostControl } from './ElectricityCostControl';
-import { HouseControl } from './HouseControl';
-import { SimulationDurationControl } from './SimulationDurationControl';
-import { TemperatureControl } from './TemperatureControl/TemperatureControl';
+import { ElectricityCostSettings } from './ElectricityCostSettings';
+import { HouseSettings } from './HouseSettings';
+import { SimulationDurationSettings } from './SimulationDurationSettings';
+import { TemperatureSettings } from './TemperatureSettings';
 
 const AccordionContainer = styled(Accordion, {
   shouldForwardProp: (prop) => prop !== 'md',
@@ -21,8 +21,8 @@ const AccordionContainer = styled(Accordion, {
   backgroundColor: '#f5f5f8',
 }));
 
-export const SimulationControlPanel = (): JSX.Element => {
-  const { t } = useTranslation('SIMULATION_CONTROL_PANEL');
+export const SimulationSettingsPanel = (): JSX.Element => {
+  const { t } = useTranslation('SIMULATION_SETTINGS_PANEL');
   const theme = useTheme();
   const md = useMediaQuery(theme.breakpoints.up('sm'));
 
@@ -42,10 +42,10 @@ export const SimulationControlPanel = (): JSX.Element => {
             aria-controls="panel-duration-content"
             id="panel-duration-header"
           >
-            {t('DURATION_CONTROL_PANEL.TITLE')}
+            {t('DURATION_SETTINGS_PANEL.TITLE')}
           </AccordionSummary>
           <AccordionDetails>
-            <SimulationDurationControl />
+            <SimulationDurationSettings />
           </AccordionDetails>
         </Accordion>
 
@@ -55,10 +55,10 @@ export const SimulationControlPanel = (): JSX.Element => {
             aria-controls="panel-house-content"
             id="panel-house-header"
           >
-            {t('HOUSE_CONTROL_PANEL.TITLE')}
+            {t('HOUSE_SETTINGS_PANEL.TITLE')}
           </AccordionSummary>
           <AccordionDetails>
-            <HouseControl />
+            <HouseSettings />
           </AccordionDetails>
         </Accordion>
 
@@ -68,10 +68,10 @@ export const SimulationControlPanel = (): JSX.Element => {
             aria-controls="panel-electricity-content"
             id="panel-electricity-header"
           >
-            {t('ELECTRICITY_CONTROL_PANEL.TITLE')}
+            {t('ELECTRICITY_SETTINGS_PANEL.TITLE')}
           </AccordionSummary>
           <AccordionDetails>
-            <ElectricityCostControl />
+            <ElectricityCostSettings />
           </AccordionDetails>
         </Accordion>
 
@@ -81,10 +81,10 @@ export const SimulationControlPanel = (): JSX.Element => {
             aria-controls="panel-temperature-content"
             id="panel-temperature-header"
           >
-            {t('TEMPERATURES_CONTROL_PANEL.TITLE')}
+            {t('TEMPERATURES_SETTINGS_PANEL.TITLE')}
           </AccordionSummary>
           <AccordionDetails>
-            <TemperatureControl />
+            <TemperatureSettings />
           </AccordionDetails>
         </Accordion>
       </AccordionDetails>

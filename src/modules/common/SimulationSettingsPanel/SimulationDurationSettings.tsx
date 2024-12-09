@@ -9,17 +9,19 @@ import { TimeUnit } from '@/types/time';
 
 const OPTIONS = Object.keys(SIMULATION_CSV_FILES);
 
-export const SimulationDurationControl = (): JSX.Element => {
-  const { t } = useTranslation('SIMULATION_CONTROL_PANEL', {
-    keyPrefix: 'DURATION_CONTROL_PANEL',
+export const SimulationDurationSettings = (): JSX.Element => {
+  const { t } = useTranslation('SIMULATION_SETTINGS_PANEL', {
+    keyPrefix: 'DURATION_SETTINGS_PANEL',
   });
 
   const { t: tDates } = useTranslation('DATES');
 
   const { duration, updateSimulationDuration, status } = useSimulation();
 
-  const selectIsDisabled =
-    status !== SimulationStatus.IDLE && status !== SimulationStatus.FINISHED;
+  const selectIsDisabled = [
+    SimulationStatus.LOADING,
+    SimulationStatus.RUNNING,
+  ].includes(status);
 
   const handleChange = (newDuration: string | number): void => {
     if (selectIsDisabled) {

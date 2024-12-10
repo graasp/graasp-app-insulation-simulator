@@ -102,13 +102,19 @@ export const SimulationProvider = ({
     ];
   // TODO: accept multiple temperatures per day => TemperatureRow{date, meanTemperature}[]
   const numberOfRows = temperatures.current.length; // We assume it is one temperature per day for now
-  const [history, dispatchHistory] = useReducer(simulationHistory, [
-    SimulationCommand.createDefault({
-      numberOfFloors,
-      windowSize,
-      houseConfigurator: houseComponentsConfigurator,
-    }),
-  ]);
+  const [{ past: history, futur }, dispatchHistory] = useReducer(
+    simulationHistory,
+    {
+      past: [
+        SimulationCommand.createDefault({
+          numberOfFloors,
+          windowSize,
+          houseConfigurator: houseComponentsConfigurator,
+        }),
+      ],
+      futur: [],
+    },
+  );
   const currDayIdx = history.length - 1;
   const currentCommand = history[currDayIdx];
 
@@ -142,47 +148,6 @@ export const SimulationProvider = ({
     simulationDuration.value,
   ]);
 
-  // Handle the simulation's iterations
-  useEffect(() => {
-    if (simulationStatus === SimulationStatus.RUNNING) {
-      simulationIntervalId.current = setInterval(() => {
-        const nextIdx = currDayIdx + 1;
-        if (nextIdx < numberOfRows) {
-          const { userOverride, value } =
-            history[currDayIdx].outdoorTemperature;
-          const weatherValue = temperatures.current[nextIdx].temperature;
-
-          dispatchHistory({
-            type: 'add',
-            command: history[currDayIdx].from({
-              outdoorTemperature: {
-                userOverride,
-                weatherValue: temperatures.current[nextIdx].temperature,
-                value: userOverride ? value : weatherValue,
-              },
-            }),
-          });
-        } else {
-          setSimulationStatus(SimulationStatus.FINISHED);
-        }
-      }, simulationFrameMS);
-    }
-
-    return () => {
-      // Cleanup on unmount or status change
-      if (simulationIntervalId.current) {
-        clearInterval(simulationIntervalId.current);
-      }
-    };
-  }, [
-    simulationStatus,
-    numberOfRows,
-    simulationFrameMS,
-    history,
-    dispatchHistory,
-    currDayIdx,
-  ]);
-
   // Simulation Status Command
   const startSimulation = useCallback((): void => {
     if (temperatures.current.length === 0) {
@@ -213,6 +178,88 @@ export const SimulationProvider = ({
 
     setSimulationStatus(SimulationStatus.PAUSED);
   }, [simulationStatus]);
+
+  const goToFutur = useCallback(
+    (idx: number): void => {
+      const { userOverride, value } = history[currDayIdx].outdoorTemperature;
+
+      const outdoorTemperatures = temperatures.current
+        .slice(currDayIdx + 1, idx + 1)
+        .map(({ temperature: weatherValue }) => ({
+          userOverride,
+          weatherValue,
+          value: userOverride ? value : weatherValue,
+        }));
+
+      // if (futur.length) {
+      //   const t = futur[outdoorTemperatures.length - history.length];
+      //   replaceHouseComponentsConfigurator(t.houseConfigurator);
+      //   changeWindowSize(t.windowSize);
+      //   updateNumberOfFloors(t.numberOfFloors);
+      // }
+
+      dispatchHistory({
+        type: 'goToFutur',
+        outdoorTemperatures,
+      });
+    },
+    [currDayIdx, history],
+  );
+
+  const goToPast = useCallback(
+    (idx: number): void => {
+      replaceHouseComponentsConfigurator(history[idx].houseConfigurator);
+      changeWindowSize(history[idx].windowSize);
+      updateNumberOfFloors(history[idx].numberOfFloors);
+      dispatchHistory({ type: 'goToPast', idx });
+    },
+    [
+      changeWindowSize,
+      history,
+      replaceHouseComponentsConfigurator,
+      updateNumberOfFloors,
+    ],
+  );
+
+  // The useDebouncedCallback function is used to avoid modifying days too quickly
+  // and creating too many new days.
+  const gotToDay = useDebouncedCallback((idx: number): void => {
+    pauseSimulation();
+    if (idx <= currDayIdx) {
+      goToPast(idx);
+    } else if (idx < temperatures.current.length) {
+      goToFutur(idx);
+    }
+  }, 10);
+
+  // Handle the simulation's iterations
+  useEffect(() => {
+    if (simulationStatus === SimulationStatus.RUNNING) {
+      simulationIntervalId.current = setInterval(() => {
+        const nextIdx = currDayIdx + 1;
+        if (nextIdx < numberOfRows) {
+          goToFutur(nextIdx);
+        } else {
+          setSimulationStatus(SimulationStatus.FINISHED);
+        }
+      }, simulationFrameMS);
+    }
+
+    return () => {
+      // Cleanup on unmount or status change
+      if (simulationIntervalId.current) {
+        clearInterval(simulationIntervalId.current);
+      }
+    };
+  }, [
+    simulationStatus,
+    numberOfRows,
+    simulationFrameMS,
+    history,
+    dispatchHistory,
+    currDayIdx,
+    goToFutur,
+  ]);
 
   // Update simulation's current state
   useEffect(() => {
@@ -273,34 +320,6 @@ export const SimulationProvider = ({
     },
     [],
   );
-
-  // The useDebouncedCallback function is used to avoid modifying days too quickly
-  // and creating too many new days.
-  const gotToDay = useDebouncedCallback((idx: number): void => {
-    pauseSimulation();
-
-    if (idx <= currDayIdx) {
-      replaceHouseComponentsConfigurator(history[idx].houseConfigurator);
-      changeWindowSize(history[idx].windowSize);
-      updateNumberOfFloors(history[idx].numberOfFloors);
-      dispatchHistory({ type: 'goToPast', idx });
-    } else if (idx < temperatures.current.length) {
-      const { userOverride, value } = history[currDayIdx].outdoorTemperature;
-
-      const outdoorTemperatures = temperatures.current
-        .slice(currDayIdx + 1, idx + 1)
-        .map(({ temperature: weatherValue }) => ({
-          userOverride,
-          weatherValue,
-          value: userOverride ? value : weatherValue,
-        }));
-
-      dispatchHistory({
-        type: 'goToFutur',
-        outdoorTemperatures,
-      });
-    }
-  }, 10);
 
   const contextValue = useMemo(
     () => ({

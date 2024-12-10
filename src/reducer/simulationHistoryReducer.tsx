@@ -15,14 +15,17 @@ const updateState = (
   state: NonEmptyArray<SimulationCommand>,
   index: number,
   value: Partial<SimulationCommand>,
-): NonEmptyArray<SimulationCommand> => {
+): SimulationHistory => {
   if (index < 0 || index >= state.length) {
-    return state;
+    return { past: state, futur: [] };
   }
 
-  return CreateNonEmptyArray(
-    updateArrayElement(state, index, state[index].from(value)),
-  );
+  return {
+    past: CreateNonEmptyArray(
+      updateArrayElement(state, index, state[index].from(value)),
+    ),
+    futur: [],
+  };
 };
 
 const computePrevTot = (
@@ -57,10 +60,6 @@ type Action =
       outdoorTemperature: Pick<OutdoorTemperature, 'weatherValue'>;
     }
   | {
-      type: 'add';
-      command: Partial<SimulationCommand>;
-    }
-  | {
       type: 'goToFutur';
       outdoorTemperatures: SimulationCommand['outdoorTemperature'][];
     }
@@ -93,82 +92,97 @@ type Action =
       windowSize: WindowSizeType;
     };
 
+type SimulationHistory = {
+  futur: SimulationCommand[];
+  past: NonEmptyArray<SimulationCommand>;
+};
+
 export const simulationHistory = (
-  state: NonEmptyArray<SimulationCommand>,
+  state: SimulationHistory,
   action: Action,
-): NonEmptyArray<SimulationCommand> => {
-  if (!state.length) {
+): SimulationHistory => {
+  if (!state || !state.past.length) {
     throw new Error('The initial state must contain at least one value!');
   }
 
+  const { past, futur } = state;
   const { type } = action;
 
   switch (type) {
     case 'reset': {
-      const { value, userOverride } =
-        state[state.length - 1].outdoorTemperature;
+      const { value, userOverride } = past[past.length - 1].outdoorTemperature;
       const { weatherValue } = action.outdoorTemperature;
 
-      return [
-        state[state.length - 1].from({
-          outdoorTemperature: {
-            userOverride,
-            weatherValue,
-            value: userOverride ? value : weatherValue,
-          },
-          prevTotHeatLoss: 0,
-          prevTotPowerCost: 0,
-        }),
-      ];
-    }
-    case 'add': {
-      const prev = state[state.length - 1];
-
-      return [
-        ...state,
-        prev.from({
-          ...action.command,
-          ...computePrevTot(prev),
-        }),
-      ];
+      return {
+        past: [
+          past[past.length - 1].from({
+            outdoorTemperature: {
+              userOverride,
+              weatherValue,
+              value: userOverride ? value : weatherValue,
+            },
+            prevTotHeatLoss: 0,
+            prevTotPowerCost: 0,
+          }),
+        ],
+        futur: [],
+      };
     }
     case 'goToFutur': {
-      return CreateNonEmptyArray(
-        action.outdoorTemperatures.reduce<SimulationCommand[]>(
-          (acc, currOutdoor) => {
-            const prev = acc[acc.length - 1];
+      if (futur.length) {
+        // TODO: explain
+        const idx = action.outdoorTemperatures.length;
 
-            return [
-              ...acc,
-              prev.from({
-                ...computePrevTot(prev),
-                outdoorTemperature: currOutdoor,
-              }),
-            ];
-          },
-          [...state],
+        return {
+          past: CreateNonEmptyArray([...past, ...futur.slice(0, idx)]),
+          futur: futur.slice(idx),
+        };
+      }
+
+      return {
+        past: CreateNonEmptyArray(
+          action.outdoorTemperatures.reduce<SimulationCommand[]>(
+            (acc, currOutdoor) => {
+              const prev = acc[acc.length - 1];
+
+              return [
+                ...acc,
+                prev.from({
+                  ...computePrevTot(prev),
+                  outdoorTemperature: currOutdoor,
+                }),
+              ];
+            },
+            [...past],
+          ),
         ),
-      );
+        futur: [],
+      };
     }
     case 'goToPast': {
       if (action.idx < 0) {
         throw new Error('The given index is out of range!');
       }
 
-      return CreateNonEmptyArray(state.slice(0, action.idx + 1));
+      const lastIdx = action.idx + 1; // + 1 to include the idx
+
+      return {
+        past: CreateNonEmptyArray(past.slice(0, lastIdx)),
+        futur: [...past.slice(lastIdx), ...futur],
+      };
     }
     case 'updateIndoorTemperature':
       // always update the current command
-      return updateState(state, state.length - 1, {
+      return updateState(past, past.length - 1, {
         indoorTemperature: action.indoorTemperature,
       });
     case 'updateOutdoorTemperature': {
       // always update the current command
-      const index = state.length - 1;
+      const index = past.length - 1;
       const { userOverride, value } = action.outdoorTemperature;
-      const { weatherValue } = state[index].outdoorTemperature;
+      const { weatherValue } = past[index].outdoorTemperature;
 
-      return updateState(state, index, {
+      return updateState(past, index, {
         outdoorTemperature: {
           userOverride,
           weatherValue,
@@ -178,22 +192,22 @@ export const simulationHistory = (
     }
     case 'updateNumberOfFloors':
       // always update the current command
-      return updateState(state, state.length - 1, {
+      return updateState(past, past.length - 1, {
         numberOfFloors: action.numberOfFloors,
       });
     case 'updatePricekWh':
       // always update the current command
-      return updateState(state, state.length - 1, {
+      return updateState(past, past.length - 1, {
         pricekWh: action.pricekWh,
       });
     case 'updateHouseConfigurator':
       // always update the current command
-      return updateState(state, state.length - 1, {
+      return updateState(past, past.length - 1, {
         houseConfigurator: action.houseConfigurator,
       });
     case 'updateWindowSize':
       // always update the current command
-      return updateState(state, state.length - 1, {
+      return updateState(past, past.length - 1, {
         windowSize: action.windowSize,
       });
     default:

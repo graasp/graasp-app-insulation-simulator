@@ -9,8 +9,8 @@
   "homepage": ".",
   "type": "module",
   "dependencies": {
-    "@emotion/react": "11.13.3",
-    "@emotion/styled": "11.13.0",
+    "@emotion/react": "11.13.5",
+    "@emotion/styled": "11.13.5",
     "@graasp/apps-query-client": "3.4.15",
     "@graasp/sdk": "4.9.0",
     "@graasp/ui": "4.17.1",

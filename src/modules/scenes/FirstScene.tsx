@@ -123,13 +123,13 @@ const FirstSceneComponent = (): JSX.Element => {
 
 const FirstScene = (): JSX.Element => (
   <HouseComponentsProvider>
-    <SimulationProvider simulationFrameMS={SIMULATION_FRAME_MS}>
-      <SeasonProvider>
-        <WindowSizeProvider>
+    <WindowSizeProvider>
+      <SimulationProvider simulationFrameMS={SIMULATION_FRAME_MS}>
+        <SeasonProvider>
           <FirstSceneComponent />
-        </WindowSizeProvider>
-      </SeasonProvider>
-    </SimulationProvider>
+        </SeasonProvider>
+      </SimulationProvider>
+    </WindowSizeProvider>
   </HouseComponentsProvider>
 );
 

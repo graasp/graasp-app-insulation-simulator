@@ -26,6 +26,7 @@ import { formatHeatLossRate, powerConversionFactors } from '@/utils/heatLoss';
 import { loadTemperaturesFromCSV } from '@/utils/temperatures';
 
 import { useHouseComponents } from './HouseComponentsContext';
+import { useWindowSize } from './WindowSizeContext';
 
 type SimulationContextType = {
   status: SimulationStatus;
@@ -70,8 +71,11 @@ export const SimulationProvider = ({
   const {
     houseComponentsConfigurator,
     numberOfFloors,
+    updateNumberOfFloors,
     replaceHouseComponentsConfigurator,
   } = useHouseComponents();
+
+  const { windowSize, changeWindowSize } = useWindowSize();
 
   // Refs
   const simulationIntervalId = useRef<NodeJS.Timeout | null>(null);
@@ -101,6 +105,7 @@ export const SimulationProvider = ({
   const [history, dispatchHistory] = useReducer(simulationHistory, [
     SimulationCommand.createDefault({
       numberOfFloors,
+      windowSize,
       houseConfigurator: houseComponentsConfigurator,
     }),
   ]);
@@ -217,6 +222,20 @@ export const SimulationProvider = ({
     });
   }, [houseComponentsConfigurator]);
 
+  useEffect(() => {
+    dispatchHistory({
+      type: 'updateNumberOfFloors',
+      numberOfFloors,
+    });
+  }, [numberOfFloors]);
+
+  useEffect(() => {
+    dispatchHistory({
+      type: 'updateWindowSize',
+      windowSize,
+    });
+  }, [windowSize]);
+
   const updateOutdoorTemperature = useCallback(
     ({ override, value }: { override: boolean; value: number }): void => {
       dispatchHistory({
@@ -262,6 +281,8 @@ export const SimulationProvider = ({
 
     if (idx <= currDayIdx) {
       replaceHouseComponentsConfigurator(history[idx].houseConfigurator);
+      changeWindowSize(history[idx].windowSize);
+      updateNumberOfFloors(history[idx].numberOfFloors);
       dispatchHistory({ type: 'goToPast', idx });
     } else if (idx < temperatures.current.length) {
       const { userOverride, value } = history[currDayIdx].outdoorTemperature;

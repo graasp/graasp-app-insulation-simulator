@@ -2,6 +2,7 @@ import {
   SIMULATION_INDOOR_TEMPERATURE_CELCIUS,
   SIMULATION_PRICE_KWH,
 } from '@/config/simulation';
+import { WindowSizeType } from '@/context/WindowSizeContext';
 import { OutdoorTemperature } from '@/types/temperatures';
 
 import { HouseComponentsConfigurator } from './HouseComponentsConfigurator';
@@ -15,6 +16,7 @@ type Constructor = {
   prevTotHeatLoss: number;
   prevTotPowerCost: number;
   houseConfigurator: HouseComponentsConfigurator;
+  windowSize: WindowSizeType;
 };
 
 export class SimulationCommand {
@@ -34,7 +36,7 @@ export class SimulationCommand {
 
   readonly houseConfigurator: HouseComponentsConfigurator;
 
-  //   TODO: also include window size and missing props?
+  readonly windowSize: WindowSizeType;
 
   constructor({
     indoorTemperature,
@@ -44,6 +46,7 @@ export class SimulationCommand {
     prevTotHeatLoss,
     prevTotPowerCost,
     houseConfigurator,
+    windowSize,
   }: Constructor) {
     this.indoorTemperature = indoorTemperature;
     this.outdoorTemperature = outdoorTemperature;
@@ -57,14 +60,16 @@ export class SimulationCommand {
       outdoorTemperature: outdoorTemperature.value,
       houseConfigurator,
     });
+    this.windowSize = windowSize;
   }
 
   public static createDefault({
     numberOfFloors,
+    windowSize,
     houseConfigurator,
   }: Pick<
     Constructor,
-    'numberOfFloors' | 'houseConfigurator'
+    'numberOfFloors' | 'houseConfigurator' | 'windowSize'
   >): SimulationCommand {
     return new SimulationCommand({
       indoorTemperature: SIMULATION_INDOOR_TEMPERATURE_CELCIUS.DEFAULT,
@@ -74,6 +79,7 @@ export class SimulationCommand {
       prevTotHeatLoss: 0,
       prevTotPowerCost: 0,
       houseConfigurator,
+      windowSize,
     });
   }
 
@@ -86,6 +92,7 @@ export class SimulationCommand {
       prevTotHeatLoss: params.prevTotHeatLoss ?? this.prevTotHeatLoss,
       prevTotPowerCost: params.prevTotPowerCost ?? this.prevTotPowerCost,
       houseConfigurator: params.houseConfigurator ?? this.houseConfigurator,
+      windowSize: params.windowSize ?? this.windowSize,
     });
   }
 }

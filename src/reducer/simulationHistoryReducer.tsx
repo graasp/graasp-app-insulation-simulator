@@ -1,4 +1,5 @@
 import { SIMULATION_PRICE_KWH } from '@/config/simulation';
+import { WindowSizeType } from '@/context/WindowSizeContext';
 import { HouseComponentsConfigurator } from '@/models/HouseComponentsConfigurator';
 import { SimulationCommand } from '@/models/SimulationCommand';
 import { OutdoorTemperature } from '@/types/temperatures';
@@ -86,6 +87,10 @@ type Action =
   | {
       type: 'updateHouseConfigurator';
       houseConfigurator: HouseComponentsConfigurator;
+    }
+  | {
+      type: 'updateWindowSize';
+      windowSize: WindowSizeType;
     };
 
 export const simulationHistory = (
@@ -185,6 +190,11 @@ export const simulationHistory = (
       // always update the current command
       return updateState(state, state.length - 1, {
         houseConfigurator: action.houseConfigurator,
+      });
+    case 'updateWindowSize':
+      // always update the current command
+      return updateState(state, state.length - 1, {
+        windowSize: action.windowSize,
       });
     default:
       throw new Error(`The given type ${type} is not a valid type.`);

@@ -13,32 +13,32 @@ import { powerConversionFactors } from '@/utils/heatLoss';
 
 type SimulationHistory = {
   futur: SimulationCommand[];
-  past: NonEmptyArray<SimulationCommand>;
+  history: NonEmptyArray<SimulationCommand>;
 };
 
 const updateCurrentCommand = (
   state: SimulationHistory,
   newValue: Partial<SimulationCommand>,
 ): SimulationHistory => {
-  const { past, futur } = state;
+  const { history, futur } = state;
   // always update the current command
-  const index = past.length - 1;
-  if (index < 0 || index >= past.length) {
-    return { past, futur: [] };
+  const index = history.length - 1;
+  if (index < 0 || index >= history.length) {
+    return { history, futur: [] };
   }
 
   return {
-    past: CreateNonEmptyArray(
-      updateArrayElement(past, index, past[index].from(newValue)),
+    history: CreateNonEmptyArray(
+      updateArrayElement(history, index, history[index].from(newValue)),
     ),
     /**
      * If the new value does not modify the current command, do not delete the future one!
-     * This check is necessary, because when a command is applied in the past and the inputs are modified,
-     * the changes cause a call to update the current command (the one in the past).
+     * This check is necessary, because when a command is applied in the history and the inputs are modified,
+     * the changes cause a call to update the current command (the one in the history).
      *
      * Even though the value is identical, if the change is not checked, the future will be deleted.
      */
-    futur: past[index].equalsTo(newValue) ? futur : [],
+    futur: history[index].equalsTo(newValue) ? futur : [],
   };
 };
 
@@ -110,21 +110,22 @@ export const simulationHistory = (
   state: SimulationHistory,
   action: Action,
 ): SimulationHistory => {
-  if (!state || !state.past.length) {
+  if (!state || !state.history.length) {
     throw new Error('The initial state must contain at least one value!');
   }
 
-  const { past, futur } = state;
+  const { history, futur } = state;
   const { type } = action;
 
   switch (type) {
     case 'reset': {
-      const { value, userOverride } = past[past.length - 1].outdoorTemperature;
+      const { value, userOverride } =
+        history[history.length - 1].outdoorTemperature;
       const { weatherValue } = action.outdoorTemperature;
 
       return {
-        past: [
-          past[past.length - 1].from({
+        history: [
+          history[history.length - 1].from({
             outdoorTemperature: {
               userOverride,
               weatherValue,
@@ -138,36 +139,72 @@ export const simulationHistory = (
       };
     }
     case 'goToFutur': {
-      // TODO: fix or double check, what if we go in futur ouside of futur array? (check schema on ipad)
-      if (futur.length) {
-        // TODO: explain
-        const idx = action.outdoorTemperatures.length;
+      // TODO: explain
+      const numberOfCommands = action.outdoorTemperatures.length;
 
+      // the futur destination has already been visited (exist in futur array)
+      if (numberOfCommands - 1 < futur.length) {
         return {
-          past: CreateNonEmptyArray([...past, ...futur.slice(0, idx)]),
-          futur: futur.slice(idx),
+          history: CreateNonEmptyArray([
+            ...history,
+            ...futur.slice(0, numberOfCommands),
+          ]),
+          futur: futur.slice(numberOfCommands),
         };
       }
 
-      return {
-        past: CreateNonEmptyArray(
-          action.outdoorTemperatures.reduce<SimulationCommand[]>(
-            (acc, currOutdoor) => {
-              const prev = acc[acc.length - 1];
+      // const neverVisitedFutur = action.outdoorTemperatures.slice()
 
-              return [
-                ...acc,
-                prev.from({
-                  ...computePrevTot(prev),
-                  outdoorTemperature: currOutdoor,
-                }),
-              ];
-            },
-            [...past],
-          ),
-        ),
-        futur,
-      };
+      switch (true) {
+        // no futur, we have to create it using the past
+        case futur.length === 0:
+          return {
+            history: CreateNonEmptyArray(
+              action.outdoorTemperatures.reduce<SimulationCommand[]>(
+                (acc, currOutdoor) => {
+                  const prev = acc[acc.length - 1];
+
+                  return [
+                    ...acc,
+                    prev.from({
+                      ...computePrevTot(prev),
+                      outdoorTemperature: currOutdoor,
+                    }),
+                  ];
+                },
+                [...history],
+              ),
+            ),
+            futur,
+          };
+        // the futur destination has been visited partially
+        // but a part must be created (partial futur present in futur array)
+        case numberOfCommands >= futur.length:
+          return {
+            history: CreateNonEmptyArray(
+              action.outdoorTemperatures
+                .slice(futur.length)
+                .reduce<SimulationCommand[]>(
+                  (acc, currOutdoor) => {
+                    const prev = acc[acc.length - 1];
+
+                    return [
+                      ...acc,
+                      prev.from({
+                        ...computePrevTot(prev),
+                        outdoorTemperature: currOutdoor,
+                      }),
+                    ];
+                  },
+                  [...history, ...futur.slice(0, futur.length)],
+                ),
+            ),
+            futur: [],
+          };
+        default:
+          console.error('This case was not handled!');
+          return state;
+      }
     }
     case 'goToPast': {
       if (action.idx < 0) {
@@ -177,8 +214,8 @@ export const simulationHistory = (
       const lastIdx = action.idx + 1; // + 1 to include the idx
 
       return {
-        past: CreateNonEmptyArray(past.slice(0, lastIdx)),
-        futur: [...past.slice(lastIdx), ...futur],
+        history: CreateNonEmptyArray(history.slice(0, lastIdx)),
+        futur: [...history.slice(lastIdx), ...futur],
       };
     }
     case 'updateIndoorTemperature':
@@ -187,9 +224,9 @@ export const simulationHistory = (
       });
     case 'updateOutdoorTemperature': {
       // always update the current command
-      const index = past.length - 1;
+      const index = history.length - 1;
       const { userOverride, value } = action.outdoorTemperature;
-      const { weatherValue } = past[index].outdoorTemperature;
+      const { weatherValue } = history[index].outdoorTemperature;
 
       return updateCurrentCommand(state, {
         outdoorTemperature: {

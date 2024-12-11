@@ -106,8 +106,8 @@ export const SimulationProvider = ({
     ];
   // TODO: accept multiple temperatures per day => TemperatureRow{date, meanTemperature}[]
   const numberOfRows = temperatures.current.length; // We assume it is one temperature per day for now
-  const [{ past: history }, dispatchHistory] = useReducer(simulationHistory, {
-    past: [
+  const [{ history, futur }, dispatchHistory] = useReducer(simulationHistory, {
+    history: [
       SimulationCommand.createDefault({
         numberOfFloors,
         houseConfigurator: houseComponentsConfigurator,

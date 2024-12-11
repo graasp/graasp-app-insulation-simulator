@@ -5,7 +5,7 @@ import { FormControlValidator } from '@/modules/common/FormControlValidator';
 
 export const ElectricityCostControl = (): JSX.Element => {
   const { t } = useTranslation('SIMULATION_CONTROL_PANEL');
-  const { setPricekWh } = useSimulation();
+  const { pricekWh, setPricekWh } = useSimulation();
 
   const handleElectricityCostChange = (newValue: string): void => {
     const newPrice = Number.parseFloat(newValue);
@@ -20,7 +20,7 @@ export const ElectricityCostControl = (): JSX.Element => {
   return (
     <FormControlValidator
       label={t('ELECTRICITY_CONTROL_PANEL.ELECTRICITY_COST_LABEL')}
-      value="0.22"
+      value={pricekWh.toString()}
       onChange={(value) => handleElectricityCostChange(value)}
       validationRules={{
         min: 1e-3,

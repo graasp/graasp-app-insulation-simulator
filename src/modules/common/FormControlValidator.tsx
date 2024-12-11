@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -96,24 +96,34 @@ export const FormControlValidator = ({
   const { t } = useTranslation('ERROR_BOUNDARY', {
     keyPrefix: 'INPUT_VALIDATOR',
   });
-  const [controlledValue, setControlledValue] = useState<string>(String(value));
+  const [controlledValue, setControlledValue] = useState<string>(value);
   const [error, setError] = useState<string | undefined>();
   const rules = useMemo(
     () => ValidationRulesFactory(validationRules),
     [validationRules],
   );
 
-  const handleValueChange = (newValue: string): void => {
-    setControlledValue(newValue);
+  const handleValueChange = useCallback(
+    (newValue: string, notify: boolean = true): void => {
+      setControlledValue(newValue);
 
-    const { message } = rules.find((rule) => !rule.test(newValue)) ?? {};
+      const { message } = rules.find((rule) => !rule.test(newValue)) ?? {};
 
-    setError(message);
+      setError(message);
 
-    if (!message) {
-      onChange(newValue);
-    }
-  };
+      if (notify && !message) {
+        onChange(newValue);
+      }
+    },
+    [onChange, rules],
+  );
+
+  // Synchronize with the props to change
+  // the value when the props changed.
+  // Use when going into the past for example.
+  useEffect(() => {
+    handleValueChange(value, false);
+  }, [handleValueChange, value]);
 
   return (
     <FormControl fullWidth error={Boolean(error)}>

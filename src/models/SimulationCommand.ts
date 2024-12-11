@@ -1,8 +1,11 @@
+import equal from 'deep-equal';
+
 import {
   SIMULATION_INDOOR_TEMPERATURE_CELCIUS,
   SIMULATION_PRICE_KWH,
 } from '@/config/simulation';
 import { OutdoorTemperature } from '@/types/temperatures';
+import { WindowSizeType } from '@/types/window';
 
 import { HouseComponentsConfigurator } from './HouseComponentsConfigurator';
 import { SimulationHeatLoss } from './SimulationHeatLoss';
@@ -15,6 +18,7 @@ type Constructor = {
   prevTotHeatLoss: number;
   prevTotPowerCost: number;
   houseConfigurator: HouseComponentsConfigurator;
+  windowSize: WindowSizeType;
 };
 
 export class SimulationCommand {
@@ -34,7 +38,7 @@ export class SimulationCommand {
 
   readonly houseConfigurator: HouseComponentsConfigurator;
 
-  //   TODO: also include window size and missing props?
+  readonly windowSize: WindowSizeType;
 
   constructor({
     indoorTemperature,
@@ -44,6 +48,7 @@ export class SimulationCommand {
     prevTotHeatLoss,
     prevTotPowerCost,
     houseConfigurator,
+    windowSize,
   }: Constructor) {
     this.indoorTemperature = indoorTemperature;
     this.outdoorTemperature = outdoorTemperature;
@@ -57,6 +62,7 @@ export class SimulationCommand {
       outdoorTemperature: outdoorTemperature.value,
       houseConfigurator,
     });
+    this.windowSize = windowSize;
   }
 
   public static createDefault({
@@ -74,6 +80,7 @@ export class SimulationCommand {
       prevTotHeatLoss: 0,
       prevTotPowerCost: 0,
       houseConfigurator,
+      windowSize: 'Medium',
     });
   }
 
@@ -86,6 +93,13 @@ export class SimulationCommand {
       prevTotHeatLoss: params.prevTotHeatLoss ?? this.prevTotHeatLoss,
       prevTotPowerCost: params.prevTotPowerCost ?? this.prevTotPowerCost,
       houseConfigurator: params.houseConfigurator ?? this.houseConfigurator,
+      windowSize: params.windowSize ?? this.windowSize,
     });
+  }
+
+  public equalsTo(params: Partial<Constructor>): boolean {
+    return Object.entries(params).every(([k, v]) =>
+      equal(this[k as keyof typeof this], v),
+    );
   }
 }

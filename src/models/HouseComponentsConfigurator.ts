@@ -1,4 +1,7 @@
-import { HouseInsulationPerComponent } from '@/config/houseInsulations';
+import {
+  HouseInsulation,
+  HouseInsulationPerComponent,
+} from '@/config/houseInsulations';
 import { HouseComponent } from '@/types/houseComponent';
 import { HouseComponentInsulation } from '@/types/houseComponentInsulation';
 import { NonEmptyArray } from '@/types/utils';
@@ -15,7 +18,7 @@ type ChildrenId = string;
 type ParentId = string;
 
 /**
- * Manages a tree-like structure of house component insulations, ensuring immutability for efficient React updates.
+ * Manages a tree-like structure of house component insulations.
  */
 export class HouseComponentsConfigurator {
   /**
@@ -48,15 +51,22 @@ export class HouseComponentsConfigurator {
     return new HouseComponentsConfigurator();
   }
 
+  public clone(): HouseComponentsConfigurator {
+    return new HouseComponentsConfigurator(
+      this.components,
+      this.componentParents,
+    );
+  }
+
   /**
-   * Creates a new `HouseComponentsConfigurator` instance with the given component added or updated. The original instance remains unchanged.  This method is designed to support immutable updates in React applications.
+   * Creates a new `HouseComponentsConfigurator` instance with the given component added or updated.
    * @param parentId The ID of the parent component, or `undefined` if it's a root component (like a wall).
    * @param componentId The unique ID of the component.
    * @param component The component object itself.
    * @throws {Error} If `parentId` is the same as `componentId` (a component cannot be its own parent), or if the component is already assigned to a different parent.
    * @returns A new `HouseComponentsConfigurator` instance with the component added or updated.
    */
-  public cloneWith({
+  public add({
     parentId,
     componentId,
     component,
@@ -69,12 +79,8 @@ export class HouseComponentsConfigurator {
       throw new Error('A component cannot be its own parent!');
     }
 
-    const newComponents = new Map(this.components);
-    newComponents.set(componentId, component);
-
-    const newComponentParents = new Map(this.componentParents);
-
-    const currentParentId = newComponentParents.get(componentId);
+    this.components.set(componentId, component);
+    const currentParentId = this.componentParents.get(componentId);
 
     if (currentParentId && currentParentId !== parentId) {
       throw new Error(
@@ -83,12 +89,12 @@ export class HouseComponentsConfigurator {
     }
 
     if (parentId) {
-      newComponentParents.set(componentId, parentId);
+      this.componentParents.set(componentId, parentId);
     } else {
-      newComponentParents.delete(componentId);
+      this.componentParents.delete(componentId);
     }
 
-    return new HouseComponentsConfigurator(newComponents, newComponentParents);
+    return this;
   }
 
   /**
@@ -96,24 +102,21 @@ export class HouseComponentsConfigurator {
    * @param componentId The unique ID of the component.
    * @returns A new `HouseComponentsConfigurator` instance with the component added or updated.
    */
-  public cloneWithout({
+  public remove({
     componentId,
   }: {
     componentId: string;
   }): HouseComponentsConfigurator {
-    const newComponents = new Map(this.components);
-    newComponents.delete(componentId);
-
-    const newComponentParents = new Map(this.componentParents);
-    newComponentParents.delete(componentId);
+    this.components.delete(componentId);
+    this.componentParents.delete(componentId);
 
     this.removeComponent({
       componentId,
-      components: newComponents,
-      componentParents: newComponentParents,
+      components: this.components,
+      componentParents: this.componentParents,
     });
 
-    return new HouseComponentsConfigurator(newComponents, newComponentParents);
+    return this;
   }
 
   /**
@@ -152,7 +155,7 @@ export class HouseComponentsConfigurator {
    * @param insulation The new insulation to use to update the components of the given type.
    * @returns A new `HouseComponentsConfigurator` instance with the components' insulation of the given type updated.
    */
-  public cloneWithNewInsulation<
+  public updateInsulation<
     T extends HouseComponent,
     K extends keyof (typeof HouseInsulationPerComponent)[T],
   >({
@@ -171,24 +174,18 @@ export class HouseComponentsConfigurator {
       );
     }
 
-    const newComponents = Array.from(this.components.entries()).map(
-      ([k, v]) => {
-        const shouldUdpate = v.componentType === componentType;
-        const update = {
-          insulationName: shouldUdpate ? insulation.name : v.insulationName,
-          buildingMaterials: shouldUdpate
-            ? insulation.buildingMaterials
-            : v.buildingMaterials,
+    this.components.forEach((component, key) => {
+      if (component.componentType === componentType) {
+        const updatedComponent = {
+          ...component,
+          insulationName: insulation.name as HouseInsulation,
+          buildingMaterials: insulation.buildingMaterials,
         };
+        this.components.set(key, updatedComponent);
+      }
+    });
 
-        return [k, { ...v, ...update }] as [string, HouseComponentInsulation];
-      },
-    );
-
-    return new HouseComponentsConfigurator(
-      new Map(newComponents),
-      new Map(this.componentParents),
-    );
+    return this;
   }
 
   /**

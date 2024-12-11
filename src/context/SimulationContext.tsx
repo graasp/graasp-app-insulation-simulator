@@ -113,11 +113,12 @@ export const SimulationProvider = ({
   // Hooks
   const houseComponentsHook = useHouseComponents({
     currentDay: currentCommand,
-    onChange: (houseConfigurator) =>
+    onChange: (houseConfigurator) => {
       dispatchHistory({
         type: 'updateHouseConfigurator',
-        houseConfigurator,
-      }),
+        houseConfigurator: houseConfigurator.clone(),
+      });
+    },
   });
 
   const resetSimulation = useCallback(() => {

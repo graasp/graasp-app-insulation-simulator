@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 
 import {
   HOUSE_INSULATIONS,
@@ -83,7 +83,7 @@ export const useHouseComponents = ({
       }
 
       onChange(
-        houseComponentsConfigurator.cloneWith({
+        houseComponentsConfigurator.add({
           componentId,
           parentId,
           component: {
@@ -101,7 +101,7 @@ export const useHouseComponents = ({
 
   const unregisterComponent = useCallback(
     ({ componentId }: Pick<RegisterComponentParams, 'componentId'>): void => {
-      onChange(houseComponentsConfigurator.cloneWithout({ componentId }));
+      onChange(houseComponentsConfigurator.remove({ componentId }));
     },
     [houseComponentsConfigurator, onChange],
   );
@@ -125,11 +125,10 @@ export const useHouseComponents = ({
         );
       }
 
-      // TODO: use state on home insulations to not reset updated insulations?
       const buildingMaterials = HOUSE_INSULATIONS[componentType][newInsulation];
 
       onChange(
-        houseComponentsConfigurator.cloneWithNewInsulation({
+        houseComponentsConfigurator.updateInsulation({
           componentType,
           insulation: { name: newInsulation, buildingMaterials },
         }),
@@ -172,7 +171,7 @@ export const useHouseComponents = ({
       });
 
       onChange(
-        houseComponentsConfigurator.cloneWithNewInsulation({
+        houseComponentsConfigurator.updateInsulation({
           componentType,
           insulation: {
             name: insulationName,

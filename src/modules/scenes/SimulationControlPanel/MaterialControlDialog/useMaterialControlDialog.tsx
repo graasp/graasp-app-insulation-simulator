@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { HouseInsulation } from '@/config/houseInsulations';
-import { useHouseComponents } from '@/context/HouseComponentsContext';
+import { useSimulation } from '@/context/SimulationContext';
 import { BuildingMaterial } from '@/models/BuildingMaterial';
 import { HouseComponent } from '@/types/houseComponent';
 import { NonEmptyArray } from '@/types/utils';
@@ -18,7 +18,7 @@ type UseMaterialControlDialogReturnType = {
 export const useMaterialControlDialog =
   (): UseMaterialControlDialogReturnType => {
     const { houseComponentsConfigurator, updateCompositionOfInsulation } =
-      useHouseComponents();
+      useSimulation();
     const [currTab, setCurrTab] = useState('');
 
     const wallComponents = useMemo(

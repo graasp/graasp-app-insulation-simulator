@@ -23,7 +23,6 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
 import { BuildingMaterialKeys } from '@/config/buildingMaterials';
-import { useHouseComponents } from '@/context/HouseComponentsContext';
 import { useSimulation } from '@/context/SimulationContext';
 import { HouseComponent } from '@/types/houseComponent';
 import { WindowSizeType, WindowSizes } from '@/types/window';
@@ -44,8 +43,8 @@ export const WindowControlDialog = ({
   const { t: tInsulations } = useTranslation('INSULATIONS');
   const { t: tMaterials } = useTranslation('MATERIALS');
 
-  const { updateWindowSize, windowSize } = useSimulation();
-  const { houseComponentsConfigurator } = useHouseComponents();
+  const { updateWindowSize, windowSize, houseComponentsConfigurator } =
+    useSimulation();
   const windowComponent = houseComponentsConfigurator.getFirstOfType(
     HouseComponent.Window,
   );

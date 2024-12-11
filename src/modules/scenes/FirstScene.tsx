@@ -6,10 +6,6 @@ import { OrbitControls } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 
 import { SIMULATION_FRAME_MS } from '@/config/simulation';
-import {
-  HouseComponentsProvider,
-  useHouseComponents,
-} from '@/context/HouseComponentsContext';
 import { SeasonProvider } from '@/context/SeasonContext';
 import { SimulationProvider, useSimulation } from '@/context/SimulationContext';
 import { SimulationStatus } from '@/types/simulation';
@@ -29,10 +25,10 @@ const FirstSceneComponent = (): JSX.Element => {
     gotToDay,
     currDayIdx,
     numberOfDays,
+    numberOfFloors,
     status,
     getDateOf,
   } = useSimulation();
-  const { numberOfFloors } = useHouseComponents();
 
   const theme = useTheme();
   const md = useMediaQuery(theme.breakpoints.up('sm'));
@@ -121,13 +117,11 @@ const FirstSceneComponent = (): JSX.Element => {
 };
 
 const FirstScene = (): JSX.Element => (
-  <HouseComponentsProvider>
-    <SimulationProvider simulationFrameMS={SIMULATION_FRAME_MS}>
-      <SeasonProvider>
-        <FirstSceneComponent />
-      </SeasonProvider>
-    </SimulationProvider>
-  </HouseComponentsProvider>
+  <SimulationProvider simulationFrameMS={SIMULATION_FRAME_MS}>
+    <SeasonProvider>
+      <FirstSceneComponent />
+    </SeasonProvider>
+  </SimulationProvider>
 );
 
 export default FirstScene;

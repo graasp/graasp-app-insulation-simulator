@@ -14,6 +14,11 @@ import { Vector3 } from 'three';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { SIMULATION_CSV_FILES } from '@/config/simulation';
+import {
+  UseHouseComponentsReturnType,
+  useHouseComponents,
+} from '@/hooks/useHouseComponents';
+import { HouseComponentsConfigurator } from '@/models/HouseComponentsConfigurator';
 import { SimulationCommand } from '@/models/SimulationCommand';
 import { simulationHistory } from '@/reducer/simulationHistoryReducer';
 import { FormattedHeatLoss } from '@/types/heatLoss';
@@ -27,10 +32,8 @@ import { electricityCost } from '@/utils/electricity';
 import { formatHeatLossRate, powerConversionFactors } from '@/utils/heatLoss';
 import { loadTemperaturesFromCSV } from '@/utils/temperatures';
 
-import { useHouseComponents } from './HouseComponentsContext';
-
 // TODO: regroup by type like windowSize: { value, update }...
-type SimulationContextType = {
+type SimulationContextType = UseHouseComponentsReturnType & {
   status: SimulationStatus;
   heatLossPerComponent: HeatLossPerComponent;
   heatLoss: number;
@@ -56,10 +59,12 @@ type SimulationContextType = {
   currDayIdx: number;
   gotToDay: (idx: number) => void;
   getDateOf: (idx: number) => Date;
-
   windowScaleSize: Vector3;
   windowSize: WindowSizeType;
   updateWindowSize: (newSize: WindowSizeType) => void;
+  numberOfFloors: number;
+  updateNumberOfFloors: (numberOfFloors: number) => void;
+  houseComponentsConfigurator: HouseComponentsConfigurator;
 };
 
 const SimulationContext = createContext<SimulationContextType | null>(null);
@@ -73,14 +78,6 @@ export const SimulationProvider = ({
   children,
   simulationFrameMS,
 }: Props): ReactNode => {
-  // Hooks
-  const {
-    houseComponentsConfigurator,
-    numberOfFloors,
-    updateNumberOfFloors,
-    replaceHouseComponentsConfigurator,
-  } = useHouseComponents();
-
   // Refs
   const simulationIntervalId = useRef<NodeJS.Timeout | null>(null);
   const temperatures = useRef<TemperatureRow[]>([
@@ -107,16 +104,21 @@ export const SimulationProvider = ({
   // TODO: accept multiple temperatures per day => TemperatureRow{date, meanTemperature}[]
   const numberOfRows = temperatures.current.length; // We assume it is one temperature per day for now
   const [{ history }, dispatchHistory] = useReducer(simulationHistory, {
-    history: [
-      SimulationCommand.createDefault({
-        numberOfFloors,
-        houseConfigurator: houseComponentsConfigurator,
-      }),
-    ],
+    history: [SimulationCommand.createDefault()],
     future: [],
   });
   const currDayIdx = history.length - 1;
   const currentCommand = history[currDayIdx];
+
+  // Hooks
+  const houseComponentsHook = useHouseComponents({
+    currentDay: currentCommand,
+    onChange: (houseConfigurator) =>
+      dispatchHistory({
+        type: 'updateHouseConfigurator',
+        houseConfigurator,
+      }),
+  });
 
   const resetSimulation = useCallback(() => {
     dispatchHistory({
@@ -206,18 +208,13 @@ export const SimulationProvider = ({
     [currDayIdx, history, numberOfRows],
   );
 
-  const goToPast = useCallback(
-    (idx: number): void => {
-      if (idx < 0) {
-        console.warn(`goToPast: ignoring because idx ${idx} < 0.`);
-        return;
-      }
-      replaceHouseComponentsConfigurator(history[idx].houseConfigurator);
-      updateNumberOfFloors(history[idx].numberOfFloors);
-      dispatchHistory({ type: 'goToPast', idx });
-    },
-    [history, replaceHouseComponentsConfigurator, updateNumberOfFloors],
-  );
+  const goToPast = useCallback((idx: number): void => {
+    if (idx < 0) {
+      console.warn(`goToPast: ignoring because idx ${idx} < 0.`);
+      return;
+    }
+    dispatchHistory({ type: 'goToPast', idx });
+  }, []);
 
   // The useDebouncedCallback function is used to avoid modifying days too quickly
   // and creating too many new days.
@@ -261,19 +258,16 @@ export const SimulationProvider = ({
   ]);
 
   // Update simulation's current state
-  useEffect(() => {
-    dispatchHistory({
-      type: 'updateHouseConfigurator',
-      houseConfigurator: houseComponentsConfigurator,
-    });
-  }, [houseComponentsConfigurator]);
+  const updateNumberOfFloors = useCallback((numberOfFloors: number) => {
+    if (numberOfFloors < 1 || numberOfFloors > 2) {
+      throw new Error('The number of floors must be between [1, 2]');
+    }
 
-  useEffect(() => {
     dispatchHistory({
       type: 'updateNumberOfFloors',
       numberOfFloors,
     });
-  }, [numberOfFloors]);
+  }, []);
 
   const updateOutdoorTemperature = useCallback(
     ({ override, value }: { override: boolean; value: number }): void => {
@@ -354,6 +348,11 @@ export const SimulationProvider = ({
       windowSize: currentCommand.windowSize,
       windowScaleSize: WindowScaleSize[currentCommand.windowSize],
       updateWindowSize,
+
+      numberOfFloors: currentCommand.numberOfFloors,
+      updateNumberOfFloors,
+      houseComponentsConfigurator: currentCommand.houseConfigurator,
+      ...houseComponentsHook,
     }),
     [
       currentCommand.indoorTemperature,
@@ -364,6 +363,8 @@ export const SimulationProvider = ({
       currentCommand.prevTotPowerCost,
       currentCommand.pricekWh,
       currentCommand.windowSize,
+      currentCommand.numberOfFloors,
+      currentCommand.houseConfigurator,
       updateIndoorTemperature,
       updateOutdoorTemperature,
       currDayIdx,
@@ -375,6 +376,8 @@ export const SimulationProvider = ({
       pauseSimulation,
       gotToDay,
       updateWindowSize,
+      updateNumberOfFloors,
+      houseComponentsHook,
     ],
   );
 

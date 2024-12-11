@@ -1,11 +1,4 @@
-import {
-  ReactNode,
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from 'react';
+import { useCallback, useMemo } from 'react';
 
 import {
   HOUSE_INSULATIONS,
@@ -17,9 +10,9 @@ import {
 } from '@/config/simulation';
 import { FromBuildingMaterial } from '@/models/BuildingMaterial';
 import { HouseComponentsConfigurator } from '@/models/HouseComponentsConfigurator';
+import { SimulationCommand } from '@/models/SimulationCommand';
 import { HouseComponent, Size } from '@/types/houseComponent';
 import { CreateNonEmptyArray } from '@/types/utils';
-import { undefinedContextErrorFactory } from '@/utils/context';
 
 export type RegisterComponentParams = {
   componentId: string;
@@ -28,9 +21,7 @@ export type RegisterComponentParams = {
   componentType: HouseComponent.Wall | HouseComponent.Window;
 };
 
-type HouseComponentsContextType = {
-  houseComponentsConfigurator: HouseComponentsConfigurator;
-  numberOfFloors: number;
+export type UseHouseComponentsReturnType = {
   registerComponent: (params: RegisterComponentParams) => void;
   unregisterComponent: ({
     componentId,
@@ -52,18 +43,6 @@ type HouseComponentsContextType = {
     componentType: T;
     materialProps: { name: string } & FromBuildingMaterial;
   }) => void;
-  updateNumberOfFloors: (floors: number) => void;
-  replaceHouseComponentsConfigurator: (
-    houseComponentsConfigurator: HouseComponentsConfigurator,
-  ) => void;
-};
-
-const HouseComponentsContext = createContext<HouseComponentsContextType | null>(
-  null,
-);
-
-type Props = {
-  children: ReactNode;
 };
 
 // An house component can be composed with multiple materials
@@ -73,13 +52,18 @@ const DEFAULT_COMPONENTS_INSULATION = {
   [HouseComponent.Window]: SIMULATION_DEFAULT_WINDOW_COMPONENT_INSULATION,
 };
 
-export const HouseComponentsProvider = ({ children }: Props): ReactNode => {
-  const [houseComponentsConfigurator, setHouseComponentsConfigurator] =
-    useState<HouseComponentsConfigurator>(() =>
-      HouseComponentsConfigurator.create(),
-    );
+type Props = {
+  // TODO: rename SimulationCommand by SimulationDay?
+  currentDay: SimulationCommand;
+  onChange: (newHouseComponents: HouseComponentsConfigurator) => void;
+};
 
-  const [numberOfFloors, setNumberOfFloors] = useState(1);
+export const useHouseComponents = ({
+  currentDay,
+  onChange,
+}: Props): UseHouseComponentsReturnType => {
+  // Not working now...
+  const houseComponentsConfigurator = currentDay.houseConfigurator;
 
   const registerComponent = useCallback(
     ({
@@ -98,8 +82,8 @@ export const HouseComponentsProvider = ({ children }: Props): ReactNode => {
         );
       }
 
-      setHouseComponentsConfigurator((curr) =>
-        curr.cloneWith({
+      onChange(
+        houseComponentsConfigurator.cloneWith({
           componentId,
           parentId,
           component: {
@@ -112,16 +96,14 @@ export const HouseComponentsProvider = ({ children }: Props): ReactNode => {
         }),
       );
     },
-    [houseComponentsConfigurator],
+    [houseComponentsConfigurator, onChange],
   );
 
   const unregisterComponent = useCallback(
     ({ componentId }: Pick<RegisterComponentParams, 'componentId'>): void => {
-      setHouseComponentsConfigurator((curr) =>
-        curr.cloneWithout({ componentId }),
-      );
+      onChange(houseComponentsConfigurator.cloneWithout({ componentId }));
     },
-    [],
+    [houseComponentsConfigurator, onChange],
   );
 
   const changeComponentInsulation = useCallback(
@@ -146,14 +128,14 @@ export const HouseComponentsProvider = ({ children }: Props): ReactNode => {
       // TODO: use state on home insulations to not reset updated insulations?
       const buildingMaterials = HOUSE_INSULATIONS[componentType][newInsulation];
 
-      setHouseComponentsConfigurator((curr) =>
-        curr.cloneWithNewInsulation({
+      onChange(
+        houseComponentsConfigurator.cloneWithNewInsulation({
           componentType,
           insulation: { name: newInsulation, buildingMaterials },
         }),
       );
     },
-    [],
+    [houseComponentsConfigurator, onChange],
   );
 
   const updateCompositionOfInsulation = useCallback(
@@ -189,8 +171,8 @@ export const HouseComponentsProvider = ({ children }: Props): ReactNode => {
         return m;
       });
 
-      setHouseComponentsConfigurator((curr) =>
-        curr.cloneWithNewInsulation({
+      onChange(
+        houseComponentsConfigurator.cloneWithNewInsulation({
           componentType,
           insulation: {
             name: insulationName,
@@ -199,60 +181,21 @@ export const HouseComponentsProvider = ({ children }: Props): ReactNode => {
         }),
       );
     },
-    [houseComponentsConfigurator],
+    [houseComponentsConfigurator, onChange],
   );
 
-  const updateNumberOfFloors = useCallback((floors: number) => {
-    if (floors < 1 || floors > 2) {
-      throw new Error('The number of floors must be between [1, 2]');
-    }
-
-    setNumberOfFloors(floors);
-  }, []);
-
-  const replaceHouseComponentsConfigurator = useCallback(
-    (newConfigurator: HouseComponentsConfigurator) => {
-      setHouseComponentsConfigurator(newConfigurator);
-    },
-    [],
-  );
-
-  const contextValue = useMemo(
+  return useMemo(
     () => ({
-      houseComponentsConfigurator,
-      numberOfFloors,
       registerComponent,
       unregisterComponent,
       changeComponentInsulation,
       updateCompositionOfInsulation,
-      updateNumberOfFloors,
-      replaceHouseComponentsConfigurator,
     }),
     [
-      houseComponentsConfigurator,
-      numberOfFloors,
       registerComponent,
       unregisterComponent,
       changeComponentInsulation,
       updateCompositionOfInsulation,
-      updateNumberOfFloors,
-      replaceHouseComponentsConfigurator,
     ],
   );
-
-  return (
-    <HouseComponentsContext.Provider value={contextValue}>
-      {children}
-    </HouseComponentsContext.Provider>
-  );
-};
-
-export const useHouseComponents = (): HouseComponentsContextType => {
-  const context = useContext(HouseComponentsContext);
-
-  if (!context) {
-    throw undefinedContextErrorFactory('HouseComponents');
-  }
-
-  return context;
 };

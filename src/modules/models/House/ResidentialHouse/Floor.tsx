@@ -1,4 +1,4 @@
-import { useHouseComponents } from '@/context/HouseComponentsContext';
+import { useSimulation } from '@/context/SimulationContext';
 import { HouseComponent } from '@/types/houseComponent';
 
 import { Wall } from './Wall';
@@ -15,7 +15,7 @@ export const Floor = ({
   floor: number;
 }): JSX.Element => {
   const { wallGeometries } = useWallGeometries();
-  const { houseComponentsConfigurator } = useHouseComponents();
+  const { houseComponentsConfigurator } = useSimulation();
 
   if (floor < 0) {
     throw new Error('The floor number can be < 0!');

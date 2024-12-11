@@ -19,7 +19,7 @@ import {
   SIMULATION_DEFAULT_WALL_COMPONENT_INSULATION,
   SIMULATION_DEFAULT_WINDOW_COMPONENT_INSULATION,
 } from '@/config/simulation';
-import { useHouseComponents } from '@/context/HouseComponentsContext';
+import { useSimulation } from '@/context/SimulationContext';
 import { useDialogControl } from '@/hooks/useDialogControl';
 import { HouseComponent } from '@/types/houseComponent';
 
@@ -34,7 +34,7 @@ export const HouseControl = (): JSX.Element => {
     changeComponentInsulation,
     numberOfFloors,
     updateNumberOfFloors,
-  } = useHouseComponents();
+  } = useSimulation();
 
   const wallInsulations = Object.keys(
     HOUSE_INSULATIONS.Wall,

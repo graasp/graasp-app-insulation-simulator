@@ -65,21 +65,15 @@ export class SimulationCommand {
     this.windowSize = windowSize;
   }
 
-  public static createDefault({
-    numberOfFloors,
-    houseConfigurator,
-  }: Pick<
-    Constructor,
-    'numberOfFloors' | 'houseConfigurator'
-  >): SimulationCommand {
+  public static createDefault(): SimulationCommand {
     return new SimulationCommand({
       indoorTemperature: SIMULATION_INDOOR_TEMPERATURE_CELCIUS.DEFAULT,
       outdoorTemperature: { userOverride: false, weatherValue: 0, value: 0 },
-      numberOfFloors,
+      numberOfFloors: 1,
       pricekWh: SIMULATION_PRICE_KWH,
       prevTotHeatLoss: 0,
       prevTotPowerCost: 0,
-      houseConfigurator,
+      houseConfigurator: HouseComponentsConfigurator.create(),
       windowSize: 'Medium',
     });
   }

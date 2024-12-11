@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 
-import { useHouseComponents } from '@/context/HouseComponentsContext';
 import { useSimulation } from '@/context/SimulationContext';
 import { useWindowMaterial } from '@/hooks/useWindowMaterial';
 import { HouseComponent } from '@/types/houseComponent';
@@ -23,8 +22,12 @@ export const WindowFrame = ({
   ...props
 }: Props): JSX.Element => {
   const id = `${wallId}-Window-${windowIdx}`;
-  const { heatLossPerComponent, windowScaleSize } = useSimulation();
-  const { registerComponent, unregisterComponent } = useHouseComponents();
+  const {
+    heatLossPerComponent,
+    windowScaleSize,
+    registerComponent,
+    unregisterComponent,
+  } = useSimulation();
   const { frameMaterial } = useWindowMaterial({
     windowMaterial: materials.Wood,
   });

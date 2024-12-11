@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 
 import { Color, Material, MeshStandardMaterial } from 'three';
 
-import { useHouseComponents } from '@/context/HouseComponentsContext';
+import { useSimulation } from '@/context/SimulationContext';
 import { HouseComponent } from '@/types/houseComponent';
 
 type Props = {
@@ -16,7 +16,7 @@ export const useHouseMaterial = ({
   houseComponent,
   colors,
 }: Props): Material => {
-  const { houseComponentsConfigurator } = useHouseComponents();
+  const { houseComponentsConfigurator } = useSimulation();
 
   // Use memo to avoid too many renrenders
   const houseComponentMaterials = useMemo(

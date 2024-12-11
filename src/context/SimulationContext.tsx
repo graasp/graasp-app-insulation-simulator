@@ -106,14 +106,14 @@ export const SimulationProvider = ({
     ];
   // TODO: accept multiple temperatures per day => TemperatureRow{date, meanTemperature}[]
   const numberOfRows = temperatures.current.length; // We assume it is one temperature per day for now
-  const [{ history, futur }, dispatchHistory] = useReducer(simulationHistory, {
+  const [{ history }, dispatchHistory] = useReducer(simulationHistory, {
     history: [
       SimulationCommand.createDefault({
         numberOfFloors,
         houseConfigurator: houseComponentsConfigurator,
       }),
     ],
-    futur: [],
+    future: [],
   });
   const currDayIdx = history.length - 1;
   const currentCommand = history[currDayIdx];
@@ -179,11 +179,11 @@ export const SimulationProvider = ({
     setSimulationStatus(SimulationStatus.PAUSED);
   }, [simulationStatus]);
 
-  const goToFutur = useCallback(
+  const goToFuture = useCallback(
     (idx: number): void => {
       if (idx > numberOfRows - 1) {
         console.warn(
-          `goToFutur: ignoring because idx ${idx} > last day ${numberOfRows - 1}.`,
+          `goToFuture: ignoring because idx ${idx} > last day ${numberOfRows - 1}.`,
         );
         return;
       }
@@ -199,7 +199,7 @@ export const SimulationProvider = ({
         }));
 
       dispatchHistory({
-        type: 'goToFutur',
+        type: 'goToFuture',
         outdoorTemperatures,
       });
     },
@@ -226,7 +226,7 @@ export const SimulationProvider = ({
     if (idx < currDayIdx) {
       goToPast(idx);
     } else if (idx >= currDayIdx) {
-      goToFutur(idx);
+      goToFuture(idx);
     }
   }, 10);
 
@@ -236,7 +236,8 @@ export const SimulationProvider = ({
       simulationIntervalId.current = setInterval(() => {
         const nextIdx = currDayIdx + 1;
         if (nextIdx < numberOfRows) {
-          goToFutur(nextIdx);
+          // Go to next day.
+          goToFuture(nextIdx);
         } else {
           setSimulationStatus(SimulationStatus.FINISHED);
         }
@@ -256,7 +257,7 @@ export const SimulationProvider = ({
     history,
     dispatchHistory,
     currDayIdx,
-    goToFutur,
+    goToFuture,
   ]);
 
   // Update simulation's current state

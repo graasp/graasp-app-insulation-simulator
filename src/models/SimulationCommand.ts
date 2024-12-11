@@ -1,9 +1,11 @@
+import equal from 'deep-equal';
+
 import {
   SIMULATION_INDOOR_TEMPERATURE_CELCIUS,
   SIMULATION_PRICE_KWH,
 } from '@/config/simulation';
-import { WindowSizeType } from '@/context/WindowSizeContext';
 import { OutdoorTemperature } from '@/types/temperatures';
+import { WindowSizeType } from '@/types/window';
 
 import { HouseComponentsConfigurator } from './HouseComponentsConfigurator';
 import { SimulationHeatLoss } from './SimulationHeatLoss';
@@ -65,11 +67,10 @@ export class SimulationCommand {
 
   public static createDefault({
     numberOfFloors,
-    windowSize,
     houseConfigurator,
   }: Pick<
     Constructor,
-    'numberOfFloors' | 'houseConfigurator' | 'windowSize'
+    'numberOfFloors' | 'houseConfigurator'
   >): SimulationCommand {
     return new SimulationCommand({
       indoorTemperature: SIMULATION_INDOOR_TEMPERATURE_CELCIUS.DEFAULT,
@@ -79,7 +80,7 @@ export class SimulationCommand {
       prevTotHeatLoss: 0,
       prevTotPowerCost: 0,
       houseConfigurator,
-      windowSize,
+      windowSize: 'Medium',
     });
   }
 
@@ -94,5 +95,11 @@ export class SimulationCommand {
       houseConfigurator: params.houseConfigurator ?? this.houseConfigurator,
       windowSize: params.windowSize ?? this.windowSize,
     });
+  }
+
+  public equalsTo(params: Partial<Constructor>): boolean {
+    return Object.entries(params).every(([k, v]) =>
+      equal(this[k as keyof typeof this], v),
+    );
   }
 }

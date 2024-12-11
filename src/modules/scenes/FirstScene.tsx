@@ -12,7 +12,6 @@ import {
 } from '@/context/HouseComponentsContext';
 import { SeasonProvider } from '@/context/SeasonContext';
 import { SimulationProvider, useSimulation } from '@/context/SimulationContext';
-import { WindowSizeProvider } from '@/context/WindowSizeContext';
 import { SimulationStatus } from '@/types/simulation';
 
 import { LabelledSlider } from '../common/LabelledSlider';
@@ -123,13 +122,11 @@ const FirstSceneComponent = (): JSX.Element => {
 
 const FirstScene = (): JSX.Element => (
   <HouseComponentsProvider>
-    <WindowSizeProvider>
-      <SimulationProvider simulationFrameMS={SIMULATION_FRAME_MS}>
-        <SeasonProvider>
-          <FirstSceneComponent />
-        </SeasonProvider>
-      </SimulationProvider>
-    </WindowSizeProvider>
+    <SimulationProvider simulationFrameMS={SIMULATION_FRAME_MS}>
+      <SeasonProvider>
+        <FirstSceneComponent />
+      </SeasonProvider>
+    </SimulationProvider>
   </HouseComponentsProvider>
 );
 

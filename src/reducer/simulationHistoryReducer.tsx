@@ -1,5 +1,4 @@
 import { SIMULATION_PRICE_KWH } from '@/config/simulation';
-import { WindowSizeType } from '@/context/WindowSizeContext';
 import { HouseComponentsConfigurator } from '@/models/HouseComponentsConfigurator';
 import { SimulationCommand } from '@/models/SimulationCommand';
 import { OutdoorTemperature } from '@/types/temperatures';
@@ -8,23 +7,38 @@ import {
   NonEmptyArray,
   updateArrayElement,
 } from '@/types/utils';
+import { WindowSizeType } from '@/types/window';
 import { electricityCost } from '@/utils/electricity';
 import { powerConversionFactors } from '@/utils/heatLoss';
 
-const updateState = (
-  state: NonEmptyArray<SimulationCommand>,
-  index: number,
-  value: Partial<SimulationCommand>,
+type SimulationHistory = {
+  futur: SimulationCommand[];
+  past: NonEmptyArray<SimulationCommand>;
+};
+
+const updateCurrentCommand = (
+  state: SimulationHistory,
+  newValue: Partial<SimulationCommand>,
 ): SimulationHistory => {
-  if (index < 0 || index >= state.length) {
-    return { past: state, futur: [] };
+  const { past, futur } = state;
+  // always update the current command
+  const index = past.length - 1;
+  if (index < 0 || index >= past.length) {
+    return { past, futur: [] };
   }
 
   return {
     past: CreateNonEmptyArray(
-      updateArrayElement(state, index, state[index].from(value)),
+      updateArrayElement(past, index, past[index].from(newValue)),
     ),
-    futur: [],
+    /**
+     * If the new value does not modify the current command, do not delete the future one!
+     * This check is necessary, because when a command is applied in the past and the inputs are modified,
+     * the changes cause a call to update the current command (the one in the past).
+     *
+     * Even though the value is identical, if the change is not checked, the future will be deleted.
+     */
+    futur: past[index].equalsTo(newValue) ? futur : [],
   };
 };
 
@@ -92,11 +106,6 @@ type Action =
       windowSize: WindowSizeType;
     };
 
-type SimulationHistory = {
-  futur: SimulationCommand[];
-  past: NonEmptyArray<SimulationCommand>;
-};
-
 export const simulationHistory = (
   state: SimulationHistory,
   action: Action,
@@ -129,6 +138,7 @@ export const simulationHistory = (
       };
     }
     case 'goToFutur': {
+      // TODO: fix or double check, what if we go in futur ouside of futur array? (check schema on ipad)
       if (futur.length) {
         // TODO: explain
         const idx = action.outdoorTemperatures.length;
@@ -156,7 +166,7 @@ export const simulationHistory = (
             [...past],
           ),
         ),
-        futur: [],
+        futur,
       };
     }
     case 'goToPast': {
@@ -172,8 +182,7 @@ export const simulationHistory = (
       };
     }
     case 'updateIndoorTemperature':
-      // always update the current command
-      return updateState(past, past.length - 1, {
+      return updateCurrentCommand(state, {
         indoorTemperature: action.indoorTemperature,
       });
     case 'updateOutdoorTemperature': {
@@ -182,7 +191,7 @@ export const simulationHistory = (
       const { userOverride, value } = action.outdoorTemperature;
       const { weatherValue } = past[index].outdoorTemperature;
 
-      return updateState(past, index, {
+      return updateCurrentCommand(state, {
         outdoorTemperature: {
           userOverride,
           weatherValue,
@@ -191,23 +200,19 @@ export const simulationHistory = (
       });
     }
     case 'updateNumberOfFloors':
-      // always update the current command
-      return updateState(past, past.length - 1, {
+      return updateCurrentCommand(state, {
         numberOfFloors: action.numberOfFloors,
       });
     case 'updatePricekWh':
-      // always update the current command
-      return updateState(past, past.length - 1, {
+      return updateCurrentCommand(state, {
         pricekWh: action.pricekWh,
       });
     case 'updateHouseConfigurator':
-      // always update the current command
-      return updateState(past, past.length - 1, {
+      return updateCurrentCommand(state, {
         houseConfigurator: action.houseConfigurator,
       });
     case 'updateWindowSize':
-      // always update the current command
-      return updateState(past, past.length - 1, {
+      return updateCurrentCommand(state, {
         windowSize: action.windowSize,
       });
     default:

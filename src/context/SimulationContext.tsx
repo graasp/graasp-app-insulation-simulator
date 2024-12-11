@@ -10,6 +10,7 @@ import {
   useState,
 } from 'react';
 
+import { Vector3 } from 'three';
 import { useDebouncedCallback } from 'use-debounce';
 
 import { SIMULATION_CSV_FILES } from '@/config/simulation';
@@ -20,14 +21,15 @@ import { HeatLossPerComponent } from '@/types/houseComponent';
 import { SimulationStatus } from '@/types/simulation';
 import { OutdoorTemperature, TemperatureRow } from '@/types/temperatures';
 import { FormattedTime, TimeUnit } from '@/types/time';
+import { WindowScaleSize, WindowSizeType } from '@/types/window';
 import { undefinedContextErrorFactory } from '@/utils/context';
 import { electricityCost } from '@/utils/electricity';
 import { formatHeatLossRate, powerConversionFactors } from '@/utils/heatLoss';
 import { loadTemperaturesFromCSV } from '@/utils/temperatures';
 
 import { useHouseComponents } from './HouseComponentsContext';
-import { useWindowSize } from './WindowSizeContext';
 
+// TODO: regroup by type like windowSize: { value, update }...
 type SimulationContextType = {
   status: SimulationStatus;
   heatLossPerComponent: HeatLossPerComponent;
@@ -54,6 +56,10 @@ type SimulationContextType = {
   currDayIdx: number;
   gotToDay: (idx: number) => void;
   getDateOf: (idx: number) => Date;
+
+  windowScaleSize: Vector3;
+  windowSize: WindowSizeType;
+  updateWindowSize: (newSize: WindowSizeType) => void;
 };
 
 const SimulationContext = createContext<SimulationContextType | null>(null);
@@ -74,8 +80,6 @@ export const SimulationProvider = ({
     updateNumberOfFloors,
     replaceHouseComponentsConfigurator,
   } = useHouseComponents();
-
-  const { windowSize, changeWindowSize } = useWindowSize();
 
   // Refs
   const simulationIntervalId = useRef<NodeJS.Timeout | null>(null);
@@ -102,19 +106,15 @@ export const SimulationProvider = ({
     ];
   // TODO: accept multiple temperatures per day => TemperatureRow{date, meanTemperature}[]
   const numberOfRows = temperatures.current.length; // We assume it is one temperature per day for now
-  const [{ past: history, futur }, dispatchHistory] = useReducer(
-    simulationHistory,
-    {
-      past: [
-        SimulationCommand.createDefault({
-          numberOfFloors,
-          windowSize,
-          houseConfigurator: houseComponentsConfigurator,
-        }),
-      ],
-      futur: [],
-    },
-  );
+  const [{ past: history }, dispatchHistory] = useReducer(simulationHistory, {
+    past: [
+      SimulationCommand.createDefault({
+        numberOfFloors,
+        houseConfigurator: houseComponentsConfigurator,
+      }),
+    ],
+    futur: [],
+  });
   const currDayIdx = history.length - 1;
   const currentCommand = history[currDayIdx];
 
@@ -181,6 +181,13 @@ export const SimulationProvider = ({
 
   const goToFutur = useCallback(
     (idx: number): void => {
+      if (idx > numberOfRows - 1) {
+        console.warn(
+          `goToFutur: ignoring because idx ${idx} > last day ${numberOfRows - 1}.`,
+        );
+        return;
+      }
+
       const { userOverride, value } = history[currDayIdx].outdoorTemperature;
 
       const outdoorTemperatures = temperatures.current
@@ -191,43 +198,34 @@ export const SimulationProvider = ({
           value: userOverride ? value : weatherValue,
         }));
 
-      // if (futur.length) {
-      //   const t = futur[outdoorTemperatures.length - history.length];
-      //   replaceHouseComponentsConfigurator(t.houseConfigurator);
-      //   changeWindowSize(t.windowSize);
-      //   updateNumberOfFloors(t.numberOfFloors);
-      // }
-
       dispatchHistory({
         type: 'goToFutur',
         outdoorTemperatures,
       });
     },
-    [currDayIdx, history],
+    [currDayIdx, history, numberOfRows],
   );
 
   const goToPast = useCallback(
     (idx: number): void => {
+      if (idx < 0) {
+        console.warn(`goToPast: ignoring because idx ${idx} < 0.`);
+        return;
+      }
       replaceHouseComponentsConfigurator(history[idx].houseConfigurator);
-      changeWindowSize(history[idx].windowSize);
       updateNumberOfFloors(history[idx].numberOfFloors);
       dispatchHistory({ type: 'goToPast', idx });
     },
-    [
-      changeWindowSize,
-      history,
-      replaceHouseComponentsConfigurator,
-      updateNumberOfFloors,
-    ],
+    [history, replaceHouseComponentsConfigurator, updateNumberOfFloors],
   );
 
   // The useDebouncedCallback function is used to avoid modifying days too quickly
   // and creating too many new days.
   const gotToDay = useDebouncedCallback((idx: number): void => {
     pauseSimulation();
-    if (idx <= currDayIdx) {
+    if (idx < currDayIdx) {
       goToPast(idx);
-    } else if (idx < temperatures.current.length) {
+    } else if (idx >= currDayIdx) {
       goToFutur(idx);
     }
   }, 10);
@@ -276,13 +274,6 @@ export const SimulationProvider = ({
     });
   }, [numberOfFloors]);
 
-  useEffect(() => {
-    dispatchHistory({
-      type: 'updateWindowSize',
-      windowSize,
-    });
-  }, [windowSize]);
-
   const updateOutdoorTemperature = useCallback(
     ({ override, value }: { override: boolean; value: number }): void => {
       dispatchHistory({
@@ -321,6 +312,13 @@ export const SimulationProvider = ({
     [],
   );
 
+  const updateWindowSize = useCallback((newSize: WindowSizeType): void => {
+    dispatchHistory({
+      type: 'updateWindowSize',
+      windowSize: newSize,
+    });
+  }, []);
+
   const contextValue = useMemo(
     () => ({
       indoorTemperature: currentCommand.indoorTemperature,
@@ -351,6 +349,10 @@ export const SimulationProvider = ({
       pauseSimulation,
       currDayIdx,
       gotToDay,
+
+      windowSize: currentCommand.windowSize,
+      windowScaleSize: WindowScaleSize[currentCommand.windowSize],
+      updateWindowSize,
     }),
     [
       currentCommand.indoorTemperature,
@@ -360,6 +362,7 @@ export const SimulationProvider = ({
       currentCommand.prevTotHeatLoss,
       currentCommand.prevTotPowerCost,
       currentCommand.pricekWh,
+      currentCommand.windowSize,
       updateIndoorTemperature,
       updateOutdoorTemperature,
       currDayIdx,
@@ -370,6 +373,7 @@ export const SimulationProvider = ({
       startSimulation,
       pauseSimulation,
       gotToDay,
+      updateWindowSize,
     ],
   );
 

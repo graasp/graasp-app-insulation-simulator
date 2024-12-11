@@ -1,6 +1,6 @@
 import { Locator, Page, expect } from '@playwright/test';
 
-import { WindowSizeType } from '../../src/context/WindowSizeContext';
+import { WindowSizeType } from '../../src/context/SimulationContext';
 
 // Page Object for the window editor (modal)
 export class WindowEditorPage {

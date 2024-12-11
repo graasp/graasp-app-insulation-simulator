@@ -24,12 +24,9 @@ import DialogTitle from '@mui/material/DialogTitle';
 
 import { BuildingMaterialKeys } from '@/config/buildingMaterials';
 import { useHouseComponents } from '@/context/HouseComponentsContext';
-import {
-  WindowSizeType,
-  WindowSizes,
-  useWindowSize,
-} from '@/context/WindowSizeContext';
+import { useSimulation } from '@/context/SimulationContext';
 import { HouseComponent } from '@/types/houseComponent';
+import { WindowSizeType, WindowSizes } from '@/types/window';
 import { formatComponentSize } from '@/utils/formatComponentSize';
 
 type Props = {
@@ -47,7 +44,7 @@ export const WindowControlDialog = ({
   const { t: tInsulations } = useTranslation('INSULATIONS');
   const { t: tMaterials } = useTranslation('MATERIALS');
 
-  const { changeWindowSize, windowSize } = useWindowSize();
+  const { updateWindowSize, windowSize } = useSimulation();
   const { houseComponentsConfigurator } = useHouseComponents();
   const windowComponent = houseComponentsConfigurator.getFirstOfType(
     HouseComponent.Window,
@@ -60,7 +57,7 @@ export const WindowControlDialog = ({
   const windowInsulation = tInsulations(windowComponent.insulationName);
 
   const handleSizeChange = (newSize: string): void => {
-    changeWindowSize(newSize as WindowSizeType);
+    updateWindowSize(newSize as WindowSizeType);
   };
 
   return (

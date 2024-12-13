@@ -25,8 +25,12 @@ export class SimulationControlPage {
     this.lastDate = this.page.getByTestId(`${this.testId}-max`);
   }
 
-  getButton(action: 'start' | 'pause'): Locator {
+  getControlButton(action: 'start' | 'pause'): Locator {
     return this.page.getByTestId(`simulation-control-button-${action}`);
+  }
+
+  getSpeedButton(speed: number): Locator {
+    return this.page.getByTestId(`speed-button-x${speed}`);
   }
 
   async startSimulation(): Promise<void> {

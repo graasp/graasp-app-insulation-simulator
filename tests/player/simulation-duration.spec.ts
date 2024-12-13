@@ -9,7 +9,7 @@ test('simulation duration should be disabled when simulation is running', async 
   const { settings, control } = housePage;
   await housePage.goto();
   await settings.setSimulationDuration(25);
-  await control.getButton('start').click();
+  await control.getControlButton('start').click();
   await expect(settings.simulationDuration).toBeDisabled();
 });
 

@@ -42,9 +42,20 @@ describe('HouseComponentsConfigurator', () => {
     expect(houseComponents.getAll().length).eq(0);
   });
 
-  it('should add a new component and returns a new instance', () => {
+  it('should add a new component', () => {
+    const houseComponents = HouseComponentsConfigurator.create().add({
+      componentId: 'wall1',
+      component: WALL_COMPONENT_INSULATION,
+    });
+
+    expect(houseComponents.getAll().length).eq(1);
+    expect(houseComponents.get('wall1')).toEqual(WALL_COMPONENT_INSULATION);
+  });
+
+  it('should create a copy component', () => {
     const houseComponents = HouseComponentsConfigurator.create();
-    const newHouseComponents = houseComponents.cloneWith({
+
+    const newHouseComponents = houseComponents.clone().add({
       componentId: 'wall1',
       component: WALL_COMPONENT_INSULATION,
     });
@@ -57,21 +68,20 @@ describe('HouseComponentsConfigurator', () => {
   });
 
   it('should add a child component', () => {
-    const houseComponents = HouseComponentsConfigurator.create().cloneWith({
-      componentId: 'wall1',
-      component: WALL_COMPONENT_INSULATION,
-    });
-    const newHouseComponents = houseComponents.cloneWith({
-      parentId: 'wall1',
-      componentId: 'window1',
-      component: WINDOW_COMPONENT_INSULATION,
-    });
+    const houseComponents = HouseComponentsConfigurator.create()
+      .add({
+        componentId: 'wall1',
+        component: WALL_COMPONENT_INSULATION,
+      })
+      .add({
+        parentId: 'wall1',
+        componentId: 'window1',
+        component: WINDOW_COMPONENT_INSULATION,
+      });
 
-    expect(newHouseComponents.getAll().length).eq(2);
-    expect(newHouseComponents.get('window1')).toEqual(
-      WINDOW_COMPONENT_INSULATION,
-    );
-    expect(newHouseComponents.get('wall1').actualArea).eq(
+    expect(houseComponents.getAll().length).eq(2);
+    expect(houseComponents.get('window1')).toEqual(WINDOW_COMPONENT_INSULATION);
+    expect(houseComponents.get('wall1').actualArea).eq(
       WALL_COMPONENT_INSULATION.actualArea -
         WINDOW_COMPONENT_INSULATION.actualArea,
     );
@@ -79,16 +89,16 @@ describe('HouseComponentsConfigurator', () => {
 
   it('should remove component', () => {
     const houseComponents = HouseComponentsConfigurator.create()
-      .cloneWith({
+      .add({
         componentId: 'wall1',
         component: WALL_COMPONENT_INSULATION,
       })
-      .cloneWith({
+      .add({
         parentId: 'wall1',
         componentId: 'window1',
         component: WINDOW_COMPONENT_INSULATION,
       })
-      .cloneWithout({ componentId: 'window1' });
+      .remove({ componentId: 'window1' });
 
     expect(houseComponents.getAll().length).eq(1);
     expect(houseComponents.getAll()[0].houseComponentId).eq('wall1');
@@ -96,34 +106,68 @@ describe('HouseComponentsConfigurator', () => {
 
   it('should remove component and its children', () => {
     const houseComponents = HouseComponentsConfigurator.create()
-      .cloneWith({
+      .add({
         componentId: 'wall1',
         component: WALL_COMPONENT_INSULATION,
       })
-      .cloneWith({
+      .add({
         parentId: 'wall1',
         componentId: 'window1',
         component: WINDOW_COMPONENT_INSULATION,
       })
-      .cloneWith({
+      .add({
         parentId: 'wall1',
         componentId: 'window2',
         component: WINDOW_COMPONENT_INSULATION,
       })
-      .cloneWith({
+      .add({
         parentId: 'window2',
         componentId: 'window3',
         component: WINDOW_COMPONENT_INSULATION,
       })
-      .cloneWithout({ componentId: 'wall1' });
+      .remove({ componentId: 'wall1' });
 
     expect(houseComponents.getAll().length).eq(0);
   });
 
+  it('should remove component and its children of the clone only', () => {
+    const houseComponents = HouseComponentsConfigurator.create()
+      .add({
+        componentId: 'wall1',
+        component: WALL_COMPONENT_INSULATION,
+      })
+      .add({
+        parentId: 'wall1',
+        componentId: 'window1',
+        component: WINDOW_COMPONENT_INSULATION,
+      })
+      .add({
+        parentId: 'wall1',
+        componentId: 'window2',
+        component: WINDOW_COMPONENT_INSULATION,
+      })
+      .add({
+        parentId: 'window2',
+        componentId: 'window3',
+        component: {
+          ...WINDOW_COMPONENT_INSULATION,
+          actualArea: 1,
+          size: { width: 1, height: 1 },
+        },
+      });
+
+    const newHouseComponents = houseComponents
+      .clone()
+      .remove({ componentId: 'wall1' });
+
+    expect(houseComponents.getAll().length).eq(4);
+    expect(newHouseComponents.getAll().length).eq(0);
+  });
+
   it('should get a component', () => {
     const houseComponents = HouseComponentsConfigurator.create()
-      .cloneWith({ componentId: 'wall1', component: WALL_COMPONENT_INSULATION })
-      .cloneWith({
+      .add({ componentId: 'wall1', component: WALL_COMPONENT_INSULATION })
+      .add({
         parentId: 'wall1',
         componentId: 'window1',
         component: WINDOW_COMPONENT_INSULATION,
@@ -138,8 +182,8 @@ describe('HouseComponentsConfigurator', () => {
 
   it('should get all components', () => {
     const houseComponents = HouseComponentsConfigurator.create()
-      .cloneWith({ componentId: 'wall1', component: WALL_COMPONENT_INSULATION })
-      .cloneWith({
+      .add({ componentId: 'wall1', component: WALL_COMPONENT_INSULATION })
+      .add({
         parentId: 'wall1',
         componentId: 'window1',
         component: WINDOW_COMPONENT_INSULATION,
@@ -160,11 +204,11 @@ describe('HouseComponentsConfigurator', () => {
 
   it('should get the good component by type', () => {
     const houseConfigurator = HouseComponentsConfigurator.create()
-      .cloneWith({
+      .add({
         componentId: 'wall1',
         component: WALL_COMPONENT_INSULATION,
       })
-      .cloneWith({
+      .add({
         parentId: 'wall1',
         componentId: 'window1',
         component: WINDOW_COMPONENT_INSULATION,
@@ -186,11 +230,11 @@ describe('HouseComponentsConfigurator', () => {
   });
 
   it('should update the wall components but not the windows', () => {
-    const houseComponents = HouseComponentsConfigurator.create().cloneWith({
+    const houseComponents = HouseComponentsConfigurator.create().add({
       componentId: 'wall1',
       component: WALL_COMPONENT_INSULATION,
     });
-    const newHouseComponents = houseComponents.cloneWith({
+    const newHouseComponents = houseComponents.add({
       parentId: 'wall1',
       componentId: 'window1',
       component: WINDOW_COMPONENT_INSULATION,
@@ -207,7 +251,7 @@ describe('HouseComponentsConfigurator', () => {
 
     // update the house component
     const newMaterial = WALL_MATERIAL_1.from({ price: 15, thickness: 2 });
-    const updatedHouseComponents = newHouseComponents.cloneWithNewInsulation({
+    const updatedHouseComponents = newHouseComponents.updateInsulation({
       componentType: HouseComponent.Wall,
       insulation: {
         name: 'Aerogel',
@@ -232,11 +276,11 @@ describe('HouseComponentsConfigurator', () => {
   });
 
   it('should update the windows components but not the walls', () => {
-    const houseComponents = HouseComponentsConfigurator.create().cloneWith({
+    const houseComponents = HouseComponentsConfigurator.create().add({
       componentId: 'wall1',
       component: WALL_COMPONENT_INSULATION,
     });
-    const newHouseComponents = houseComponents.cloneWith({
+    const newHouseComponents = houseComponents.add({
       parentId: 'wall1',
       componentId: 'window1',
       component: WINDOW_COMPONENT_INSULATION,
@@ -253,7 +297,7 @@ describe('HouseComponentsConfigurator', () => {
 
     // update the house component
     const newMaterial = WINDOW_MATERIAL.from({ price: 15, thickness: 2 });
-    const updatedHouseComponents = newHouseComponents.cloneWithNewInsulation({
+    const updatedHouseComponents = newHouseComponents.updateInsulation({
       componentType: HouseComponent.Window,
       insulation: {
         name: 'DoublePane',
@@ -280,7 +324,7 @@ describe('HouseComponentsConfigurator', () => {
   it('should throw an error if a component is its own parent', () => {
     const houseComponents = HouseComponentsConfigurator.create();
     expect(() =>
-      houseComponents.cloneWith({
+      houseComponents.add({
         parentId: 'comp1',
         componentId: 'comp1',
         component: WALL_COMPONENT_INSULATION,
@@ -290,18 +334,18 @@ describe('HouseComponentsConfigurator', () => {
 
   it('should throw an error if a component is already assigned to a different parent', () => {
     const houseComponents = HouseComponentsConfigurator.create()
-      .cloneWith({
+      .add({
         parentId: 'wall1',
         componentId: 'window1',
         component: WINDOW_COMPONENT_INSULATION,
       })
-      .cloneWith({
+      .add({
         componentId: 'wall2',
         component: WINDOW_COMPONENT_INSULATION,
       });
 
     expect(() =>
-      houseComponents.cloneWith({
+      houseComponents.add({
         parentId: 'wall2',
         componentId: 'window1',
         component: WALL_COMPONENT_INSULATION,
@@ -317,11 +361,11 @@ describe('HouseComponentsConfigurator', () => {
 
   it('should throw an error if actual area is incorrect after accounting for children', () => {
     const houseComponents = HouseComponentsConfigurator.create()
-      .cloneWith({
+      .add({
         componentId: 'wall1',
         component: { ...WALL_COMPONENT_INSULATION, actualArea: 2 },
       })
-      .cloneWith({
+      .add({
         parentId: 'wall1',
         componentId: 'window1',
         component: { ...WINDOW_COMPONENT_INSULATION, actualArea: 3 },

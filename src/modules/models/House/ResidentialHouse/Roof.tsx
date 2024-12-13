@@ -1,4 +1,4 @@
-import { useHouseComponents } from '@/context/HouseComponentsContext';
+import { useSimulation } from '@/context/SimulationContext';
 import { useWallMaterial } from '@/hooks/useWallMaterial';
 import { useWindowMaterial } from '@/hooks/useWindowMaterial';
 import { HouseComponent } from '@/types/houseComponent';
@@ -60,7 +60,7 @@ export const Roof = ({
   nFloors: number;
 }): JSX.Element => {
   const wallMaterial = useWallMaterial({ wallMaterial: materials.Wall });
-  const { houseComponentsConfigurator } = useHouseComponents();
+  const { houseComponentsConfigurator } = useSimulation();
 
   if (nFloors <= 0) {
     throw new Error('The house must at least have one floor!');

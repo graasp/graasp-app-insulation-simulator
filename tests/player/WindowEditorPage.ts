@@ -1,6 +1,6 @@
 import { Locator, Page, expect } from '@playwright/test';
 
-import { WindowSizeType } from '../../src/context/WindowSizeContext';
+import { WindowSizeType } from '../../src/types/window';
 
 // Page Object for the window editor (modal)
 export class WindowEditorPage {
@@ -13,7 +13,7 @@ export class WindowEditorPage {
     this.closeButton = this.page.getByRole('button', { name: 'Close' });
   }
 
-  async getWindowSizeHelper(size: WindowSizeType = 'Medium'): Promise<Locator> {
+  async getWindowSizeHelper(size: WindowSizeType): Promise<Locator> {
     return this.page.getByTestId(`window-size-helper-${size.toLowerCase()}`);
   }
 

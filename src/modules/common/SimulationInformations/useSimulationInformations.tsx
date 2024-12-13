@@ -1,6 +1,5 @@
 import { Flower, Leaf, Snowflake, Sun } from 'lucide-react';
 
-import { useHouseComponents } from '@/context/HouseComponentsContext';
 import { useSeason } from '@/context/SeasonContext';
 import { useSimulation } from '@/context/SimulationContext';
 import { FormattedHeatLoss } from '@/types/heatLoss';
@@ -28,9 +27,7 @@ export const useSimulationInformations =
   (): UseSimulationInformationsReturnType => {
     const { season } = useSeason();
 
-    const { heatLoss } = useSimulation();
-
-    const { houseComponentsConfigurator } = useHouseComponents();
+    const { heatLoss, houseComponentsConfigurator } = useSimulation();
 
     const wallComponent = houseComponentsConfigurator.getFirstOfType(
       HouseComponent.Wall,

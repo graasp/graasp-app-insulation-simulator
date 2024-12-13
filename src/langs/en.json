@@ -30,13 +30,13 @@
       "HOUSE_WALL_SIZE": "House Wall"
     }
   },
-  "SIMULATION_CONTROL_PANEL": {
+  "SIMULATION_SETTINGS_PANEL": {
     "TITLE": "Settings",
-    "DURATION_CONTROL_PANEL": {
+    "DURATION_SETTINGS_PANEL": {
       "TITLE": "Simulation",
       "LABEL": "Duration of Simulation"
     },
-    "HOUSE_CONTROL_PANEL": {
+    "HOUSE_SETTINGS_PANEL": {
       "TITLE": "House",
       "WALL_INSULATION_SELECT_LABEL": "Wall Insulation",
       "WINDOW_INSULATION_SELECT_LABEL": "Windows Insulation",
@@ -68,11 +68,11 @@
         "N_FLOORS_other": "{{count}} floors"
       }
     },
-    "ELECTRICITY_CONTROL_PANEL": {
+    "ELECTRICITY_SETTINGS_PANEL": {
       "TITLE": "Electricity Cost",
       "ELECTRICITY_COST_LABEL": "Electricity Cost"
     },  
-    "TEMPERATURES_CONTROL_PANEL": {
+    "TEMPERATURES_SETTINGS_PANEL": {
       "TITLE": "Temperatures",
       "INDOOR_TEMPERATURE_LABEL": "Indoor Temperature",
       "OUTDOOR_TEMPERATURE_LABEL": "Outdoor Temperature",

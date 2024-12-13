@@ -1,12 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
 
 import { HouseInsulation } from '@/config/houseInsulations';
-import { useHouseComponents } from '@/context/HouseComponentsContext';
+import { useSimulation } from '@/context/SimulationContext';
 import { BuildingMaterial } from '@/models/BuildingMaterial';
 import { HouseComponent } from '@/types/houseComponent';
 import { NonEmptyArray } from '@/types/utils';
 
-type UseMaterialControlDialogReturnType = {
+type UseMaterialSettingsDialogReturnType = {
   currTab: string;
   updateTab: (tab: string) => void;
   handleThicknessChange: (materialName: string, newThickness: number) => void;
@@ -15,10 +15,10 @@ type UseMaterialControlDialogReturnType = {
   wallInsulation?: HouseInsulation;
 };
 
-export const useMaterialControlDialog =
-  (): UseMaterialControlDialogReturnType => {
+export const useMaterialSettingsDialog =
+  (): UseMaterialSettingsDialogReturnType => {
     const { houseComponentsConfigurator, updateCompositionOfInsulation } =
-      useHouseComponents();
+      useSimulation();
     const [currTab, setCurrTab] = useState('');
 
     const wallComponents = useMemo(

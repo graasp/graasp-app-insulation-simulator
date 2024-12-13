@@ -1,6 +1,5 @@
 import { memo, useEffect } from 'react';
 
-import { useHouseComponents } from '@/context/HouseComponentsContext';
 import { useSimulation } from '@/context/SimulationContext';
 import { useWallMaterial } from '@/hooks/useWallMaterial';
 import { HouseComponent } from '@/types/houseComponent';
@@ -25,8 +24,8 @@ const WallComponent = ({
   hasWindows?: boolean;
   wallProps: WallProps;
 }): JSX.Element => {
-  const { heatLossPerComponent } = useSimulation();
-  const { registerComponent, unregisterComponent } = useHouseComponents();
+  const { heatLossPerComponent, registerComponent, unregisterComponent } =
+    useSimulation();
   const heatLoss = heatLossPerComponent[id] ?? 0;
 
   const material = useWallMaterial({ wallMaterial: materials.Wall });

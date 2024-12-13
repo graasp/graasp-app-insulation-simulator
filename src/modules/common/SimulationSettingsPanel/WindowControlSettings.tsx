@@ -23,13 +23,9 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
 import { BuildingMaterialKeys } from '@/config/buildingMaterials';
-import { useHouseComponents } from '@/context/HouseComponentsContext';
-import {
-  WindowSizeType,
-  WindowSizes,
-  useWindowSize,
-} from '@/context/WindowSizeContext';
+import { useSimulation } from '@/context/SimulationContext';
 import { HouseComponent } from '@/types/houseComponent';
+import { WindowSizeType, WindowSizes } from '@/types/window';
 import { formatComponentSize } from '@/utils/formatComponentSize';
 
 type Props = {
@@ -37,18 +33,18 @@ type Props = {
   handleClose: () => void;
 };
 
-export const WindowControlDialog = ({
+export const WindowControlSettings = ({
   open,
   handleClose,
 }: Props): JSX.Element | null => {
-  const { t } = useTranslation('SIMULATION_CONTROL_PANEL', {
-    keyPrefix: 'HOUSE_CONTROL_PANEL.WINDOW_DIALOG',
+  const { t } = useTranslation('SIMULATION_SETTINGS_PANEL', {
+    keyPrefix: 'HOUSE_SETTINGS_PANEL.WINDOW_DIALOG',
   });
   const { t: tInsulations } = useTranslation('INSULATIONS');
   const { t: tMaterials } = useTranslation('MATERIALS');
 
-  const { changeWindowSize, windowSize } = useWindowSize();
-  const { houseComponentsConfigurator } = useHouseComponents();
+  const { updateWindowSize, windowSize, houseComponentsConfigurator } =
+    useSimulation();
   const windowComponent = houseComponentsConfigurator.getFirstOfType(
     HouseComponent.Window,
   );
@@ -60,7 +56,7 @@ export const WindowControlDialog = ({
   const windowInsulation = tInsulations(windowComponent.insulationName);
 
   const handleSizeChange = (newSize: string): void => {
-    changeWindowSize(newSize as WindowSizeType);
+    updateWindowSize(newSize as WindowSizeType);
   };
 
   return (

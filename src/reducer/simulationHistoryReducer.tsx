@@ -1,37 +1,107 @@
-import { SIMULATION_PRICE_KWH } from '@/config/simulation';
-import { HouseComponentsConfigurator } from '@/models/HouseComponentsConfigurator';
-import { SimulationCommand } from '@/models/SimulationCommand';
-import { OutdoorTemperature } from '@/types/temperatures';
+import equal from 'deep-equal';
+
 import {
-  CreateNonEmptyArray,
-  NonEmptyArray,
-  updateArrayElement,
-} from '@/types/utils';
+  SIMULATION_INDOOR_TEMPERATURE_CELCIUS,
+  SIMULATION_OUTDOOR_TEMPERATURE_CELCIUS,
+  SIMULATION_PRICE_KWH,
+} from '@/config/simulation';
+import { HouseComponentsConfigurator } from '@/models/HouseComponentsConfigurator';
+import { SimulationHeatLoss } from '@/models/SimulationHeatLoss';
+import { TemperatureRow, UserOutdoorTemperature } from '@/types/temperatures';
+import { CreateNonEmptyArray, NonEmptyArray } from '@/types/utils';
+import { WindowSizeType } from '@/types/window';
 import { electricityCost } from '@/utils/electricity';
 import { powerConversionFactors } from '@/utils/heatLoss';
+import { getOutdoorTemperature } from '@/utils/temperatures';
 
-const updateState = (
-  state: NonEmptyArray<SimulationCommand>,
-  index: number,
-  value: Partial<SimulationCommand>,
-): NonEmptyArray<SimulationCommand> => {
-  if (index < 0 || index >= state.length) {
+export type SimulationDay = {
+  heatLoss: SimulationHeatLoss;
+  totalHeatLoss: number;
+  totalElectricityCost: number;
+  weatherTemperature: number;
+};
+
+type SimulationSettings = {
+  indoorTemperature: number;
+  outdoorTemperature: UserOutdoorTemperature;
+  pricekWh: number;
+  numberOfFloors: number;
+  houseConfigurator: HouseComponentsConfigurator;
+  windowSize: WindowSizeType;
+};
+
+type SimulationHistory = {
+  currentDayIdx: number;
+  simulationDays: NonEmptyArray<SimulationDay>;
+  simulationSettings: SimulationSettings;
+};
+
+const computeSimulation = (
+  state: SimulationHistory,
+  newSettings: Partial<SimulationSettings>,
+): SimulationHistory => {
+  const { currentDayIdx, simulationDays, simulationSettings, ...otherStates } =
+    state;
+  const { outdoorTemperature, indoorTemperature, houseConfigurator, pricekWh } =
+    { ...simulationSettings, ...newSettings };
+
+  // If the new value does not modify the current day, do noting!
+  // This check is necessary, because when we navigate through the history and the inputs are modified,
+  // the changes cause a call to recompute the whole simulation, even though the value is identical.
+  if (equal(simulationDays[currentDayIdx], newSettings)) {
     return state;
   }
 
-  return CreateNonEmptyArray(
-    updateArrayElement(state, index, state[index].from(value)),
-  );
+  return {
+    currentDayIdx,
+    ...otherStates,
+    simulationSettings: {
+      ...simulationSettings,
+      ...newSettings,
+    },
+    simulationDays: CreateNonEmptyArray(
+      simulationDays.reduce<SimulationDay[]>((acc, currDay) => {
+        const prevDay = acc[acc.length - 1];
+        const prevTotHeatLoss =
+          prevDay?.totalHeatLoss ?? prevDay?.heatLoss ?? 0;
+
+        const heatLoss = new SimulationHeatLoss({
+          indoorTemperature,
+          outdoorTemperature: getOutdoorTemperature({
+            userTemperature: outdoorTemperature,
+            weather: currDay.weatherTemperature,
+          }),
+          houseConfigurator,
+        });
+
+        const totalHeatLoss = prevTotHeatLoss + heatLoss.global;
+
+        return [
+          ...acc,
+          {
+            heatLoss,
+            totalHeatLoss,
+            totalElectricityCost: electricityCost({
+              pricekWh,
+              energyConsumptionkWh:
+                totalHeatLoss / powerConversionFactors.KiloWatt,
+            }),
+            weatherTemperature: currDay.weatherTemperature,
+          },
+        ];
+      }, []),
+    ),
+  };
 };
 
 type Action =
   | {
       type: 'reset';
-      outdoorTemperature: Pick<OutdoorTemperature, 'weatherValue'>;
+      temperatureRows: TemperatureRow[];
     }
   | {
-      type: 'add';
-      command: Partial<SimulationCommand>;
+      type: 'goToDay';
+      dayIdx: number;
     }
   | {
       type: 'updateIndoorTemperature';
@@ -39,7 +109,7 @@ type Action =
     }
   | {
       type: 'updateOutdoorTemperature';
-      outdoorTemperature: Omit<OutdoorTemperature, 'weatherValue'>;
+      outdoorTemperature: UserOutdoorTemperature;
     }
   | {
       type: 'updateNumberOfFloors';
@@ -52,94 +122,119 @@ type Action =
   | {
       type: 'updateHouseConfigurator';
       houseConfigurator: HouseComponentsConfigurator;
+    }
+  | {
+      type: 'updateWindowSize';
+      windowSize: WindowSizeType;
     };
 
+export const createDefault = (): SimulationHistory => {
+  const houseConfigurator = HouseComponentsConfigurator.create();
+
+  return {
+    currentDayIdx: 0,
+    simulationDays: CreateNonEmptyArray([
+      {
+        heatLoss: {} as SimulationHeatLoss,
+        totalHeatLoss: 0,
+        totalElectricityCost: 0,
+        weatherTemperature: 0,
+      },
+    ]),
+    simulationSettings: {
+      indoorTemperature: SIMULATION_INDOOR_TEMPERATURE_CELCIUS.DEFAULT,
+      outdoorTemperature: {
+        userOverride: false,
+        value: SIMULATION_OUTDOOR_TEMPERATURE_CELCIUS.DEFAULT,
+      },
+      pricekWh: SIMULATION_PRICE_KWH,
+      numberOfFloors: 1,
+      houseConfigurator,
+      windowSize: 'Medium',
+    },
+  };
+};
+
 export const simulationHistory = (
-  state: NonEmptyArray<SimulationCommand>,
+  state: SimulationHistory,
   action: Action,
-): NonEmptyArray<SimulationCommand> => {
-  if (!state.length) {
+): SimulationHistory => {
+  if (!state || !state.simulationDays.length) {
     throw new Error('The initial state must contain at least one value!');
   }
-
   const { type } = action;
+  const { simulationDays } = state;
 
   switch (type) {
     case 'reset': {
-      const { value, userOverride } =
-        state[state.length - 1].outdoorTemperature;
-      const { weatherValue } = action.outdoorTemperature;
-
-      return [
-        state[state.length - 1].from({
-          outdoorTemperature: {
-            userOverride,
-            weatherValue,
-            value: userOverride ? value : weatherValue,
-          },
-          prevTotHeatLoss: 0,
-          prevTotPowerCost: 0,
-        }),
-      ];
+      const numberOfDays = action.temperatureRows.length;
+      return computeSimulation(
+        {
+          ...state,
+          simulationDays: CreateNonEmptyArray(
+            action.temperatureRows.map(({ temperature }) => ({
+              heatLoss: {} as SimulationHeatLoss,
+              totalHeatLoss: 0,
+              totalElectricityCost: 0,
+              weatherTemperature: temperature,
+            })),
+          ),
+          currentDayIdx:
+            state.currentDayIdx >= numberOfDays
+              ? numberOfDays - 1
+              : state.currentDayIdx,
+        },
+        {},
+      );
     }
-    case 'add': {
-      const prev = state[state.length - 1];
-      // Calculate the cumulative heat loss.  If this is the first element
-      // (prev is undefined), the total is 0. Otherwise, add the current
-      // element's heat loss to the accumulated heat loss from previous elements.
-      const prevTotHeatLoss =
-        (prev.prevTotHeatLoss ?? 0) + (prev?.heatLoss.global ?? 0);
+    case 'goToDay': {
+      const { dayIdx } = action;
+      const numberOfDays = simulationDays.length;
 
-      const prevTotPowerCost =
-        (prev.prevTotPowerCost ?? 0) +
-        electricityCost({
-          pricekWh: prev.pricekWh ?? SIMULATION_PRICE_KWH,
-          energyConsumptionkWh:
-            (prev.heatLoss.global ?? 0) / powerConversionFactors.KiloWatt,
-        });
+      if (dayIdx < 0) {
+        console.warn(
+          `goToDay: ignoring as dayIdx must be >= 0. Given value was "${dayIdx}".`,
+        );
 
-      return [
-        ...state,
-        prev.from({
-          ...action.command,
-          prevTotHeatLoss,
-          prevTotPowerCost,
-        }),
-      ];
+        return { ...state, currentDayIdx: 0 };
+      }
+
+      if (dayIdx >= numberOfDays) {
+        console.warn(
+          `goToDay: ignoring as dayIdx must be < ${numberOfDays}. Given value was "${dayIdx}".`,
+        );
+
+        return { ...state, currentDayIdx: numberOfDays - 1 };
+      }
+
+      return { ...state, currentDayIdx: dayIdx };
     }
     case 'updateIndoorTemperature':
-      // always update the current command
-      return updateState(state, state.length - 1, {
+      return computeSimulation(state, {
         indoorTemperature: action.indoorTemperature,
       });
-    case 'updateOutdoorTemperature': {
-      // always update the current command
-      const index = state.length - 1;
-      const { userOverride, value } = action.outdoorTemperature;
-      const { weatherValue } = state[index].outdoorTemperature;
-
-      return updateState(state, index, {
-        outdoorTemperature: {
-          userOverride,
-          weatherValue,
-          value: userOverride ? value : weatherValue,
-        },
+    case 'updateOutdoorTemperature':
+      return computeSimulation(state, {
+        outdoorTemperature: action.outdoorTemperature,
       });
-    }
     case 'updateNumberOfFloors':
-      // always update the current command
-      return updateState(state, state.length - 1, {
+      return computeSimulation(state, {
         numberOfFloors: action.numberOfFloors,
       });
     case 'updatePricekWh':
-      // always update the current command
-      return updateState(state, state.length - 1, {
+      return computeSimulation(state, {
         pricekWh: action.pricekWh,
       });
     case 'updateHouseConfigurator':
-      // always update the current command
-      return updateState(state, state.length - 1, {
-        houseConfigurator: action.houseConfigurator,
+      return computeSimulation(state, {
+        // As React compare the memory adress to
+        // dectect changes, we have to clone the configurator
+        // to ensure re-render when necessary.
+        houseConfigurator: action.houseConfigurator.clone(),
+      });
+    case 'updateWindowSize':
+      return computeSimulation(state, {
+        windowSize: action.windowSize,
       });
     default:
       throw new Error(`The given type ${type} is not a valid type.`);

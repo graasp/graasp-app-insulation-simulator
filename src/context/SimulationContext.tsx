@@ -36,6 +36,17 @@ import {
   loadTemperaturesFromCSV,
 } from '@/utils/temperatures';
 
+type SpeedState = {
+  text: string;
+  multiply: number;
+};
+
+const SPEED_STATES: SpeedState[] = [
+  { text: 'x1', multiply: 1 },
+  { text: 'x3', multiply: 3 },
+  { text: 'x5', multiply: 5 },
+];
+
 // TODO: regroup by type like windowSize: { value, update }...
 type SimulationContextType = UseHouseComponentsReturnType & {
   status: SimulationStatus;
@@ -69,6 +80,8 @@ type SimulationContextType = UseHouseComponentsReturnType & {
   numberOfFloors: number;
   updateNumberOfFloors: (numberOfFloors: number) => void;
   houseComponentsConfigurator: HouseComponentsConfigurator;
+  speed: string;
+  nextSpeed: () => void;
 };
 
 const SimulationContext = createContext<SimulationContextType | null>(null);
@@ -99,6 +112,7 @@ export const SimulationProvider = ({
   const [simulationStatus, setSimulationStatus] = useState<SimulationStatus>(
     SimulationStatus.LOADING, // waiting for the temperatures...
   );
+  const [simulationSpeedIdx, setSimulationSpeedIdx] = useState(0);
 
   // Computed states
   const csv =
@@ -209,7 +223,7 @@ export const SimulationProvider = ({
         } else {
           setSimulationStatus(SimulationStatus.FINISHED);
         }
-      }, simulationFrameMS);
+      }, simulationFrameMS / SPEED_STATES[simulationSpeedIdx].multiply);
     }
 
     return () => {
@@ -224,6 +238,7 @@ export const SimulationProvider = ({
     simulationFrameMS,
     dispatchHistory,
     currentDayIdx,
+    simulationSpeedIdx,
   ]);
 
   // Update simulation's current state
@@ -317,6 +332,9 @@ export const SimulationProvider = ({
       numberOfFloors: simulationSettings.numberOfFloors,
       updateNumberOfFloors,
       houseComponentsConfigurator: simulationSettings.houseConfigurator,
+      speed: SPEED_STATES[simulationSpeedIdx].text,
+      nextSpeed: () =>
+        setSimulationSpeedIdx((curr) => (curr + 1) % SPEED_STATES.length),
       ...houseComponentsHook,
     }),
     [
@@ -344,6 +362,7 @@ export const SimulationProvider = ({
       gotToDay,
       updateWindowSize,
       updateNumberOfFloors,
+      simulationSpeedIdx,
       houseComponentsHook,
     ],
   );

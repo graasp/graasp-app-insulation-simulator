@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 
 import {
   HOUSE_INSULATIONS,
@@ -52,16 +52,15 @@ const DEFAULT_COMPONENTS_INSULATION = {
 };
 
 type Props = {
-  houseConfigurator: HouseComponentsConfigurator;
   onChange: (newHouseComponents: HouseComponentsConfigurator) => void;
 };
 
 export const useHouseComponents = ({
-  houseConfigurator,
   onChange,
 }: Props): UseHouseComponentsReturnType => {
-  // Not working now...
-  const houseComponentsConfigurator = houseConfigurator;
+  const houseComponentsConfigurator = useRef(
+    HouseComponentsConfigurator.create(),
+  );
 
   const registerComponent = useCallback(
     ({
@@ -71,7 +70,7 @@ export const useHouseComponents = ({
       componentType,
     }: RegisterComponentParams): void => {
       const { buildingMaterials, insulationName } =
-        houseComponentsConfigurator.getFirstOfType(componentType) ??
+        houseComponentsConfigurator.current.getFirstOfType(componentType) ??
         DEFAULT_COMPONENTS_INSULATION[componentType];
 
       if (!buildingMaterials?.length) {
@@ -81,7 +80,7 @@ export const useHouseComponents = ({
       }
 
       onChange(
-        houseComponentsConfigurator.add({
+        houseComponentsConfigurator.current.add({
           componentId,
           parentId,
           component: {
@@ -99,7 +98,7 @@ export const useHouseComponents = ({
 
   const unregisterComponent = useCallback(
     ({ componentId }: Pick<RegisterComponentParams, 'componentId'>): void => {
-      onChange(houseComponentsConfigurator.remove({ componentId }));
+      onChange(houseComponentsConfigurator.current.remove({ componentId }));
     },
     [houseComponentsConfigurator, onChange],
   );
@@ -126,7 +125,7 @@ export const useHouseComponents = ({
       const buildingMaterials = HOUSE_INSULATIONS[componentType][newInsulation];
 
       onChange(
-        houseComponentsConfigurator.updateInsulation({
+        houseComponentsConfigurator.current.updateInsulation({
           componentType,
           insulation: { name: newInsulation, buildingMaterials },
         }),
@@ -144,7 +143,7 @@ export const useHouseComponents = ({
       materialProps: { name: string } & FromBuildingMaterial;
     }): void => {
       const component =
-        houseComponentsConfigurator.getFirstOfType(componentType);
+        houseComponentsConfigurator.current.getFirstOfType(componentType);
 
       if (!component) {
         throw new Error(`No ${componentType} component was found!`);
@@ -169,7 +168,7 @@ export const useHouseComponents = ({
       });
 
       onChange(
-        houseComponentsConfigurator.updateInsulation({
+        houseComponentsConfigurator.current.updateInsulation({
           componentType,
           insulation: {
             name: insulationName,

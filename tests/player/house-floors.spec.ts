@@ -25,3 +25,19 @@ test('changing the number of floors should change the simulation info', async ({
     totElectricityCost,
   );
 });
+
+test('resetting the number of floors should not change the wall insulation', async ({
+  page,
+}) => {
+  const housePage = new HousePage(page);
+  const { settings } = housePage;
+  await housePage.goto();
+
+  await settings.selectWallInsulation('Brick');
+
+  await settings.selectNumberOfFloors(2);
+  await settings.selectWallInsulation('Aerogel');
+
+  await settings.selectNumberOfFloors(1);
+  await expect(page.getByLabel('Aerogel')).toBeVisible();
+});

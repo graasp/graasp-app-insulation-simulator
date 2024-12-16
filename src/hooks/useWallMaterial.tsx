@@ -1,6 +1,7 @@
 import { Color, Material } from 'three';
 
 import { HouseInsulationPerComponent } from '@/config/houseInsulations';
+import { SIMULATION_DEFAULT_WALL_COMPONENT_INSULATION } from '@/config/simulation';
 import { HouseComponent } from '@/types/houseComponent';
 import { fromHSL } from '@/utils/colors';
 
@@ -32,6 +33,8 @@ const COLORS: {
   [HouseInsulationPerComponent.Wall.Brick]: fromHSL({ h: 20, s: 0.6, l: 0.4 }),
 };
 
+type WallColor = keyof typeof HouseInsulationPerComponent.Wall;
+
 export const useWallMaterial = ({
   wallMaterial,
 }: {
@@ -41,4 +44,8 @@ export const useWallMaterial = ({
     houseMaterial: wallMaterial,
     houseComponent: HouseComponent.Wall,
     colors: COLORS,
+    defaultColor:
+      COLORS[
+        SIMULATION_DEFAULT_WALL_COMPONENT_INSULATION.insulationName as WallColor
+      ],
   });

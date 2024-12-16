@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 
 import { Color, Material, MeshStandardMaterial } from 'three';
 
@@ -9,12 +9,14 @@ type Props = {
   houseMaterial: Material;
   houseComponent: HouseComponent;
   colors: { [name: string]: Color };
+  defaultColor?: Color;
 };
 
 export const useHouseMaterial = ({
   houseMaterial,
   houseComponent,
   colors,
+  defaultColor,
 }: Props): Material => {
   const { houseComponentsConfigurator } = useSimulation();
 
@@ -24,26 +26,21 @@ export const useHouseMaterial = ({
     [houseComponent, houseComponentsConfigurator],
   );
 
-  const [newMaterial, setNewMaterial] = useState(() => houseMaterial);
+  const copiedMaterial = new MeshStandardMaterial().copy(houseMaterial);
 
-  useEffect(() => {
-    if (houseComponentMaterials) {
-      setNewMaterial((curr) => {
-        const copiedMaterial = new MeshStandardMaterial().copy(curr);
-        const color = colors[houseComponentMaterials.insulationName];
+  if (houseComponentMaterials) {
+    const color = colors[houseComponentMaterials.insulationName];
 
-        if (!color) {
-          throw new Error(
-            `No color was found for the ${houseComponent} insulation ${houseComponentMaterials.insulationName}!`,
-          );
-        }
-
-        copiedMaterial.color = color;
-
-        return copiedMaterial;
-      });
+    if (!color) {
+      throw new Error(
+        `No color was found for the ${houseComponent} insulation ${houseComponentMaterials.insulationName}!`,
+      );
     }
-  }, [colors, houseComponent, houseComponentMaterials]);
 
-  return newMaterial;
+    copiedMaterial.color = color;
+  } else if (defaultColor) {
+    copiedMaterial.color = defaultColor;
+  }
+
+  return copiedMaterial;
 };

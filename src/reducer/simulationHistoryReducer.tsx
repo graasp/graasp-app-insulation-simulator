@@ -96,8 +96,11 @@ const computeSimulation = (
 
 type Action =
   | {
-      type: 'reset';
+      type: 'load';
       temperatureRows: TemperatureRow[];
+    }
+  | {
+      type: 'restart';
     }
   | {
       type: 'goToDay';
@@ -128,32 +131,28 @@ type Action =
       windowSize: WindowSizeType;
     };
 
-export const createDefault = (): SimulationHistory => {
-  const houseConfigurator = HouseComponentsConfigurator.create();
-
-  return {
-    currentDayIdx: 0,
-    simulationDays: CreateNonEmptyArray([
-      {
-        heatLoss: {} as SimulationHeatLoss,
-        totalHeatLoss: 0,
-        totalElectricityCost: 0,
-        weatherTemperature: 0,
-      },
-    ]),
-    simulationSettings: {
-      indoorTemperature: SIMULATION_INDOOR_TEMPERATURE_CELCIUS.DEFAULT,
-      outdoorTemperature: {
-        userOverride: false,
-        value: SIMULATION_OUTDOOR_TEMPERATURE_CELCIUS.DEFAULT,
-      },
-      pricekWh: SIMULATION_PRICE_KWH,
-      numberOfFloors: 1,
-      houseConfigurator,
-      windowSize: 'Medium',
+export const createDefault = (): SimulationHistory => ({
+  currentDayIdx: 0,
+  simulationDays: CreateNonEmptyArray([
+    {
+      heatLoss: {} as SimulationHeatLoss,
+      totalHeatLoss: 0,
+      totalElectricityCost: 0,
+      weatherTemperature: 0,
     },
-  };
-};
+  ]),
+  simulationSettings: {
+    indoorTemperature: SIMULATION_INDOOR_TEMPERATURE_CELCIUS.DEFAULT,
+    outdoorTemperature: {
+      userOverride: false,
+      value: SIMULATION_OUTDOOR_TEMPERATURE_CELCIUS.DEFAULT,
+    },
+    pricekWh: SIMULATION_PRICE_KWH,
+    numberOfFloors: 1,
+    houseConfigurator: HouseComponentsConfigurator.create(), // will be replaced on component register
+    windowSize: 'Medium',
+  },
+});
 
 export const simulationHistory = (
   state: SimulationHistory,
@@ -166,7 +165,7 @@ export const simulationHistory = (
   const { simulationDays } = state;
 
   switch (type) {
-    case 'reset': {
+    case 'load': {
       const numberOfDays = action.temperatureRows.length;
       return computeSimulation(
         {
@@ -187,6 +186,8 @@ export const simulationHistory = (
         {},
       );
     }
+    case 'restart':
+      return { ...state, currentDayIdx: 0 };
     case 'goToDay': {
       const { dayIdx } = action;
       const numberOfDays = simulationDays.length;

@@ -128,21 +128,13 @@ export const SimulationProvider = ({
 
   // Hooks
   const houseComponentsHook = useHouseComponents({
-    houseConfigurator: simulationSettings.houseConfigurator,
-    onChange: (houseConfigurator) => {
+    onChange: (newHouseConfigurator) => {
       dispatchHistory({
         type: 'updateHouseConfigurator',
-        houseConfigurator,
+        houseConfigurator: newHouseConfigurator,
       });
     },
   });
-
-  const resetSimulation = useCallback(() => {
-    dispatchHistory({
-      type: 'reset',
-      temperatureRows: temperatures.current,
-    });
-  }, []);
 
   // Load CSV
   useEffect(() => {
@@ -154,15 +146,12 @@ export const SimulationProvider = ({
 
     loadTemperaturesFromCSV(csv.path).then((rows) => {
       temperatures.current = rows;
-      resetSimulation();
+      dispatchHistory({
+        type: 'load',
+        temperatureRows: temperatures.current,
+      });
     });
-  }, [
-    csv,
-    csv.measurementFrequency,
-    csv.path,
-    resetSimulation,
-    simulationDuration.value,
-  ]);
+  }, [csv, csv.measurementFrequency, csv.path, simulationDuration.value]);
 
   useEffect(() => {
     // Only set the status from LOADING to IDLE when the heat loss is computed.
@@ -180,6 +169,12 @@ export const SimulationProvider = ({
       throw new Error('The temperatures are not loaded!');
     }
 
+    if (simulationStatus === SimulationStatus.FINISHED) {
+      dispatchHistory({
+        type: 'restart',
+      });
+    }
+
     if (
       simulationStatus === SimulationStatus.RUNNING ||
       simulationStatus === SimulationStatus.LOADING
@@ -187,12 +182,8 @@ export const SimulationProvider = ({
       return;
     }
 
-    if (simulationStatus === SimulationStatus.FINISHED) {
-      resetSimulation();
-    }
-
     setSimulationStatus(SimulationStatus.RUNNING);
-  }, [resetSimulation, simulationStatus]);
+  }, [simulationStatus]);
 
   const pauseSimulation = useCallback((): void => {
     if (
@@ -209,6 +200,11 @@ export const SimulationProvider = ({
   // and creating too many new days.
   const gotToDay = useDebouncedCallback((idx: number): void => {
     pauseSimulation();
+
+    if (idx >= numberOfDays - 1) {
+      setSimulationStatus(SimulationStatus.FINISHED);
+    }
+
     dispatchHistory({ type: 'goToDay', dayIdx: idx });
   }, 10);
 

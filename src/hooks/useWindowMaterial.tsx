@@ -1,6 +1,7 @@
 import { Color, Material } from 'three';
 
 import { HouseInsulationPerComponent } from '@/config/houseInsulations';
+import { SIMULATION_DEFAULT_WINDOW_COMPONENT_INSULATION } from '@/config/simulation';
 import { HouseComponent } from '@/types/houseComponent';
 import { fromRGB } from '@/utils/colors';
 
@@ -30,6 +31,8 @@ type UseWindowMaterialReturnType = {
   frameMaterial: Material;
 };
 
+type WindowColor = keyof typeof HouseInsulationPerComponent.Window;
+
 export const useWindowMaterial = ({
   windowMaterial,
 }: {
@@ -39,5 +42,9 @@ export const useWindowMaterial = ({
     houseMaterial: windowMaterial,
     houseComponent: HouseComponent.Window,
     colors: COLORS,
+    defaultColor:
+      COLORS[
+        SIMULATION_DEFAULT_WINDOW_COMPONENT_INSULATION.insulationName as WindowColor
+      ],
   }),
 });

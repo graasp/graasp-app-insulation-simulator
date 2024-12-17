@@ -1,13 +1,8 @@
 import { useEffect } from 'react';
 
 import { useLocalContext } from '@graasp/apps-query-client';
-import { Context } from '@graasp/sdk';
-
-import { SettingsProvider } from '@/context/SettingsContext';
 
 import i18n, { DEFAULT_LANGUAGE } from '../../config/i18n';
-import AnalyticsView from './AnalyticsView';
-import BuilderView from './BuilderView';
 import PlayerView from './PlayerView';
 
 const App = (): JSX.Element => {
@@ -21,26 +16,7 @@ const App = (): JSX.Element => {
     }
   }, [context]);
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const renderContent = (): JSX.Element => {
-    switch (context.context) {
-      case Context.Builder:
-        return <BuilderView />;
-
-      case Context.Analytics:
-        return <AnalyticsView />;
-
-      case Context.Player:
-      default:
-        return <PlayerView />;
-    }
-  };
-
-  return (
-    <SettingsProvider>
-      <PlayerView />
-    </SettingsProvider>
-  );
+  return <PlayerView />;
 };
 
 export default App;

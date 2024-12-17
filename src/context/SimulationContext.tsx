@@ -110,7 +110,7 @@ export const SimulationProvider = ({
     unit: TimeUnit.Years,
   });
   const [simulationStatus, setSimulationStatus] = useState<SimulationStatus>(
-    SimulationStatus.LOADING, // waiting for the temperatures...
+    SimulationStatus.INITIAL_LOADING, // waiting for the temperatures...
   );
   const [simulationSpeedIdx, setSimulationSpeedIdx] = useState(0);
 
@@ -150,6 +150,7 @@ export const SimulationProvider = ({
         type: 'load',
         temperatureRows: temperatures.current,
       });
+      setSimulationStatus(SimulationStatus.LOADING);
     });
   }, [csv, csv.measurementFrequency, csv.path, simulationDuration.value]);
 

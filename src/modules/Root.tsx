@@ -7,22 +7,14 @@ import { CssBaseline, ThemeProvider, createTheme, styled } from '@mui/material';
 import { grey, orange, pink } from '@mui/material/colors';
 import { StyledEngineProvider } from '@mui/material/styles';
 
-import {
-  GraaspContextDevTool,
-  WithLocalContext,
-  WithTokenContext,
-} from '@graasp/apps-query-client';
+import '@graasp/apps-query-client';
 
 import i18nConfig from '@/config/i18n';
 import {
   QueryClientProvider,
   ReactQueryDevtools,
-  hooks,
   queryClient,
 } from '@/config/queryClient';
-import { defaultMockContext, mockMembers } from '@/mocks/db';
-import Loader from '@/modules/common/Loader';
-import { useObjectState } from '@/utils/hooks';
 
 import ErrorBoundary from './ErrorBoundary';
 import App from './main/App';
@@ -73,59 +65,26 @@ const RootDiv = styled('div')({
   background: '#fafaff',
 });
 
-const Root: FC = () => {
-  const [mockContext, setMockContext] = useObjectState(defaultMockContext);
-
-  return (
-    <RootDiv>
-      {/* Used to define the order of injected properties between JSS and emotion */}
-      <StyledEngineProvider injectFirst>
-        <ThemeProvider theme={theme}>
-          <CssBaseline enableColorScheme />
-          <I18nextProvider i18n={i18nConfig}>
-            <ErrorBoundary>
-              <QueryClientProvider client={queryClient}>
-                <ToastContainer />
-                <WithLocalContext
-                  defaultValue={mockContext}
-                  LoadingComponent={<Loader />}
-                  useGetLocalContext={hooks.useGetLocalContext}
-                  useAutoResize={hooks.useAutoResize}
-                  onError={() => {
-                    console.error(
-                      'An error occurred while fetching the context.',
-                    );
-                  }}
-                >
-                  <WithTokenContext
-                    LoadingComponent={<Loader />}
-                    useAuthToken={hooks.useAuthToken}
-                    onError={() => {
-                      console.error(
-                        'An error occurred while requesting the token.',
-                      );
-                    }}
-                  >
-                    <App />
-                    {import.meta.env.DEV && (
-                      <GraaspContextDevTool
-                        members={mockMembers}
-                        context={mockContext}
-                        setContext={setMockContext}
-                      />
-                    )}
-                  </WithTokenContext>
-                </WithLocalContext>
-                {import.meta.env.DEV && (
-                  <ReactQueryDevtools position="bottom-left" />
-                )}
-              </QueryClientProvider>
-            </ErrorBoundary>
-          </I18nextProvider>
-        </ThemeProvider>
-      </StyledEngineProvider>
-    </RootDiv>
-  );
-};
+const Root: FC = () => (
+  <RootDiv>
+    {/* Used to define the order of injected properties between JSS and emotion */}
+    <StyledEngineProvider injectFirst>
+      <ThemeProvider theme={theme}>
+        <CssBaseline enableColorScheme />
+        <I18nextProvider i18n={i18nConfig}>
+          <ErrorBoundary>
+            <QueryClientProvider client={queryClient}>
+              <ToastContainer />
+              <App />
+              {import.meta.env.DEV && (
+                <ReactQueryDevtools position="bottom-left" />
+              )}
+            </QueryClientProvider>
+          </ErrorBoundary>
+        </I18nextProvider>
+      </ThemeProvider>
+    </StyledEngineProvider>
+  </RootDiv>
+);
 
 export default Root;

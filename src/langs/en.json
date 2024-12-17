@@ -1,4 +1,7 @@
 {
+  "INITIAL_LOADING": {
+    "LOADING_MESSAGE": "Loading House Insulation Simulator..."
+  },
   "DATES": {
     "YEARS_one": "{{count}} year",
     "YEARS_other": "{{count}} years",

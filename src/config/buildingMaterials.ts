@@ -27,7 +27,7 @@ export const BUILDING_MATERIALS = {
   }),
   Brick: BuildingMaterial.create({
     name: 'Brick',
-    price: 0,
+    price: 55,
     thermalConductivity: 0.6,
     thickness: 0.2,
   }),

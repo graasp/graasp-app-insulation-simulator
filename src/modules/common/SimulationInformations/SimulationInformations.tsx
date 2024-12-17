@@ -9,6 +9,7 @@ import {
 } from '@mui/material';
 
 import {
+  BrickWall,
   CalendarRange,
   Heater,
   House,
@@ -21,6 +22,7 @@ import { useSeason } from '@/context/SeasonContext';
 import { useSimulation } from '@/context/SimulationContext';
 import { LoadingComponent } from '@/modules/common/LoadingComponent';
 import { SimulationStatus } from '@/types/simulation';
+import { formatNumber } from '@/utils/numbers';
 
 import { useSimulationInformations } from './useSimulationInformations';
 
@@ -38,7 +40,7 @@ export const SimulationInformations = (): JSX.Element => {
     electricityCost,
   } = useSimulation();
 
-  const { seasonIcon, heatLoss, formattedWallSize } =
+  const { seasonIcon, heatLoss, formattedWallSize, wallsPrice } =
     useSimulationInformations();
 
   const theme = useTheme();
@@ -136,7 +138,7 @@ export const SimulationInformations = (): JSX.Element => {
               </Stack>
               <Typography>{tInformations('TOTAL.ELECTRICITY_COST')}</Typography>
               <Typography data-testid="simulation-info-tot-electricity-cost">
-                {electricityCost} CHF
+                {formatNumber(electricityCost)} CHF
               </Typography>
             </Stack>
 
@@ -149,6 +151,18 @@ export const SimulationInformations = (): JSX.Element => {
                   {tInformations('TOTAL.HOUSE_WALL_SIZE')}
                 </Typography>
                 <Typography>{formattedWallSize}</Typography>
+              </Stack>
+            </Stack>
+
+            <Stack direction="row" alignItems="center" spacing={1}>
+              <Stack height={iconSize} width={iconSize} alignItems="center">
+                <BrickWall />
+              </Stack>
+              <Stack direction="row" alignItems="baseline" spacing={1}>
+                <Typography>
+                  {tInformations('TOTAL.HOUSE_WALL_MATERIAL_COST')}
+                </Typography>
+                <Typography>{formatNumber(wallsPrice)} CHF</Typography>
               </Stack>
             </Stack>
           </Stack>

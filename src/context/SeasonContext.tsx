@@ -1,7 +1,7 @@
 import { ReactNode, createContext, useContext, useMemo } from 'react';
 
 import { Season, Seasons } from '@/types/seasons';
-import { getMostPresentSeason } from '@/utils/seasons';
+import { getSeason } from '@/utils/seasons';
 
 import { useSimulation } from './SimulationContext';
 
@@ -19,8 +19,7 @@ type Props = {
 
 export const SeasonProvider = ({ children }: Props): ReactNode => {
   const { date } = useSimulation();
-  // TODO: juste use the date...
-  const season = getMostPresentSeason(date, date);
+  const season = getSeason(date);
 
   const contextValue = useMemo(
     () => ({

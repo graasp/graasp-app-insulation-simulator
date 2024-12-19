@@ -1,8 +1,7 @@
 import { HeatLossPerComponent } from '@/types/houseComponent';
-import { TimeUnit } from '@/types/time';
 import {
   calculateHeatLossConstantFactor,
-  sumHeatLossRate,
+  sumHeatLossRateForDay,
 } from '@/utils/heatLoss';
 
 import { HouseComponentsConfigurator } from './HouseComponentsConfigurator';
@@ -23,7 +22,6 @@ export class SimulationHeatLoss {
     outdoorTemperature,
     houseConfigurator,
   }: Constructor) {
-    // TODO: improve this code?
     const heatLossConstantFactors = houseConfigurator
       .getAll()
       .reduce<HeatLossPerComponent>(
@@ -42,11 +40,10 @@ export class SimulationHeatLoss {
     ).reduce<HeatLossPerComponent>(
       (acc, [componentId, heatLossConstantFactor]) => ({
         ...acc,
-        [componentId]: sumHeatLossRate({
-          temperatures: [outdoorTemperature],
+        [componentId]: sumHeatLossRateForDay({
+          temperature: outdoorTemperature,
           constantFactor: heatLossConstantFactor,
           indoorTemperature,
-          timeUnit: TimeUnit.Days, // TODO: to adapt or always set per day?,
         }),
       }),
       {},

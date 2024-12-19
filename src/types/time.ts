@@ -5,7 +5,7 @@ export const TimeUnit = {
   Months: 'Months',
   Years: 'Years',
 } as const;
-export type TimeUnitType = keyof typeof TimeUnit;
+type TimeUnitType = keyof typeof TimeUnit;
 
 export type FormattedTime = {
   value: number;

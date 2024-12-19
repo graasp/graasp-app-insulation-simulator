@@ -32,12 +32,10 @@ export const SimulationInformations = (): JSX.Element => {
   const { season } = useSeason();
 
   const {
-    status,
-    indoorTemperature,
-    outdoorTemperature,
-    date,
-    totalHeatLoss,
-    electricityCost,
+    electricity: { cost: electricityCost },
+    heatLoss: { total: totalHeatLoss },
+    temperatures: { indoor, outdoor },
+    simulation: { date, status },
   } = useSimulation();
 
   const { seasonIcon, heatLoss, formattedWallSize, wallsPrice } =
@@ -86,7 +84,7 @@ export const SimulationInformations = (): JSX.Element => {
               </Stack>
               <Typography>{tInformations('CURRENT_PERIOD.OUTDOOR')}</Typography>
               <Typography data-testid="simulation-info-outdoor-temperature">
-                {outdoorTemperature.value} °C
+                {outdoor.value} °C
               </Typography>
             </Stack>
 
@@ -96,7 +94,7 @@ export const SimulationInformations = (): JSX.Element => {
               </Stack>
               <Typography>{tInformations('CURRENT_PERIOD.INDOOR')}</Typography>
               <Typography data-testid="simulation-info-indoor-temperature">
-                {indoorTemperature} °C
+                {indoor} °C
               </Typography>
             </Stack>
 

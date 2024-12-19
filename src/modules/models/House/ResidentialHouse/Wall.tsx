@@ -24,8 +24,10 @@ const WallComponent = ({
   hasWindows?: boolean;
   wallProps: WallProps;
 }): JSX.Element => {
-  const { heatLossPerComponent, registerComponent, unregisterComponent } =
-    useSimulation();
+  const {
+    heatLoss: { perComponent: heatLossPerComponent },
+    house: { registerComponent, unregisterComponent },
+  } = useSimulation();
   const heatLoss = heatLossPerComponent[id] ?? 0;
 
   const material = useWallMaterial({ wallMaterial: materials.Wall });

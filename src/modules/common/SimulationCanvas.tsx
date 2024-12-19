@@ -11,7 +11,7 @@ import { ResidentialHouse } from '../models/House/ResidentialHouse/ResidentialHo
 import { Tree } from '../models/Tree/Tree';
 
 export const SimulationCanvas = (): JSX.Element => {
-  const { numberOfFloors } = useSimulation();
+  const { numberOfFloors } = useSimulation('house');
 
   const theme = useTheme();
   const md = useMediaQuery(theme.breakpoints.up('sm'));

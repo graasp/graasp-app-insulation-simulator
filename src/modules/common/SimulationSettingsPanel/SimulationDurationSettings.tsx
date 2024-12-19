@@ -15,7 +15,7 @@ export const SimulationDurationSettings = (): JSX.Element => {
 
   const { t: tDates } = useTranslation('DATES');
 
-  const { durationInYears, updateSimulationDuration, status } = useSimulation();
+  const { duration, status } = useSimulation('simulation');
 
   const selectIsDisabled = [
     SimulationStatus.LOADING,
@@ -33,7 +33,7 @@ export const SimulationDurationSettings = (): JSX.Element => {
         : Number.parseInt(newDuration, 10);
 
     if (!Number.isNaN(value)) {
-      updateSimulationDuration({ durationInYears: value });
+      duration.update({ durationInYears: value });
     } else {
       console.error(`The duration ${newDuration} is not a valid number!`);
     }
@@ -46,7 +46,7 @@ export const SimulationDurationSettings = (): JSX.Element => {
         labelId="house-duration-select-label"
         id="house-duration-select"
         label={t('LABEL')}
-        value={durationInYears}
+        value={duration.years}
         onChange={(e) => handleChange(e.target.value)}
         type="number"
         disabled={selectIsDisabled}

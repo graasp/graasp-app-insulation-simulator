@@ -14,7 +14,7 @@ import { SimulationSettingsPanel } from '../common/SimulationSettingsPanel/Simul
 
 const PlayerViewComponent = (): JSX.Element => {
   const { t } = useTranslation('INITIAL_LOADING');
-  const { status } = useSimulation();
+  const { status } = useSimulation('simulation');
 
   if (status === SimulationStatus.INITIAL_LOADING) {
     return (

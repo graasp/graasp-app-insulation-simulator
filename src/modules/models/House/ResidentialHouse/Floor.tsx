@@ -15,15 +15,15 @@ export const Floor = ({
   floor: number;
 }): JSX.Element => {
   const { wallGeometries } = useWallGeometries();
-  const { houseComponentsConfigurator } = useSimulation();
+  const { componentsConfigurator } = useSimulation('house');
 
   if (floor < 0) {
     throw new Error('The floor number can be < 0!');
   }
 
   const wallHeight =
-    houseComponentsConfigurator.getFirstOfType(HouseComponent.Wall)?.size
-      .height ?? 0;
+    componentsConfigurator.getFirstOfType(HouseComponent.Wall)?.size.height ??
+    0;
 
   const offSetY = wallHeight * floor;
 

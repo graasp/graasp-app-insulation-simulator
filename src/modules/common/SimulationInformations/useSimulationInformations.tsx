@@ -28,13 +28,16 @@ export const useSimulationInformations =
   (): UseSimulationInformationsReturnType => {
     const { season } = useSeason();
 
-    const { heatLoss, houseComponentsConfigurator } = useSimulation();
+    const {
+      heatLoss: { global: heatLoss },
+      house: { componentsConfigurator },
+    } = useSimulation();
 
-    const wallComponent = houseComponentsConfigurator.getFirstOfType(
+    const wallComponent = componentsConfigurator.getFirstOfType(
       HouseComponent.Wall,
     );
 
-    const wallPrices = houseComponentsConfigurator
+    const wallPrices = componentsConfigurator
       .getByType(HouseComponent.Wall)
       .reduce(
         (totCost, houseComponent) =>

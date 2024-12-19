@@ -18,7 +18,7 @@ type Props = {
 };
 
 export const SeasonProvider = ({ children }: Props): ReactNode => {
-  const { date } = useSimulation();
+  const { date } = useSimulation('simulation');
   const season = getSeason(date);
 
   const contextValue = useMemo(

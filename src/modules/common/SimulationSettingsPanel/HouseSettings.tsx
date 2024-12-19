@@ -30,11 +30,11 @@ export const HouseSettings = (): JSX.Element => {
   const { t } = useTranslation('SIMULATION_SETTINGS_PANEL');
   const { t: tInsulations } = useTranslation('INSULATIONS');
   const {
-    houseComponentsConfigurator,
+    componentsConfigurator,
     changeComponentInsulation,
     numberOfFloors,
     updateNumberOfFloors,
-  } = useSimulation();
+  } = useSimulation('house');
 
   const wallInsulations = Object.keys(
     HOUSE_INSULATIONS.Wall,
@@ -45,12 +45,12 @@ export const HouseSettings = (): JSX.Element => {
   ) as (keyof typeof HOUSE_INSULATIONS.Window)[];
 
   const currWallInsulation =
-    houseComponentsConfigurator.getFirstOfType(HouseComponent.Wall)
+    componentsConfigurator.getFirstOfType(HouseComponent.Wall)
       ?.insulationName ??
     SIMULATION_DEFAULT_WALL_COMPONENT_INSULATION.insulationName;
 
   const currWindowInsulation =
-    houseComponentsConfigurator.getFirstOfType(HouseComponent.Window)
+    componentsConfigurator.getFirstOfType(HouseComponent.Window)
       ?.insulationName ??
     SIMULATION_DEFAULT_WINDOW_COMPONENT_INSULATION.insulationName;
 

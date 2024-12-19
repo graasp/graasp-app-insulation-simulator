@@ -30,7 +30,8 @@
       "TITLE": "Total",
       "HEAT_LOSS": "Heat Loss",
       "ELECTRICITY_COST": "Electricity Cost",
-      "HOUSE_WALL_SIZE": "House Wall"
+      "HOUSE_WALL_SIZE": "House Wall",
+      "HOUSE_WALL_MATERIAL_COST": "Wall Cost"
     }
   },
   "SIMULATION_SETTINGS_PANEL": {

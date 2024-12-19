@@ -19,6 +19,7 @@ const iconsBySeason: IconBySeasonType = {
 
 type UseSimulationInformationsReturnType = {
   heatLoss: FormattedHeatLoss;
+  wallsPrice: number;
   seasonIcon: JSX.Element;
   formattedWallSize: React.ReactNode;
 };
@@ -33,8 +34,23 @@ export const useSimulationInformations =
       HouseComponent.Wall,
     );
 
+    const wallPrices = houseComponentsConfigurator
+      .getByType(HouseComponent.Wall)
+      .reduce(
+        (totCost, houseComponent) =>
+          totCost +
+          houseComponent.actualArea *
+            houseComponent.buildingMaterials.reduce(
+              (componentCost, material) =>
+                componentCost + material.price * material.thickness,
+              0,
+            ),
+        0,
+      );
+
     return {
       heatLoss: formatHeatLossRate(heatLoss),
+      wallsPrice: Math.round(wallPrices),
       seasonIcon: iconsBySeason[season],
       formattedWallSize: wallComponent
         ? formatComponentSize({

@@ -4,6 +4,10 @@ name: Deploy to GitHub Pages
 on:
   # Triggers the workflow on repository-dispatch event
   workflow_dispatch:
+  # Automatically trigger on push on main
+  push:
+    branches:
+      - main
 
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:

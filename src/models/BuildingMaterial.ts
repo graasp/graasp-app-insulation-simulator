@@ -16,7 +16,7 @@ export class BuildingMaterial {
   public readonly name: string;
 
   /**
-   * Thermal conductivity W/m^2*K.
+   * Thermal conductivity W/m*K.
    */
   public readonly thermalConductivity: number;
 
@@ -36,7 +36,6 @@ export class BuildingMaterial {
     price,
     thickness,
   }: Constructor) {
-    // TODO: validates the constructor!
     this.name = name;
     this.thermalConductivity = thermalConductivity;
     this.price = price;

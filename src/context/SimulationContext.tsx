@@ -27,7 +27,6 @@ import { FormattedHeatLoss } from '@/types/heatLoss';
 import { HeatLossPerComponent } from '@/types/houseComponent';
 import { SimulationStatus } from '@/types/simulation';
 import { TemperatureRow, UserOutdoorTemperature } from '@/types/temperatures';
-import { FormattedTime, TimeUnit } from '@/types/time';
 import { WindowScaleSize, WindowSizeType } from '@/types/window';
 import { undefinedContextErrorFactory } from '@/utils/context';
 import { formatHeatLossRate } from '@/utils/heatLoss';
@@ -64,11 +63,13 @@ type SimulationContextType = UseHouseComponentsReturnType & {
     value: number;
   }) => void;
   date: Date;
-  duration: FormattedTime;
+  durationInYears: number;
   numberOfDays: number;
-  updateSimulationDuration: (
-    duration: Pick<FormattedTime, 'value'> & { unit: typeof TimeUnit.Years },
-  ) => void;
+  updateSimulationDuration: ({
+    durationInYears,
+  }: {
+    durationInYears: number;
+  }) => void;
   startSimulation: () => void;
   pauseSimulation: () => void;
   currDayIdx: number;
@@ -105,10 +106,8 @@ export const SimulationProvider = ({
   ]);
 
   // States
-  const [simulationDuration, setSimulationDuration] = useState<FormattedTime>({
-    value: 1,
-    unit: TimeUnit.Years,
-  });
+  const [simulationDurationInYears, setSimulationDurationInYears] =
+    useState<number>(1);
   const [simulationStatus, setSimulationStatus] = useState<SimulationStatus>(
     SimulationStatus.INITIAL_LOADING, // waiting for the temperatures...
   );
@@ -117,7 +116,7 @@ export const SimulationProvider = ({
   // Computed states
   const csv =
     SIMULATION_CSV_FILES[
-      simulationDuration.value as keyof typeof SIMULATION_CSV_FILES
+      simulationDurationInYears as keyof typeof SIMULATION_CSV_FILES
     ];
   const numberOfDays = temperatures.current.length; // We assume it is one temperature per day.
   const [
@@ -140,7 +139,7 @@ export const SimulationProvider = ({
   useEffect(() => {
     if (!csv) {
       throw new Error(
-        `The CSV was not found for the duration of ${simulationDuration.value}`,
+        `The CSV was not found for the duration of ${simulationDurationInYears}`,
       );
     }
 
@@ -152,7 +151,7 @@ export const SimulationProvider = ({
       });
       setSimulationStatus(SimulationStatus.LOADING);
     });
-  }, [csv, csv.measurementFrequency, csv.path, simulationDuration.value]);
+  }, [csv, csv.measurementFrequency, csv.path, simulationDurationInYears]);
 
   useEffect(() => {
     // Only set the status from LOADING to IDLE when the heat loss is computed.
@@ -278,12 +277,8 @@ export const SimulationProvider = ({
   }, []);
 
   const updateSimulationDuration = useCallback(
-    (
-      duration: Pick<FormattedTime, 'value'> & {
-        unit: typeof TimeUnit.Years;
-      },
-    ): void => {
-      setSimulationDuration(duration);
+    ({ durationInYears }: { durationInYears: number }): void => {
+      setSimulationDurationInYears(durationInYears);
     },
     [],
   );
@@ -309,7 +304,7 @@ export const SimulationProvider = ({
       updateOutdoorTemperature,
       date: new Date(temperatures.current[currentDayIdx]?.time),
       getDateOf: (idx: number) => new Date(temperatures.current[idx]?.time),
-      duration: simulationDuration,
+      durationInYears: simulationDurationInYears,
       numberOfDays,
       updateSimulationDuration,
       status: simulationStatus,
@@ -349,7 +344,7 @@ export const SimulationProvider = ({
       currentDay.totalElectricityCost,
       updateOutdoorTemperature,
       currentDayIdx,
-      simulationDuration,
+      simulationDurationInYears,
       numberOfDays,
       updateSimulationDuration,
       simulationStatus,

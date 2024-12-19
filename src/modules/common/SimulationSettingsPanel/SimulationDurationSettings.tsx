@@ -5,7 +5,6 @@ import { FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 import { SIMULATION_CSV_FILES } from '@/config/simulation';
 import { useSimulation } from '@/context/SimulationContext';
 import { SimulationStatus } from '@/types/simulation';
-import { TimeUnit } from '@/types/time';
 
 const OPTIONS = Object.keys(SIMULATION_CSV_FILES);
 
@@ -16,7 +15,7 @@ export const SimulationDurationSettings = (): JSX.Element => {
 
   const { t: tDates } = useTranslation('DATES');
 
-  const { duration, updateSimulationDuration, status } = useSimulation();
+  const { durationInYears, updateSimulationDuration, status } = useSimulation();
 
   const selectIsDisabled = [
     SimulationStatus.LOADING,
@@ -34,7 +33,7 @@ export const SimulationDurationSettings = (): JSX.Element => {
         : Number.parseInt(newDuration, 10);
 
     if (!Number.isNaN(value)) {
-      updateSimulationDuration({ value, unit: TimeUnit.Years });
+      updateSimulationDuration({ durationInYears: value });
     } else {
       console.error(`The duration ${newDuration} is not a valid number!`);
     }
@@ -47,7 +46,7 @@ export const SimulationDurationSettings = (): JSX.Element => {
         labelId="house-duration-select-label"
         id="house-duration-select"
         label={t('LABEL')}
-        value={duration.value}
+        value={durationInYears}
         onChange={(e) => handleChange(e.target.value)}
         type="number"
         disabled={selectIsDisabled}

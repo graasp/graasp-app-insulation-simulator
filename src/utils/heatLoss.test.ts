@@ -1,14 +1,11 @@
 import { describe, expect, it } from 'vitest';
 
 import { FormattedHeatLoss, HeatLossUnit } from '@/types/heatLoss';
-import { TimeUnit, TimeUnitType } from '@/types/time';
 import {
   calculateHeatLossConstantFactor,
   formatHeatLossRate,
-  sumHeatLossRate,
+  sumHeatLossRateForDay,
 } from '@/utils/heatLoss';
-
-import { timeConversionFactors } from './time';
 
 describe('Heat Loss Utils', () => {
   describe('calculateHeatLossConstantFactor', () => {
@@ -94,90 +91,32 @@ describe('Heat Loss Utils', () => {
     });
   });
 
-  describe('sumHeatLossRate', () => {
-    it('should return 0 when there are no temperatures', () => {
-      const result = sumHeatLossRate({
-        temperatures: [],
-        constantFactor: 10,
-        indoorTemperature: 20,
-        timeUnit: TimeUnit.Hours,
-      });
-      expect(result).toBe(0);
-    });
-
+  describe('sumHeatLossRateForDay', () => {
     it('should calculate the correct total heat loss for positive heat loss values', () => {
-      const temperatures = [10, 12, 15];
+      const temperature = 10;
       const constantFactor = 2;
       const indoorTemperature = 20;
-      const timeUnit = TimeUnit.Hours;
       const expectedHeatLoss =
-        constantFactor * (indoorTemperature - temperatures[0]) +
-        constantFactor * (indoorTemperature - temperatures[1]) +
-        constantFactor * (indoorTemperature - temperatures[2]);
+        constantFactor * (indoorTemperature - temperature) * 24;
 
-      const result = sumHeatLossRate({
-        temperatures,
+      const result = sumHeatLossRateForDay({
+        temperature,
         constantFactor,
         indoorTemperature,
-        timeUnit,
       });
       expect(result).toBe(expectedHeatLoss);
     });
 
     it('should handle negative heat loss values (cooling) by treating them as 0', () => {
-      const temperatures = [25, 28, 30]; // Outdoor temps higher than indoor
+      const temperature = 30; // Outdoor temperature higher than indoor
       const constantFactor = 2;
       const indoorTemperature = 20;
-      const timeUnit = TimeUnit.Days;
       const expectedHeatLoss = 0; // Expected heat loss should be 0 as we are cooling
 
-      const result = sumHeatLossRate({
-        temperatures,
+      const result = sumHeatLossRateForDay({
+        temperature,
         constantFactor,
         indoorTemperature,
-        timeUnit,
-      });
-      expect(result).toBe(expectedHeatLoss);
-    });
-
-    it('should calculate the correct total heat loss with different time units', () => {
-      const temperatures = [10, 12, 15];
-      const constantFactor = 2;
-      const indoorTemperature = 20;
-
-      const timeUnits: TimeUnitType[] = Object.keys(TimeUnit) as TimeUnitType[];
-
-      timeUnits.forEach((timeUnit) => {
-        const expectedHeatLoss =
-          (constantFactor * (indoorTemperature - temperatures[0]) +
-            constantFactor * (indoorTemperature - temperatures[1]) +
-            constantFactor * (indoorTemperature - temperatures[2])) *
-          timeConversionFactors[timeUnit];
-        const result = sumHeatLossRate({
-          temperatures,
-          constantFactor,
-          indoorTemperature,
-          timeUnit,
-        });
-        expect(result).toBe(expectedHeatLoss);
-      });
-    });
-
-    it('should handle a mix of positive and negative heat loss values', () => {
-      const temperatures = [10, 25, 15]; // Mix of outdoor temps below and above indoor
-      const constantFactor = 2;
-      const indoorTemperature = 20;
-      const timeUnit = TimeUnit.Hours;
-      const expectedHeatLoss =
-        constantFactor * (indoorTemperature - temperatures[0]) +
-        0 +
-        constantFactor * (indoorTemperature - temperatures[2]); // Only positive heat loss contributes
-
-      const result = sumHeatLossRate({
-        temperatures,
-        constantFactor,
-        indoorTemperature,
-        timeUnit,
       });
       expect(result).toBe(expectedHeatLoss);
     });

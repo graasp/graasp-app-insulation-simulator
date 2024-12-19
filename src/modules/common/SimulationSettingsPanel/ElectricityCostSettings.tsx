@@ -5,13 +5,13 @@ import { FormControlValidator } from '@/modules/common/FormControlValidator';
 
 export const ElectricityCostSettings = (): JSX.Element => {
   const { t } = useTranslation('SIMULATION_SETTINGS_PANEL');
-  const { pricekWh, setPricekWh } = useSimulation();
+  const { pricekWh, updatePricekWh } = useSimulation('electricity');
 
   const handleElectricityCostChange = (newValue: string): void => {
     const newPrice = Number.parseFloat(newValue);
 
     if (!Number.isNaN(newPrice)) {
-      setPricekWh(newPrice);
+      updatePricekWh(newPrice);
     } else {
       console.error(`Invalid price for ${newValue}`);
     }

@@ -60,15 +60,15 @@ export const Roof = ({
   nFloors: number;
 }): JSX.Element => {
   const wallMaterial = useWallMaterial({ wallMaterial: materials.Wall });
-  const { houseComponentsConfigurator } = useSimulation();
+  const { componentsConfigurator } = useSimulation('house');
 
   if (nFloors <= 0) {
     throw new Error('The house must at least have one floor!');
   }
 
   const wallHeight =
-    houseComponentsConfigurator.getFirstOfType(HouseComponent.Wall)?.size
-      .height ?? 0;
+    componentsConfigurator.getFirstOfType(HouseComponent.Wall)?.size.height ??
+    0;
 
   const offsetY = wallHeight * (nFloors - 1);
 

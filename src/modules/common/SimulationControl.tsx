@@ -10,18 +10,15 @@ import { SpeedButton } from './SpeedButton';
 
 export const SimulationControl = (): JSX.Element => {
   const {
-    currDayIdx,
-    numberOfDays,
+    days: { currentIdx, total, getDateOf, goToDay },
+    pause,
+    start,
     status,
-    getDateOf,
-    gotToDay,
-    pauseSimulation,
-    startSimulation,
-  } = useSimulation();
+  } = useSimulation('simulation');
 
   const handleGoToDay = (idx: number | number[]): void => {
     if (typeof idx === 'number') {
-      gotToDay(idx);
+      goToDay(idx);
     }
   };
 
@@ -31,11 +28,11 @@ export const SimulationControl = (): JSX.Element => {
         <SpeedButton />
         <LabelledSlider
           dataTestId="simulation-control-dates"
-          value={currDayIdx}
+          value={currentIdx}
           sx={{ minWidth: '350px', maxWidth: '500px' }}
           onChange={(v) => handleGoToDay(v)}
           min={0}
-          max={numberOfDays - 1}
+          max={total - 1}
           hideValue
           hideLabels={status === SimulationStatus.LOADING}
           formatValue={(v) => getDateOf(v).toLocaleDateString()}
@@ -46,11 +43,7 @@ export const SimulationControl = (): JSX.Element => {
         data-testid={`simulation-control-button-${status === SimulationStatus.RUNNING ? 'pause' : 'start'}`}
         color="primary"
         disabled={status === SimulationStatus.LOADING}
-        onClick={
-          status === SimulationStatus.RUNNING
-            ? pauseSimulation
-            : startSimulation
-        }
+        onClick={status === SimulationStatus.RUNNING ? pause : start}
       >
         {status === SimulationStatus.RUNNING ? <PauseIcon /> : <PlayIcon />}
       </Fab>

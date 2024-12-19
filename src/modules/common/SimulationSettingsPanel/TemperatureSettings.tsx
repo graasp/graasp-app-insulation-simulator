@@ -14,12 +14,8 @@ export const TemperatureSettings = (): JSX.Element => {
     keyPrefix: 'TEMPERATURES_SETTINGS_PANEL',
   });
 
-  const {
-    indoorTemperature,
-    updateIndoorTemperature,
-    outdoorTemperature,
-    updateOutdoorTemperature,
-  } = useSimulation();
+  const { indoor, updateIndoor, outdoor, updateOutdoor } =
+    useSimulation('temperatures');
 
   const { MIN: minIndoorTemperature, MAX: maxIndoorTemperature } =
     SIMULATION_INDOOR_TEMPERATURE_CELCIUS;
@@ -35,10 +31,10 @@ export const TemperatureSettings = (): JSX.Element => {
       <LabelledSlider
         dataTestId="indoor-temperature"
         label={t('INDOOR_TEMPERATURE_LABEL')}
-        value={indoorTemperature}
+        value={indoor}
         min={minIndoorTemperature}
         max={maxIndoorTemperature}
-        onChange={updateIndoorTemperature}
+        onChange={updateIndoor}
         formatValue={formatTemperature}
       />
 
@@ -46,26 +42,26 @@ export const TemperatureSettings = (): JSX.Element => {
         <LabelledSlider
           dataTestId="outdoor-temperature"
           label={t('OUTDOOR_TEMPERATURE_LABEL')}
-          value={outdoorTemperature.value}
+          value={outdoor.value}
           min={minOutdoorTemperature}
           max={maxOutdoorTemperature}
           onChange={(v) =>
-            updateOutdoorTemperature({
-              override: outdoorTemperature.userOverride,
+            updateOutdoor({
+              override: outdoor.userOverride,
               value: v,
             })
           }
           formatValue={formatTemperature}
-          disabled={!outdoorTemperature.userOverride}
+          disabled={!outdoor.userOverride}
         />
         <FormControlLabel
           control={
             <Checkbox
-              checked={outdoorTemperature.userOverride}
+              checked={outdoor.userOverride}
               onChange={(_, checked) =>
-                updateOutdoorTemperature({
+                updateOutdoor({
                   override: checked,
-                  value: outdoorTemperature.value,
+                  value: outdoor.value,
                 })
               }
             />

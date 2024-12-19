@@ -43,9 +43,8 @@ export const WindowControlSettings = ({
   const { t: tInsulations } = useTranslation('INSULATIONS');
   const { t: tMaterials } = useTranslation('MATERIALS');
 
-  const { updateWindowSize, windowSize, houseComponentsConfigurator } =
-    useSimulation();
-  const windowComponent = houseComponentsConfigurator.getFirstOfType(
+  const { window, componentsConfigurator } = useSimulation('house');
+  const windowComponent = componentsConfigurator.getFirstOfType(
     HouseComponent.Window,
   );
 
@@ -56,7 +55,7 @@ export const WindowControlSettings = ({
   const windowInsulation = tInsulations(windowComponent.insulationName);
 
   const handleSizeChange = (newSize: string): void => {
-    updateWindowSize(newSize as WindowSizeType);
+    window.updateSize(newSize as WindowSizeType);
   };
 
   return (
@@ -80,7 +79,7 @@ export const WindowControlSettings = ({
                 labelId="window-size-select-label"
                 id="window-size-select"
                 label={t('SIZE_LABEL')}
-                value={windowSize}
+                value={window.size}
                 onChange={(v) => handleSizeChange(v.target.value)}
               >
                 {WindowSizes.map((s) => (
@@ -90,7 +89,7 @@ export const WindowControlSettings = ({
                 ))}
               </Select>
               <FormHelperText
-                data-testid={`window-size-helper-${windowSize.toLowerCase()}`}
+                data-testid={`window-size-helper-${window.size.toLowerCase()}`}
               >
                 {t('CURRENT_SIZE_LABEL')}{' '}
                 {formatComponentSize({ componentSize: windowComponent.size })}

@@ -23,10 +23,12 @@ export const WindowFrame = ({
 }: Props): JSX.Element => {
   const id = `${wallId}-Window-${windowIdx}`;
   const {
-    heatLossPerComponent,
-    windowScaleSize,
-    registerComponent,
-    unregisterComponent,
+    heatLoss: { perComponent: heatLossPerComponent },
+    house: {
+      window: { scaleSize: windowScaleSize },
+      registerComponent,
+      unregisterComponent,
+    },
   } = useSimulation();
   const { frameMaterial } = useWindowMaterial({
     windowMaterial: materials.Wood,

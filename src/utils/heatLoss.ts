@@ -1,9 +1,6 @@
 import { BuildingMaterial } from '@/models/BuildingMaterial';
 import { FormattedHeatLoss, HeatLossUnit } from '@/types/heatLoss';
-import { TimeUnitType } from '@/types/time';
 import { NonEmptyArray } from '@/types/utils';
-
-import { timeConversionFactors } from './time';
 
 /**
  * Calculates the overall heat transfer coefficient (U-value) for a composite material.
@@ -67,38 +64,27 @@ export const calculateHeatLossRate = ({
 };
 
 /**
- * Calculates the total heat loss rate based on an array of outdoor temperatures.
+ * Calculates the total heat loss rate per day based on an array of outdoor temperatures.
  *
  * @param temperatures - An array of outdoor temperatures (°C).
  * @param constantFactor - A constant factor used in the heat loss calculation (W/K).
  * @param indoorTemperature - The indoor temperature for comparison in the heat loss rate calculation (°C).
- * @param timeUnit - The time unit corresponding to the frequency of the temperature measurements.
- *                   Its indicate whether the temperatures are recorded once per hour, once per day, etc.
- *                   This affects the total heat loss calculation by scaling the rate according to the measurement frequency.
- * @returns The total heat loss rate summed over all specified outdoor temperatures (W or J/s).
+ * @returns The total heat loss rate per day summed over all specified outdoor temperatures (W or J/s).
  */
-export const sumHeatLossRate = ({
-  temperatures,
+export const sumHeatLossRateForDay = ({
+  temperature,
   constantFactor,
   indoorTemperature,
-  timeUnit,
 }: {
-  temperatures: number[];
+  temperature: number;
   constantFactor: number;
   indoorTemperature: number;
-  timeUnit: TimeUnitType;
 }): number =>
-  temperatures.reduce(
-    (sum, temperature) =>
-      sum +
-      calculateHeatLossRate({
-        constantFactor,
-        indoorTemperature,
-        outdoorTemperature: temperature,
-      }) *
-        timeConversionFactors[timeUnit],
-    0,
-  );
+  calculateHeatLossRate({
+    constantFactor,
+    indoorTemperature,
+    outdoorTemperature: temperature,
+  }) * 24; // multiply by 24 because its for the whole day.
 
 /**
  * Conversion factors for different units of power.

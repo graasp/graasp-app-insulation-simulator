@@ -23,7 +23,7 @@ export const SimulationControl = (): JSX.Element => {
   };
 
   return (
-    <Stack mt={2} alignItems="center" spacing={2}>
+    <Stack mt={2} mb={2} alignItems="center" spacing={2}>
       <Stack alignItems="end">
         <SpeedButton />
         <LabelledSlider

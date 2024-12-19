@@ -18,7 +18,13 @@ const PlayerViewComponent = (): JSX.Element => {
 
   if (status === SimulationStatus.INITIAL_LOADING) {
     return (
-      <Stack width="100%" height="100%" justifyContent="center" spacing={1}>
+      <Stack
+        width="100%"
+        height="100vh"
+        p={2}
+        justifyContent="center"
+        spacing={1}
+      >
         <Stack alignItems="center">
           <Typography variant="h4">{t('LOADING_MESSAGE')}</Typography>
         </Stack>
@@ -29,8 +35,6 @@ const PlayerViewComponent = (): JSX.Element => {
 
   return (
     <Stack
-      sx={{ background: '#fafaff' }}
-      height="100%"
       direction={{ xs: 'column-reverse', md: 'row' }}
       justifyContent="center"
     >

@@ -143,7 +143,7 @@ export const SimulationProvider = ({
       );
     }
 
-    loadTemperaturesFromCSV(csv.path).then((rows) => {
+    loadTemperaturesFromCSV(csv).then((rows) => {
       temperatures.current = rows;
       dispatchHistory({
         type: 'load',
@@ -151,7 +151,7 @@ export const SimulationProvider = ({
       });
       setSimulationStatus(SimulationStatus.LOADING);
     });
-  }, [csv, csv.measurementFrequency, csv.path, simulationDurationInYears]);
+  }, [csv, simulationDurationInYears]);
 
   useEffect(() => {
     // Only set the status from LOADING to IDLE when the heat loss is computed.

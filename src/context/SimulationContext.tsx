@@ -20,6 +20,7 @@ import {
 } from '@/hooks/useHouseComponents';
 import { HouseComponentsConfigurator } from '@/models/HouseComponentsConfigurator';
 import {
+  SimulationDay,
   createDefault,
   simulationHistory,
 } from '@/reducer/simulationHistoryReducer';
@@ -27,6 +28,7 @@ import { FormattedHeatLoss } from '@/types/heatLoss';
 import { HeatLossPerComponent } from '@/types/houseComponent';
 import { SimulationStatus } from '@/types/simulation';
 import { TemperatureRow, UserOutdoorTemperature } from '@/types/temperatures';
+import { NonEmptyArray } from '@/types/utils';
 import { WindowScaleSize, WindowSizeType } from '@/types/window';
 import { undefinedContextErrorFactory } from '@/utils/context';
 import { formatHeatLossRate } from '@/utils/heatLoss';
@@ -59,6 +61,7 @@ type SimulationContextType = {
     days: {
       total: number;
       currentIdx: number;
+      simulationDays: NonEmptyArray<SimulationDay>;
       goToDay: (idx: number) => void;
       getDateOf: (idx: number) => Date;
     };
@@ -157,7 +160,7 @@ export const SimulationProvider = ({
       temperatures.current = rows;
       dispatchHistory({
         type: 'load',
-        temperatureRows: temperatures.current,
+        temperatureRows: rows,
       });
       setSimulationStatus(SimulationStatus.LOADING);
     });
@@ -322,7 +325,7 @@ export const SimulationProvider = ({
         status: simulationStatus,
         start: startSimulation,
         pause: pauseSimulation,
-        date: new Date(temperatures.current[currentDayIdx]?.time),
+        date: currentDay.date,
         duration: {
           years: simulationDurationInYears,
           update: updateSimulationDuration,
@@ -330,8 +333,9 @@ export const SimulationProvider = ({
         days: {
           total: numberOfDays,
           currentIdx: currentDayIdx,
+          simulationDays,
           goToDay,
-          getDateOf: (idx: number) => new Date(temperatures.current[idx]?.time),
+          getDateOf: (idx: number) => simulationDays[idx].date,
         },
         speed: {
           current: SPEED_STATES[simulationSpeedIdx].text,
@@ -379,10 +383,10 @@ export const SimulationProvider = ({
     simulationStatus,
     startSimulation,
     pauseSimulation,
-    currentDayIdx,
     simulationDurationInYears,
     updateSimulationDuration,
     numberOfDays,
+    currentDayIdx,
     goToDay,
     simulationSpeedIdx,
     updatePricekWh,
@@ -391,6 +395,7 @@ export const SimulationProvider = ({
     updateWindowSize,
     updateNumberOfFloors,
     houseComponentsHook,
+    simulationDays,
   ]);
 
   return (

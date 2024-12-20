@@ -1,6 +1,14 @@
 import { useTranslation } from 'react-i18next';
 
-import { LinearProgress, Stack, Typography } from '@mui/material';
+import {
+  LinearProgress,
+  Stack,
+  Typography,
+  useMediaQuery,
+  useTheme,
+} from '@mui/material';
+
+import { ChartLine, Rotate3d } from 'lucide-react';
 
 import { SIMULATION_FRAME_MS } from '@/config/simulation';
 import { SeasonProvider } from '@/context/SeasonContext';
@@ -11,10 +19,21 @@ import { SimulationCanvas } from '../common/SimulationCanvas';
 import { SimulationControl } from '../common/SimulationControl';
 import { SimulationInformations } from '../common/SimulationInformations/SimulationInformations';
 import { SimulationSettingsPanel } from '../common/SimulationSettingsPanel/SimulationSettingsPanel';
+import { HeatLossCharts } from '../common/charts/HeatLossCharts';
+import { Tabs } from '../common/tabs/Tabs';
+
+const SM = { width: 375, height: 400 };
+const MD = { width: 500, height: 500 };
 
 const PlayerViewComponent = (): JSX.Element => {
   const { t } = useTranslation('INITIAL_LOADING');
+  const { t: tTabs } = useTranslation('SIMULATION_TABS');
   const { status } = useSimulation('simulation');
+
+  const theme = useTheme();
+  const md = useMediaQuery(theme.breakpoints.up('sm'));
+  const width = md ? MD.width : SM.width;
+  const height = md ? MD.height : SM.height;
 
   if (status === SimulationStatus.INITIAL_LOADING) {
     return (
@@ -40,7 +59,23 @@ const PlayerViewComponent = (): JSX.Element => {
     >
       <Stack justifyContent="space-between" alignItems="center" flexGrow={4}>
         <SimulationInformations />
-        <SimulationCanvas />
+        <Tabs
+          height={height}
+          width={width}
+          tabs={[
+            {
+              label: tTabs('VISUALIZE'),
+              icon: <Rotate3d />,
+              element: <SimulationCanvas size={width} />,
+            },
+            {
+              label: tTabs('ANALYZE'),
+              icon: <ChartLine />,
+              element: <HeatLossCharts width={width} />,
+              unmountOnExit: false,
+            },
+          ]}
+        />
         <SimulationControl />
       </Stack>
 

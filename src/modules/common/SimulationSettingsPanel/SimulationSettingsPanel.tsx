@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { styled, useMediaQuery, useTheme } from '@mui/material';
+import { Stack, styled, useMediaQuery, useTheme } from '@mui/material';
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -9,6 +9,7 @@ import AccordionSummary from '@mui/material/AccordionSummary';
 import { ElectricityCostSettings } from './ElectricityCostSettings';
 import { HouseSettings } from './HouseSettings';
 import { SimulationDurationSettings } from './SimulationDurationSettings';
+import { SimulationLocationSettings } from './SimulationLocationSettings';
 import { TemperatureSettings } from './TemperatureSettings';
 
 const AccordionContainer = styled(Accordion, {
@@ -42,10 +43,13 @@ export const SimulationSettingsPanel = (): JSX.Element => {
             aria-controls="panel-duration-content"
             id="panel-duration-header"
           >
-            {t('DURATION_SETTINGS_PANEL.TITLE')}
+            {t('CSV_SETTINGS_PANEL.TITLE')}
           </AccordionSummary>
           <AccordionDetails>
-            <SimulationDurationSettings />
+            <Stack spacing={2}>
+              <SimulationLocationSettings />
+              <SimulationDurationSettings />
+            </Stack>
           </AccordionDetails>
         </Accordion>
 

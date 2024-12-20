@@ -20,6 +20,10 @@
     "Summer": "Summer",
     "Autumn": "Autumn"
   },
+  "LOCATIONS": {
+    "ECUBLENS": "Ecublens",
+    "STOCKHOLM": "Stockholm"
+  },
   "SIMULATION_INFORMATIONS": {
     "CURRENT_PERIOD": {
       "OUTDOOR": "Outdoor",
@@ -36,9 +40,10 @@
   },
   "SIMULATION_SETTINGS_PANEL": {
     "TITLE": "Settings",
-    "DURATION_SETTINGS_PANEL": {
+    "CSV_SETTINGS_PANEL": {
       "TITLE": "Simulation",
-      "LABEL": "Duration of Simulation"
+      "LABEL_LOCATION": "Location of Simulation",
+      "LABEL_DURATION": "Duration of Simulation"
     },
     "HOUSE_SETTINGS_PANEL": {
       "TITLE": "House",

@@ -20,3 +20,6 @@ export const formatNumber = (
 
   return decimalPart ? `${formattedNumber}.${decimalPart}` : formattedNumber;
 };
+
+export const formatFloat = (number: number): number =>
+  Number.parseFloat(number.toFixed(1));

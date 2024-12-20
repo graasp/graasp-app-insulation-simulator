@@ -19,6 +19,7 @@ export type SimulationDay = {
   totalHeatLoss: number;
   totalElectricityCost: number;
   weatherTemperature: number;
+  date: Date;
 };
 
 type SimulationSettings = {
@@ -87,6 +88,7 @@ const computeSimulation = (
                 totalHeatLoss / powerConversionFactors.KiloWatt,
             }),
             weatherTemperature: currDay.weatherTemperature,
+            date: currDay.date,
           },
         ];
       }, []),
@@ -139,6 +141,7 @@ export const createDefault = (): SimulationHistory => ({
       totalHeatLoss: 0,
       totalElectricityCost: 0,
       weatherTemperature: 0,
+      date: new Date(),
     },
   ]),
   simulationSettings: {
@@ -171,11 +174,12 @@ export const simulationHistory = (
         {
           ...state,
           simulationDays: CreateNonEmptyArray(
-            action.temperatureRows.map(({ temperature }) => ({
+            action.temperatureRows.map(({ time, temperature }) => ({
               heatLoss: {} as SimulationHeatLoss,
               totalHeatLoss: 0,
               totalElectricityCost: 0,
               weatherTemperature: temperature,
+              date: new Date(time),
             })),
           ),
           currentDayIdx:

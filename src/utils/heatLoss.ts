@@ -2,6 +2,8 @@ import { BuildingMaterial } from '@/models/BuildingMaterial';
 import { FormattedHeatLoss, HeatLossUnit } from '@/types/heatLoss';
 import { NonEmptyArray } from '@/types/utils';
 
+import { formatFloat } from './numbers';
+
 /**
  * Calculates the overall heat transfer coefficient (U-value) for a composite material.
  *  The U-value represents the rate of heat transfer through a unit area of a structure divided by the temperature difference across that structure.
@@ -116,12 +118,12 @@ export const formatHeatLossRate = (watts: number): FormattedHeatLoss => {
       return { value: Math.round(watts), unit: HeatLossUnit.Watt };
     case watts < powerConversionFactors.MegaWatt:
       return {
-        value: parseFloat((watts / powerConversionFactors.KiloWatt).toFixed(1)),
+        value: formatFloat(watts / powerConversionFactors.KiloWatt),
         unit: HeatLossUnit.KiloWatt,
       };
     default:
       return {
-        value: parseFloat((watts / powerConversionFactors.MegaWatt).toFixed(1)),
+        value: formatFloat(watts / powerConversionFactors.MegaWatt),
         unit: HeatLossUnit.MegaWatt,
       };
   }

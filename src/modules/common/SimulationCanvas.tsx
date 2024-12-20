@@ -1,5 +1,3 @@
-import { useMediaQuery, useTheme } from '@mui/material';
-
 import { OrbitControls } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
 
@@ -10,17 +8,16 @@ import { Garden } from '../models/Garden';
 import { ResidentialHouse } from '../models/House/ResidentialHouse/ResidentialHouse';
 import { Tree } from '../models/Tree/Tree';
 
-export const SimulationCanvas = (): JSX.Element => {
-  const { numberOfFloors } = useSimulation('house');
+type Props = { size: string | number };
 
-  const theme = useTheme();
-  const md = useMediaQuery(theme.breakpoints.up('sm'));
+export const SimulationCanvas = ({ size }: Props): JSX.Element => {
+  const { numberOfFloors } = useSimulation('house');
 
   return (
     <Canvas
       style={{
-        height: md ? '500px' : '375px',
-        width: md ? '500px' : '375px',
+        height: size,
+        width: size,
       }}
       camera={{ position: [0, 0, -35.5], fov: 30 }}
     >

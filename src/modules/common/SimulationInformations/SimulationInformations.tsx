@@ -59,7 +59,7 @@ export const SimulationInformations = (): JSX.Element => {
         justifyContent="space-between"
         maxWidth="max-content"
       >
-        <Stack spacing={1} direction="column">
+        <Stack spacing={1} direction="column" minWidth={{ sm: '236px' }}>
           <Stack direction="row" alignItems="center" spacing={1} flexGrow={1}>
             {/* The stack ensure that the icon take the defined size  */}
             <Stack height={iconSize} width={iconSize} alignItems="center">
@@ -114,7 +114,7 @@ export const SimulationInformations = (): JSX.Element => {
 
         <Divider orientation="vertical" variant="middle" flexItem />
 
-        <Stack spacing={1} direction="column">
+        <Stack spacing={1} direction="column" minWidth={{ sm: '244px' }}>
           <Stack direction="row" alignItems="center" spacing={1}>
             {tInformations('TOTAL.TITLE')}
           </Stack>

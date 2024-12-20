@@ -53,6 +53,35 @@ const computeSimulation = (
     return state;
   }
 
+  // Using reducer degrade the performances, so we should use a simple for-loop.
+  const newSimulationDays: SimulationDay[] = [];
+  let prevTotHeatLoss = 0;
+  for (let i = 0; i < simulationDays.length; i += 1) {
+    const currDay = simulationDays[i];
+
+    const heatLoss = new SimulationHeatLoss({
+      indoorTemperature,
+      outdoorTemperature: getOutdoorTemperature({
+        userTemperature: outdoorTemperature,
+        weather: currDay.weatherTemperature,
+      }),
+      houseConfigurator,
+    });
+
+    prevTotHeatLoss += heatLoss.global;
+
+    newSimulationDays.push({
+      heatLoss,
+      totalHeatLoss: prevTotHeatLoss,
+      totalElectricityCost: electricityCost({
+        pricekWh,
+        energyConsumptionkWh: prevTotHeatLoss / powerConversionFactors.KiloWatt,
+      }),
+      weatherTemperature: currDay.weatherTemperature,
+      date: currDay.date,
+    });
+  }
+
   return {
     currentDayIdx,
     ...otherStates,
@@ -60,39 +89,7 @@ const computeSimulation = (
       ...simulationSettings,
       ...newSettings,
     },
-    simulationDays: CreateNonEmptyArray(
-      simulationDays.reduce<SimulationDay[]>((acc, currDay) => {
-        const prevDay = acc[acc.length - 1];
-        const prevTotHeatLoss =
-          prevDay?.totalHeatLoss ?? prevDay?.heatLoss ?? 0;
-
-        const heatLoss = new SimulationHeatLoss({
-          indoorTemperature,
-          outdoorTemperature: getOutdoorTemperature({
-            userTemperature: outdoorTemperature,
-            weather: currDay.weatherTemperature,
-          }),
-          houseConfigurator,
-        });
-
-        const totalHeatLoss = prevTotHeatLoss + heatLoss.global;
-
-        return [
-          ...acc,
-          {
-            heatLoss,
-            totalHeatLoss,
-            totalElectricityCost: electricityCost({
-              pricekWh,
-              energyConsumptionkWh:
-                totalHeatLoss / powerConversionFactors.KiloWatt,
-            }),
-            weatherTemperature: currDay.weatherTemperature,
-            date: currDay.date,
-          },
-        ];
-      }, []),
-    ),
+    simulationDays: CreateNonEmptyArray(newSimulationDays),
   };
 };
 

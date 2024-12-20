@@ -5,11 +5,20 @@ import {
   HouseInsulationPerComponent,
 } from './houseInsulations';
 
-export const SIMULATION_FRAME_MS = 150;
+const CSV_PATHS = (location: string) =>
+  ({
+    1: `temperatures/${location}/predictions_1_year.csv`,
+    25: `temperatures/${location}/predictions_25_year.csv`,
+  }) as const;
+
 export const SIMULATION_CSV_FILES = {
-  1: 'temperatures/predictions_1_year.csv',
-  25: 'temperatures/predictions_25_year.csv',
+  ECUBLENS: CSV_PATHS('ecublens'),
+  STOCKHOLM: CSV_PATHS('stockholm'),
 } as const;
+
+export type WeatherLocation = keyof typeof SIMULATION_CSV_FILES;
+
+export const SIMULATION_FRAME_MS = 150;
 
 export const SIMULATION_INDOOR_TEMPERATURE_CELCIUS = {
   DEFAULT: 22,

@@ -13,7 +13,7 @@ import {
 import { Vector3 } from 'three';
 import { useDebouncedCallback } from 'use-debounce';
 
-import { SIMULATION_CSV_FILES } from '@/config/simulation';
+import { SIMULATION_CSV_FILES, WeatherLocation } from '@/config/simulation';
 import {
   UseHouseComponentsReturnType,
   useHouseComponents,
@@ -57,6 +57,10 @@ type SimulationContextType = {
     duration: {
       years: number;
       update: ({ durationInYears }: { durationInYears: number }) => void;
+    };
+    location: {
+      value: WeatherLocation;
+      update: (newLocation: WeatherLocation) => void;
     };
     days: {
       total: number;
@@ -119,8 +123,8 @@ export const SimulationProvider = ({
   ]);
 
   // States
-  const [simulationDurationInYears, setSimulationDurationInYears] =
-    useState<number>(1);
+  const [simulationDurationInYears, setSimulationDurationInYears] = useState(1);
+  const [location, setLocation] = useState<WeatherLocation>('ECUBLENS');
   const [simulationStatus, setSimulationStatus] = useState<SimulationStatus>(
     SimulationStatus.INITIAL_LOADING, // waiting for the temperatures...
   );
@@ -128,8 +132,8 @@ export const SimulationProvider = ({
 
   // Computed states
   const csv =
-    SIMULATION_CSV_FILES[
-      simulationDurationInYears as keyof typeof SIMULATION_CSV_FILES
+    SIMULATION_CSV_FILES[location][
+      simulationDurationInYears as keyof (typeof SIMULATION_CSV_FILES)[typeof location]
     ];
   const numberOfDays = temperatures.current.length; // We assume it is one temperature per day.
   const [
@@ -296,6 +300,13 @@ export const SimulationProvider = ({
     [],
   );
 
+  const updateSimulationLocation = useCallback(
+    (newLocation: WeatherLocation): void => {
+      setLocation(newLocation);
+    },
+    [],
+  );
+
   const updateWindowSize = useCallback((newSize: WindowSizeType): void => {
     dispatchHistory({
       type: 'updateWindowSize',
@@ -329,6 +340,10 @@ export const SimulationProvider = ({
         duration: {
           years: simulationDurationInYears,
           update: updateSimulationDuration,
+        },
+        location: {
+          value: location,
+          update: updateSimulationLocation,
         },
         days: {
           total: numberOfDays,
@@ -385,8 +400,11 @@ export const SimulationProvider = ({
     pauseSimulation,
     simulationDurationInYears,
     updateSimulationDuration,
+    location,
+    updateSimulationLocation,
     numberOfDays,
     currentDayIdx,
+    simulationDays,
     goToDay,
     simulationSpeedIdx,
     updatePricekWh,
@@ -395,7 +413,6 @@ export const SimulationProvider = ({
     updateWindowSize,
     updateNumberOfFloors,
     houseComponentsHook,
-    simulationDays,
   ]);
 
   return (

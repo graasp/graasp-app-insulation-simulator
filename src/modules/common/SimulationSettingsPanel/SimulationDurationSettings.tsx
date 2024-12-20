@@ -6,11 +6,11 @@ import { SIMULATION_CSV_FILES } from '@/config/simulation';
 import { useSimulation } from '@/context/SimulationContext';
 import { SimulationStatus } from '@/types/simulation';
 
-const OPTIONS = Object.keys(SIMULATION_CSV_FILES);
+const OPTIONS = Object.keys(SIMULATION_CSV_FILES.ECUBLENS);
 
 export const SimulationDurationSettings = (): JSX.Element => {
   const { t } = useTranslation('SIMULATION_SETTINGS_PANEL', {
-    keyPrefix: 'DURATION_SETTINGS_PANEL',
+    keyPrefix: 'CSV_SETTINGS_PANEL',
   });
 
   const { t: tDates } = useTranslation('DATES');
@@ -41,11 +41,13 @@ export const SimulationDurationSettings = (): JSX.Element => {
 
   return (
     <FormControl fullWidth>
-      <InputLabel id="house-duration-select-label">{t('LABEL')}</InputLabel>
+      <InputLabel id="house-duration-select-label">
+        {t('LABEL_DURATION')}
+      </InputLabel>
       <Select
         labelId="house-duration-select-label"
         id="house-duration-select"
-        label={t('LABEL')}
+        label={t('LABEL_DURATION')}
         value={duration.years}
         onChange={(e) => handleChange(e.target.value)}
         type="number"

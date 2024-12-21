@@ -1,12 +1,10 @@
-import equal from 'deep-equal';
-
 import {
   SIMULATION_INDOOR_TEMPERATURE_CELCIUS,
   SIMULATION_OUTDOOR_TEMPERATURE_CELCIUS,
   SIMULATION_PRICE_KWH,
 } from '@/config/simulation';
-import { HouseComponentsConfigurator } from '@/models/HouseComponentsConfigurator';
 import { SimulationHeatLoss } from '@/models/SimulationHeatLoss';
+import { HeatLossPerComponentEntries } from '@/types/houseComponent';
 import { TemperatureRow, UserOutdoorTemperature } from '@/types/temperatures';
 import { CreateNonEmptyArray, NonEmptyArray } from '@/types/utils';
 import { WindowSizeType } from '@/types/window';
@@ -27,8 +25,8 @@ type SimulationSettings = {
   outdoorTemperature: UserOutdoorTemperature;
   pricekWh: number;
   numberOfFloors: number;
-  houseConfigurator: HouseComponentsConfigurator;
   windowSize: WindowSizeType;
+  heatLossConstantFactors: HeatLossPerComponentEntries;
 };
 
 type SimulationHistory = {
@@ -43,14 +41,43 @@ const computeSimulation = (
 ): SimulationHistory => {
   const { currentDayIdx, simulationDays, simulationSettings, ...otherStates } =
     state;
-  const { outdoorTemperature, indoorTemperature, houseConfigurator, pricekWh } =
-    { ...simulationSettings, ...newSettings };
+  const {
+    outdoorTemperature,
+    indoorTemperature,
+    pricekWh,
+    heatLossConstantFactors,
+  } = {
+    ...simulationSettings,
+    ...newSettings,
+  };
 
-  // If the new value does not modify the current day, do noting!
-  // This check is necessary, because when we navigate through the history and the inputs are modified,
-  // the changes cause a call to recompute the whole simulation, even though the value is identical.
-  if (equal(simulationDays[currentDayIdx], newSettings)) {
-    return state;
+  // Using reducer degrade the performances, so we should use a simple for-loop.
+  const newSimulationDays: SimulationDay[] = [];
+  let prevTotHeatLoss = 0;
+  for (let i = 0; i < simulationDays.length; i += 1) {
+    const currDay = simulationDays[i];
+
+    const heatLoss = new SimulationHeatLoss({
+      indoorTemperature,
+      outdoorTemperature: getOutdoorTemperature({
+        userTemperature: outdoorTemperature,
+        weather: currDay.weatherTemperature,
+      }),
+      heatLossConstantFactors,
+    });
+
+    prevTotHeatLoss += heatLoss.global;
+
+    newSimulationDays.push({
+      heatLoss,
+      totalHeatLoss: prevTotHeatLoss,
+      totalElectricityCost: electricityCost({
+        pricekWh,
+        energyConsumptionkWh: prevTotHeatLoss / powerConversionFactors.KiloWatt,
+      }),
+      weatherTemperature: currDay.weatherTemperature,
+      date: currDay.date,
+    });
   }
 
   return {
@@ -60,39 +87,7 @@ const computeSimulation = (
       ...simulationSettings,
       ...newSettings,
     },
-    simulationDays: CreateNonEmptyArray(
-      simulationDays.reduce<SimulationDay[]>((acc, currDay) => {
-        const prevDay = acc[acc.length - 1];
-        const prevTotHeatLoss =
-          prevDay?.totalHeatLoss ?? prevDay?.heatLoss ?? 0;
-
-        const heatLoss = new SimulationHeatLoss({
-          indoorTemperature,
-          outdoorTemperature: getOutdoorTemperature({
-            userTemperature: outdoorTemperature,
-            weather: currDay.weatherTemperature,
-          }),
-          houseConfigurator,
-        });
-
-        const totalHeatLoss = prevTotHeatLoss + heatLoss.global;
-
-        return [
-          ...acc,
-          {
-            heatLoss,
-            totalHeatLoss,
-            totalElectricityCost: electricityCost({
-              pricekWh,
-              energyConsumptionkWh:
-                totalHeatLoss / powerConversionFactors.KiloWatt,
-            }),
-            weatherTemperature: currDay.weatherTemperature,
-            date: currDay.date,
-          },
-        ];
-      }, []),
-    ),
+    simulationDays: CreateNonEmptyArray(newSimulationDays),
   };
 };
 
@@ -125,8 +120,8 @@ type Action =
       pricekWh: number;
     }
   | {
-      type: 'updateHouseConfigurator';
-      houseConfigurator: HouseComponentsConfigurator;
+      type: 'updateConstantFactors';
+      heatLossConstantFactors: HeatLossPerComponentEntries;
     }
   | {
       type: 'updateWindowSize';
@@ -152,8 +147,8 @@ export const createDefault = (): SimulationHistory => ({
     },
     pricekWh: SIMULATION_PRICE_KWH,
     numberOfFloors: 1,
-    houseConfigurator: HouseComponentsConfigurator.create(), // will be replaced on component register
     windowSize: 'Medium',
+    heatLossConstantFactors: [],
   },
 });
 
@@ -230,12 +225,9 @@ export const simulationHistory = (
       return computeSimulation(state, {
         pricekWh: action.pricekWh,
       });
-    case 'updateHouseConfigurator':
+    case 'updateConstantFactors':
       return computeSimulation(state, {
-        // As React compare the memory adress to
-        // dectect changes, we have to clone the configurator
-        // to ensure re-render when necessary.
-        houseConfigurator: action.houseConfigurator.clone(),
+        heatLossConstantFactors: action.heatLossConstantFactors,
       });
     case 'updateWindowSize':
       return computeSimulation(state, {

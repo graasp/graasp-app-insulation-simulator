@@ -18,20 +18,25 @@ import {
   UseHouseComponentsReturnType,
   useHouseComponents,
 } from '@/hooks/useHouseComponents';
-import { HouseComponentsConfigurator } from '@/models/HouseComponentsConfigurator';
 import {
   SimulationDay,
   createDefault,
   simulationHistory,
 } from '@/reducer/simulationHistoryReducer';
 import { FormattedHeatLoss } from '@/types/heatLoss';
-import { HeatLossPerComponent } from '@/types/houseComponent';
+import {
+  HeatLossPerComponent,
+  HeatLossPerComponentEntries,
+} from '@/types/houseComponent';
 import { SimulationStatus } from '@/types/simulation';
 import { TemperatureRow, UserOutdoorTemperature } from '@/types/temperatures';
 import { NonEmptyArray } from '@/types/utils';
 import { WindowScaleSize, WindowSizeType } from '@/types/window';
 import { undefinedContextErrorFactory } from '@/utils/context';
-import { formatHeatLossRate } from '@/utils/heatLoss';
+import {
+  calculateHeatLossConstantFactor,
+  formatHeatLossRate,
+} from '@/utils/heatLoss';
 import {
   getOutdoorTemperature,
   loadTemperaturesFromCSV,
@@ -98,7 +103,6 @@ type SimulationContextType = {
     };
     numberOfFloors: number;
     updateNumberOfFloors: (numberOfFloors: number) => void;
-    componentsConfigurator: HouseComponentsConfigurator;
   };
 };
 
@@ -143,14 +147,35 @@ export const SimulationProvider = ({
   const currentDay = simulationDays[currentDayIdx];
 
   // Hooks
-  const houseComponentsHook = useHouseComponents({
-    onChange: (newHouseConfigurator) => {
+  const houseComponentsHook = useHouseComponents();
+
+  // Transform in array here for performances in the SimulationHeatLoss.
+  // Otherwise, the transformation will be executed on each changes vs once here.
+  const heatLossConstantFactors: HeatLossPerComponentEntries = useMemo(
+    () =>
+      Object.entries(
+        houseComponentsHook.all.reduce<HeatLossPerComponent>(
+          (acc, c) => ({
+            ...acc,
+            [c.houseComponentId]: calculateHeatLossConstantFactor({
+              area: c.actualArea,
+              materials: c.buildingMaterials,
+            }),
+          }),
+          {},
+        ),
+      ),
+    [houseComponentsHook.all],
+  );
+
+  useEffect(
+    () =>
       dispatchHistory({
-        type: 'updateHouseConfigurator',
-        houseConfigurator: newHouseConfigurator,
-      });
-    },
-  });
+        type: 'updateConstantFactors',
+        heatLossConstantFactors,
+      }),
+    [heatLossConstantFactors],
+  );
 
   // Load CSV
   useEffect(() => {
@@ -328,7 +353,6 @@ export const SimulationProvider = ({
       pricekWh,
       windowSize,
       numberOfFloors,
-      houseConfigurator,
     } = simulationSettings;
 
     return {
@@ -388,7 +412,6 @@ export const SimulationProvider = ({
         },
         numberOfFloors,
         updateNumberOfFloors,
-        componentsConfigurator: houseConfigurator,
         ...houseComponentsHook,
       },
     };

@@ -1,23 +1,33 @@
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useMemo } from 'react';
+
+import { useImmer } from 'use-immer';
 
 import {
   HOUSE_INSULATIONS,
+  HouseInsulation,
   HouseInsulationPerComponent,
 } from '@/config/houseInsulations';
 import {
   SIMULATION_DEFAULT_WALL_COMPONENT_INSULATION,
   SIMULATION_DEFAULT_WINDOW_COMPONENT_INSULATION,
 } from '@/config/simulation';
-import { FromBuildingMaterial } from '@/models/BuildingMaterial';
-import { HouseComponentsConfigurator } from '@/models/HouseComponentsConfigurator';
+import {
+  BuildingMaterial,
+  FromBuildingMaterial,
+} from '@/models/BuildingMaterial';
 import { HouseComponent, Size } from '@/types/houseComponent';
-import { CreateNonEmptyArray } from '@/types/utils';
+import { HouseComponentInsulation } from '@/types/houseComponentInsulation';
+import { CreateNonEmptyArray, NonEmptyArray } from '@/types/utils';
 
 export type RegisterComponentParams = {
   componentId: string;
   parentId?: string;
   size: Size;
   componentType: HouseComponent.Wall | HouseComponent.Window;
+};
+
+type HouseComponentInsulationResult = HouseComponentInsulation & {
+  houseComponentId: string;
 };
 
 export type UseHouseComponentsReturnType = {
@@ -42,6 +52,14 @@ export type UseHouseComponentsReturnType = {
     componentType: T;
     materialProps: { name: string } & FromBuildingMaterial;
   }) => void;
+
+  all: HouseComponentInsulationResult[];
+  getByType: (
+    componentType: HouseComponent,
+  ) => HouseComponentInsulationResult[];
+  getFirstOfType: (
+    componentType: HouseComponent,
+  ) => HouseComponentInsulationResult | undefined;
 };
 
 // An house component can be composed with multiple materials
@@ -51,15 +69,147 @@ const DEFAULT_COMPONENTS_INSULATION = {
   [HouseComponent.Window]: SIMULATION_DEFAULT_WINDOW_COMPONENT_INSULATION,
 };
 
-type Props = {
-  onChange: (newHouseComponents: HouseComponentsConfigurator) => void;
-};
+// Helpful aliases
+type ComponentId = string;
+type ChildrenId = string;
+type ParentId = string;
 
-export const useHouseComponents = ({
-  onChange,
-}: Props): UseHouseComponentsReturnType => {
-  const houseComponentsConfigurator = useRef(
-    HouseComponentsConfigurator.create(),
+/**
+ * Manages a tree-like structure of house component insulations.
+ */
+export const useHouseComponents = (): UseHouseComponentsReturnType => {
+  const [state, setState] = useImmer<{
+    /**
+     * A map storing all house component insulations, keyed by their unique ID.
+     */
+    components: Map<ComponentId, HouseComponentInsulation>;
+    /**
+     * A map storing the parent ID of each component.
+     * It is useful to know which wall the window is associated with.
+     */
+    componentParents: Map<ChildrenId, ParentId>;
+  }>({ components: new Map(), componentParents: new Map() });
+
+  const componentParentsEntries = useMemo(
+    () => Array.from(state.componentParents.entries()),
+    [state.componentParents],
+  );
+
+  const componentKeys = useMemo(
+    () => Array.from(state.components.keys()),
+    [state.components],
+  );
+
+  const componentEntries = useMemo(
+    () => Array.from(state.components.entries()),
+    [state.components],
+  );
+
+  /**
+   * Retrieves all children components of a given parent component.
+   * @param parentId The ID of the parent component.
+   * @returns An array of child components.  Returns an empty array if no children are found or the parent doesn't exist.
+   */
+  const getChildren = useCallback(
+    (parentId: string): HouseComponentInsulation[] =>
+      componentParentsEntries
+        .filter(([_, v]) => v === parentId)
+        .map(([k, _]) => state.components.get(k))
+        .filter((c): c is HouseComponentInsulation => Boolean(c)),
+    [componentParentsEntries, state.components],
+  );
+
+  /**
+   * Retrieves a component and calculates its actual area by subtracting the area of its children like the windows for a wall.
+   * @param componentId The ID of the component to retrieve.
+   * @returns The component object with its actual area calculated.
+   * @throws Error if the component is not found or if its actual area is incorrect (less than or equal to zero after accounting for children).
+   */
+  const get = useCallback(
+    (componentId: string): HouseComponentInsulation => {
+      const component = state.components.get(componentId);
+
+      if (!component) {
+        throw new Error(`The house component '${componentId}' was not found!`);
+      }
+
+      const children = getChildren(componentId);
+
+      const totalChildrenArea = children.reduce(
+        (acc, comp) => acc + comp.actualArea,
+        0,
+      );
+      const actualArea = component.actualArea - totalChildrenArea;
+
+      if (actualArea <= 0) {
+        throw new Error(
+          `The actual area of house component '${componentId}' is incorrect!`,
+        );
+      }
+
+      return {
+        ...component,
+        actualArea,
+      };
+    },
+    [getChildren, state.components],
+  );
+
+  /**
+   * Retrieves all components along with their IDs.
+   * @returns An array of all components, each with its ID.
+   */
+  const all = useMemo(
+    (): HouseComponentInsulationResult[] =>
+      componentKeys.map((k) => ({
+        houseComponentId: k,
+        // Use the get method to return with the correct actual area.
+        ...get(k),
+      })),
+    [componentKeys, get],
+  );
+
+  /**
+   * Retrieves all the components of the given type.
+   * @param componentType The type of the searched components.
+   * @returns An array of components, each with its ID.
+   */
+  const getByType = useCallback(
+    (componentType: HouseComponent): HouseComponentInsulationResult[] =>
+      componentEntries
+        .filter(([_, v]) => v.componentType === componentType)
+        .map(([k, _]) => ({
+          houseComponentId: k,
+          // Use the get method to return with the correct actual area.
+          ...get(k),
+        })),
+    [componentEntries, get],
+  );
+
+  /**
+   * Retrieves the first component of the given type or undefined.
+   * @param componentType The type of the searched components.
+   * @returns The first component with its ID or undefined.
+   */
+  const getFirstOfType = useCallback(
+    (
+      componentType: HouseComponent,
+    ): HouseComponentInsulationResult | undefined => {
+      const first = componentEntries.find(
+        ([_, v]) => v.componentType === componentType,
+      );
+
+      if (!first) {
+        return undefined;
+      }
+
+      return {
+        houseComponentId: first[0],
+        // Use the get method to return with the correct actual area.
+        ...get(first[0]),
+      };
+    },
+    [componentEntries, get],
   );
 
   const registerComponent = useCallback(
@@ -69,8 +219,12 @@ export const useHouseComponents = ({
       size,
       componentType,
     }: RegisterComponentParams): void => {
+      if (parentId === componentId) {
+        throw new Error('A component cannot be its own parent!');
+      }
+
       const { buildingMaterials, insulationName } =
-        houseComponentsConfigurator.current.getFirstOfType(componentType) ??
+        getFirstOfType(componentType) ??
         DEFAULT_COMPONENTS_INSULATION[componentType];
 
       if (!buildingMaterials?.length) {
@@ -79,28 +233,108 @@ export const useHouseComponents = ({
         );
       }
 
-      onChange(
-        houseComponentsConfigurator.current.add({
-          componentId,
-          parentId,
-          component: {
-            size,
-            insulationName,
-            buildingMaterials,
-            componentType,
-            actualArea: size.height * size.width,
-          },
-        }),
-      );
+      const component = {
+        size,
+        insulationName,
+        buildingMaterials,
+        componentType,
+        actualArea: size.height * size.width,
+      };
+
+      // Adds or updates the given component.
+      setState((curr) => {
+        curr.components.set(componentId, component);
+
+        if (parentId) {
+          curr.componentParents.set(componentId, parentId);
+        } else {
+          curr.componentParents.delete(componentId);
+        }
+
+        return curr;
+      });
     },
-    [houseComponentsConfigurator, onChange],
+    [getFirstOfType, setState],
   );
 
   const unregisterComponent = useCallback(
     ({ componentId }: Pick<RegisterComponentParams, 'componentId'>): void => {
-      onChange(houseComponentsConfigurator.current.remove({ componentId }));
+      // Removes the given component and all its descendants.
+      setState((curr) => {
+        curr.components.delete(componentId);
+        curr.componentParents.delete(componentId);
+
+        // Start with the initial component
+        const componentsToRemove: string[] = [componentId];
+
+        while (componentsToRemove.length > 0) {
+          const currentComponentId = componentsToRemove.pop();
+
+          if (!currentComponentId) {
+            break;
+          }
+
+          const parents = Array.from(curr.componentParents.entries());
+
+          for (let i = 0; i < parents.length; i += 1) {
+            const [childId, parentId] = parents[i];
+
+            if (parentId === currentComponentId) {
+              curr.componentParents.delete(childId);
+              curr.components.delete(childId);
+              // Add to the main stack for processing children's children
+              componentsToRemove.push(childId);
+            }
+          }
+        }
+
+        return curr;
+      });
     },
-    [houseComponentsConfigurator, onChange],
+    [setState],
+  );
+
+  /**
+   * Updates the given component's insulation.
+   * @param componentType The component type to udpate with the new insulation.
+   * @param insulation The new insulation to use to update the components of the given type.
+   */
+  const updateInsulation = useCallback(
+    <
+      T extends HouseComponent,
+      K extends keyof (typeof HouseInsulationPerComponent)[T],
+    >({
+      componentType,
+      insulation,
+    }: {
+      componentType: T;
+      insulation: {
+        name: K;
+        buildingMaterials: NonEmptyArray<BuildingMaterial>;
+      };
+    }): void => {
+      if (!insulation.name) {
+        throw new Error(
+          `The insulation should be defined for component ${componentType}!`,
+        );
+      }
+
+      setState((curr) => {
+        curr.components.forEach((component, key) => {
+          if (component.componentType === componentType) {
+            const updatedComponent = {
+              ...component,
+              insulationName: insulation.name as HouseInsulation,
+              buildingMaterials: insulation.buildingMaterials,
+            };
+            curr.components.set(key, updatedComponent);
+          }
+        });
+
+        return curr;
+      });
+    },
+    [setState],
   );
 
   const changeComponentInsulation = useCallback(
@@ -123,15 +357,10 @@ export const useHouseComponents = ({
       }
 
       const buildingMaterials = HOUSE_INSULATIONS[componentType][newInsulation];
-
-      onChange(
-        houseComponentsConfigurator.current.updateInsulation({
-          componentType,
-          insulation: { name: newInsulation, buildingMaterials },
-        }),
-      );
+      const insulation = { name: newInsulation, buildingMaterials };
+      updateInsulation({ componentType, insulation });
     },
-    [houseComponentsConfigurator, onChange],
+    [updateInsulation],
   );
 
   const updateCompositionOfInsulation = useCallback(
@@ -142,8 +371,7 @@ export const useHouseComponents = ({
       componentType: T;
       materialProps: { name: string } & FromBuildingMaterial;
     }): void => {
-      const component =
-        houseComponentsConfigurator.current.getFirstOfType(componentType);
+      const component = getFirstOfType(componentType);
 
       if (!component) {
         throw new Error(`No ${componentType} component was found!`);
@@ -167,17 +395,14 @@ export const useHouseComponents = ({
         return m;
       });
 
-      onChange(
-        houseComponentsConfigurator.current.updateInsulation({
-          componentType,
-          insulation: {
-            name: insulationName,
-            buildingMaterials: CreateNonEmptyArray(newMaterials),
-          },
-        }),
-      );
+      const insulation = {
+        name: insulationName,
+        buildingMaterials: CreateNonEmptyArray(newMaterials),
+      };
+
+      updateInsulation({ componentType, insulation });
     },
-    [houseComponentsConfigurator, onChange],
+    [getFirstOfType, updateInsulation],
   );
 
   return useMemo(
@@ -186,12 +411,19 @@ export const useHouseComponents = ({
       unregisterComponent,
       changeComponentInsulation,
       updateCompositionOfInsulation,
+
+      all,
+      getByType,
+      getFirstOfType,
     }),
     [
       registerComponent,
       unregisterComponent,
       changeComponentInsulation,
       updateCompositionOfInsulation,
+      all,
+      getByType,
+      getFirstOfType,
     ],
   );
 };

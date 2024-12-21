@@ -18,12 +18,12 @@ export const useHouseMaterial = ({
   colors,
   defaultColor,
 }: Props): Material => {
-  const { componentsConfigurator } = useSimulation('house');
+  const { getFirstOfType } = useSimulation('house');
 
   // Use memo to avoid too many renrenders and optimize performances
   const houseComponentMaterials = useMemo(
-    () => componentsConfigurator.getFirstOfType(houseComponent),
-    [houseComponent, componentsConfigurator],
+    () => getFirstOfType(houseComponent),
+    [getFirstOfType, houseComponent],
   );
 
   const copiedMaterial = new MeshStandardMaterial().copy(houseMaterial);

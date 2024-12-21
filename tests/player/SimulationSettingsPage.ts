@@ -29,6 +29,7 @@ export class SimulationSettingsPage {
     await expect(
       this.page.getByRole('combobox', { name: selectLabel }),
     ).toHaveText(selectOption);
+    await this.page.waitForTimeout(50);
   }
 
   async selectWindowInsulation(newInsulation: string): Promise<void> {

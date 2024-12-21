@@ -9,6 +9,8 @@ import { StyledEngineProvider } from '@mui/material/styles';
 
 import '@graasp/apps-query-client';
 
+import { enableMapSet } from 'immer';
+
 import i18nConfig from '@/config/i18n';
 import {
   QueryClientProvider,
@@ -18,6 +20,9 @@ import {
 
 import ErrorBoundary from './ErrorBoundary';
 import App from './main/App';
+
+// allow to manipulate Map state as a mutable state
+enableMapSet();
 
 // declare the module to enable theme modification
 declare module '@mui/material/styles' {

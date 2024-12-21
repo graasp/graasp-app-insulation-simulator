@@ -17,13 +17,13 @@ type UseMaterialSettingsDialogReturnType = {
 
 export const useMaterialSettingsDialog =
   (): UseMaterialSettingsDialogReturnType => {
-    const { componentsConfigurator, updateCompositionOfInsulation } =
+    const { getFirstOfType, updateCompositionOfInsulation } =
       useSimulation('house');
     const [currTab, setCurrTab] = useState('');
 
     const wallComponents = useMemo(
-      () => componentsConfigurator.getFirstOfType(HouseComponent.Wall),
-      [componentsConfigurator],
+      () => getFirstOfType(HouseComponent.Wall),
+      [getFirstOfType],
     );
     const wallMaterials = wallComponents?.buildingMaterials;
     const wallInsulation = wallComponents?.insulationName;

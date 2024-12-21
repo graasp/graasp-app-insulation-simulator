@@ -4828,13 +4828,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/deep-equal@npm:^1.0.4":
-  version: 1.0.4
-  resolution: "@types/deep-equal@npm:1.0.4"
-  checksum: 10/db905bcb051bc9cf5dceb231a6b0b64ab2318073939a1769e043454e8c46b1eeaac1376338751d2ee7ca9294398dd62e03d4b120361b56f96f89dc87aec753e4
-  languageName: node
-  linkType: hard
-
 "@types/doctrine@npm:^0.0.3":
   version: 0.0.3
   resolution: "@types/doctrine@npm:0.0.3"
@@ -7158,7 +7151,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"deep-equal@npm:^2.0.5, deep-equal@npm:^2.2.3":
+"deep-equal@npm:^2.0.5":
   version: 2.2.3
   resolution: "deep-equal@npm:2.2.3"
   dependencies:
@@ -9245,7 +9238,6 @@ __metadata:
     "@tanstack/react-query": "npm:^4.36.1"
     "@tanstack/react-query-devtools": "npm:^4.36.1"
     "@trivago/prettier-plugin-sort-imports": "npm:^4.3.0"
-    "@types/deep-equal": "npm:^1.0.4"
     "@types/i18n": "npm:0.13.12"
     "@types/node": "npm:20.17.10"
     "@types/papaparse": "npm:^5.3.15"
@@ -9259,7 +9251,6 @@ __metadata:
     "@vitejs/plugin-react": "npm:^4.2.1"
     axios: "npm:1.7.9"
     concurrently: "npm:8.2.2"
-    deep-equal: "npm:^2.2.3"
     dotenv: "npm:^16.4.5"
     env-cmd: "npm:10.1.0"
     eslint: "npm:9.13.0"
@@ -9276,6 +9267,7 @@ __metadata:
     globals: "npm:^15.11.0"
     husky: "npm:9.1.7"
     i18next: "npm:^23.9.0"
+    immer: "npm:^10.1.1"
     lucide-react: "npm:^0.456.0"
     nock: "npm:^13.5.3"
     nyc: "npm:17.1.0"
@@ -9291,6 +9283,7 @@ __metadata:
     three-stdlib: "npm:2.33.0"
     typescript: "npm:5.7.2"
     use-debounce: "npm:^10.0.4"
+    use-immer: "npm:^0.11.0"
     uuid: "npm:9.0.1"
     vite: "npm:^6.0.0"
     vite-plugin-checker: "npm:^0.8.0"
@@ -9564,6 +9557,13 @@ __metadata:
   version: 3.0.6
   resolution: "immediate@npm:3.0.6"
   checksum: 10/f9b3486477555997657f70318cc8d3416159f208bec4cca3ff3442fd266bc23f50f0c9bd8547e1371a6b5e82b821ec9a7044a4f7b944798b25aa3cc6d5e63e62
+  languageName: node
+  linkType: hard
+
+"immer@npm:^10.1.1":
+  version: 10.1.1
+  resolution: "immer@npm:10.1.1"
+  checksum: 10/9dacf1e8c201d69191ccd88dc5d733bafe166cd45a5a360c5d7c88f1de0dff974a94114d72b35f3106adfe587fcfb131c545856184a2247d89d735ad25589863
   languageName: node
   linkType: hard
 
@@ -13986,6 +13986,16 @@ __metadata:
   peerDependencies:
     react: "*"
   checksum: 10/e193bbed307204b655abab545704ca608b23db10680f299f4b9b48b935a9fd68b68827c79de3bf5517010524bfa15709bf6b0ab1f915d6305b5d2ce27bf11ad7
+  languageName: node
+  linkType: hard
+
+"use-immer@npm:^0.11.0":
+  version: 0.11.0
+  resolution: "use-immer@npm:0.11.0"
+  peerDependencies:
+    immer: ">=8.0.0"
+    react: ^16.8.0 || ^17.0.1 || ^18.0.0 || ^19.0.0
+  checksum: 10/09ddbddec5bd5a939dc462de4c9d1ce47989bc60daa712c5235664650b132e246b8e61b6bd3dc8179649445b7cf389065373c75f23829a676dbda6b5d2428928
   languageName: node
   linkType: hard
 

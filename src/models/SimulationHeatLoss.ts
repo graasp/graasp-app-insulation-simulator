@@ -1,15 +1,10 @@
 import { HeatLossPerComponent } from '@/types/houseComponent';
-import {
-  calculateHeatLossConstantFactor,
-  sumHeatLossRateForDay,
-} from '@/utils/heatLoss';
-
-import { HouseComponentsConfigurator } from './HouseComponentsConfigurator';
+import { sumHeatLossRateForDay } from '@/utils/heatLoss';
 
 type Constructor = {
   indoorTemperature: number;
   outdoorTemperature: number;
-  houseConfigurator: HouseComponentsConfigurator;
+  heatLossConstantFactors: HeatLossPerComponent;
 };
 
 export class SimulationHeatLoss {
@@ -20,21 +15,8 @@ export class SimulationHeatLoss {
   constructor({
     indoorTemperature,
     outdoorTemperature,
-    houseConfigurator,
+    heatLossConstantFactors,
   }: Constructor) {
-    const heatLossConstantFactors = houseConfigurator
-      .getAll()
-      .reduce<HeatLossPerComponent>(
-        (acc, c) => ({
-          ...acc,
-          [c.houseComponentId]: calculateHeatLossConstantFactor({
-            area: c.actualArea,
-            materials: c.buildingMaterials,
-          }),
-        }),
-        {},
-      );
-
     this.perComponent = Object.entries(
       heatLossConstantFactors,
     ).reduce<HeatLossPerComponent>(

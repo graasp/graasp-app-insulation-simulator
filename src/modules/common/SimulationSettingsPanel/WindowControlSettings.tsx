@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -43,9 +44,10 @@ export const WindowControlSettings = ({
   const { t: tInsulations } = useTranslation('INSULATIONS');
   const { t: tMaterials } = useTranslation('MATERIALS');
 
-  const { window, componentsConfigurator } = useSimulation('house');
-  const windowComponent = componentsConfigurator.getFirstOfType(
-    HouseComponent.Window,
+  const { window, getFirstOfType } = useSimulation('house');
+  const windowComponent = useMemo(
+    () => getFirstOfType(HouseComponent.Window),
+    [getFirstOfType],
   );
 
   if (!windowComponent) {

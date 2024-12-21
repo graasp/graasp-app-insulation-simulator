@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 import { useSimulation } from '@/context/SimulationContext';
 import { HouseComponent } from '@/types/houseComponent';
 
@@ -15,15 +17,16 @@ export const Floor = ({
   floor: number;
 }): JSX.Element => {
   const { wallGeometries } = useWallGeometries();
-  const { componentsConfigurator } = useSimulation('house');
+  const { getFirstOfType } = useSimulation('house');
 
   if (floor < 0) {
     throw new Error('The floor number can be < 0!');
   }
 
-  const wallHeight =
-    componentsConfigurator.getFirstOfType(HouseComponent.Wall)?.size.height ??
-    0;
+  const wallHeight = useMemo(
+    () => getFirstOfType(HouseComponent.Wall)?.size.height ?? 0,
+    [getFirstOfType],
+  );
 
   const offSetY = wallHeight * floor;
 

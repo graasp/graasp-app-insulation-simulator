@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
@@ -30,7 +31,7 @@ export const HouseSettings = (): JSX.Element => {
   const { t } = useTranslation('SIMULATION_SETTINGS_PANEL');
   const { t: tInsulations } = useTranslation('INSULATIONS');
   const {
-    componentsConfigurator,
+    getFirstOfType,
     changeComponentInsulation,
     numberOfFloors,
     updateNumberOfFloors,
@@ -44,15 +45,19 @@ export const HouseSettings = (): JSX.Element => {
     HOUSE_INSULATIONS.Window,
   ) as (keyof typeof HOUSE_INSULATIONS.Window)[];
 
-  const currWallInsulation =
-    componentsConfigurator.getFirstOfType(HouseComponent.Wall)
-      ?.insulationName ??
-    SIMULATION_DEFAULT_WALL_COMPONENT_INSULATION.insulationName;
+  const currWallInsulation = useMemo(
+    () =>
+      getFirstOfType(HouseComponent.Wall)?.insulationName ??
+      SIMULATION_DEFAULT_WALL_COMPONENT_INSULATION.insulationName,
+    [getFirstOfType],
+  );
 
-  const currWindowInsulation =
-    componentsConfigurator.getFirstOfType(HouseComponent.Window)
-      ?.insulationName ??
-    SIMULATION_DEFAULT_WINDOW_COMPONENT_INSULATION.insulationName;
+  const currWindowInsulation = useMemo(
+    () =>
+      getFirstOfType(HouseComponent.Window)?.insulationName ??
+      SIMULATION_DEFAULT_WINDOW_COMPONENT_INSULATION.insulationName,
+    [getFirstOfType],
+  );
 
   const {
     open: openMaterials,

@@ -1,3 +1,5 @@
+import { useMemo } from 'react';
+
 import { useSimulation } from '@/context/SimulationContext';
 import { useWallMaterial } from '@/hooks/useWallMaterial';
 import { useWindowMaterial } from '@/hooks/useWindowMaterial';
@@ -60,15 +62,16 @@ export const Roof = ({
   nFloors: number;
 }): JSX.Element => {
   const wallMaterial = useWallMaterial({ wallMaterial: materials.Wall });
-  const { componentsConfigurator } = useSimulation('house');
+  const { getFirstOfType } = useSimulation('house');
 
   if (nFloors <= 0) {
     throw new Error('The house must at least have one floor!');
   }
 
-  const wallHeight =
-    componentsConfigurator.getFirstOfType(HouseComponent.Wall)?.size.height ??
-    0;
+  const wallHeight = useMemo(
+    () => getFirstOfType(HouseComponent.Wall)?.size.height ?? 0,
+    [getFirstOfType],
+  );
 
   const offsetY = wallHeight * (nFloors - 1);
 

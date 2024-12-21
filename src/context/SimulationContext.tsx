@@ -199,9 +199,7 @@ export const SimulationProvider = ({
     // Only set the status from LOADING to IDLE when the heat loss is computed.
     if (
       simulationStatus === SimulationStatus.LOADING &&
-      // This check is to ensure the heat loss was computed.
-      // If for some reason the computed heat loss is zero, this condition should be adapted.
-      currentDay.heatLoss?.global !== 0
+      currentDay.heatLoss?.global
     ) {
       setSimulationStatus(SimulationStatus.IDLE);
     }

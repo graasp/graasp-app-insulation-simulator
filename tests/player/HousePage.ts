@@ -25,5 +25,7 @@ export class HousePage {
     await this.page.goto('/');
     // wait to have loaded the simulation correctly
     await this.info.expectIsVisible();
+    // try to mitigate flacky tests
+    await this.page.waitForTimeout(50);
   }
 }

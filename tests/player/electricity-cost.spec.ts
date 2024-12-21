@@ -23,6 +23,7 @@ test('should not accept text', async ({ page }) => {
   const housePage = new HousePage(page);
   const { info, settings } = housePage;
   await housePage.goto();
+  await page.waitForTimeout(50);
 
   const electricityCost = await info.totElectricityCostInfo.textContent();
   await settings.electricityCost.click();

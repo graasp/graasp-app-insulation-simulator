@@ -53,6 +53,7 @@ export default ({ mode }: { mode: string }): UserConfigExport => {
           '.nyc_output',
           'coverage',
           '**/*.test.ts',
+          '**/*.test.tsx',
         ],
         extension: ['.js', '.ts', '.tsx'],
         requireEnv: false,
@@ -61,7 +62,10 @@ export default ({ mode }: { mode: string }): UserConfigExport => {
       }),
     ],
     test: {
-      include: ['**/*.test.ts'],
+      include: ['**/*.test.{ts,tsx}'],
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: './tests/setup.ts',
     },
     resolve: {
       alias: {

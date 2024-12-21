@@ -219,6 +219,10 @@ export const useHouseComponents = (): UseHouseComponentsReturnType => {
       size,
       componentType,
     }: RegisterComponentParams): void => {
+      if (parentId === componentId) {
+        throw new Error('A component cannot be its own parent!');
+      }
+
       const { buildingMaterials, insulationName } =
         getFirstOfType(componentType) ??
         DEFAULT_COMPONENTS_INSULATION[componentType];
@@ -239,18 +243,7 @@ export const useHouseComponents = (): UseHouseComponentsReturnType => {
 
       // Adds or updates the given component.
       setState((curr) => {
-        if (parentId === componentId) {
-          throw new Error('A component cannot be its own parent!');
-        }
-
         curr.components.set(componentId, component);
-        const currentParentId = curr.componentParents.get(componentId);
-
-        if (currentParentId && currentParentId !== parentId) {
-          throw new Error(
-            `The component '${componentId}' is already assigned to a parent.`,
-          );
-        }
 
         if (parentId) {
           curr.componentParents.set(componentId, parentId);

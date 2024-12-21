@@ -11,6 +11,7 @@ import {
 import { ChartLine, Rotate3d } from 'lucide-react';
 
 import { SIMULATION_FRAME_MS } from '@/config/simulation';
+import { ChartProvider } from '@/context/ChartContext';
 import { SeasonProvider } from '@/context/SeasonContext';
 import { SimulationProvider, useSimulation } from '@/context/SimulationContext';
 import { SimulationStatus } from '@/types/simulation';
@@ -59,23 +60,26 @@ const PlayerViewComponent = (): JSX.Element => {
     >
       <Stack justifyContent="space-between" alignItems="center" flexGrow={4}>
         <SimulationInformations />
-        <Tabs
-          height={height}
-          width={width}
-          tabs={[
-            {
-              label: tTabs('VISUALIZE'),
-              icon: <Rotate3d />,
-              element: <SimulationCanvas size={width} />,
-            },
-            {
-              label: tTabs('ANALYZE'),
-              icon: <ChartLine />,
-              element: <HeatLossCharts width={width} />,
-              unmountOnExit: false,
-            },
-          ]}
-        />
+        <ChartProvider>
+          <Tabs
+            height={height}
+            width={width}
+            tabs={[
+              {
+                label: tTabs('VISUALIZE'),
+                icon: <Rotate3d />,
+                element: <SimulationCanvas size={width} />,
+              },
+              {
+                label: tTabs('ANALYZE'),
+                icon: <ChartLine />,
+                element: <HeatLossCharts width={width} />,
+                // unmount to optimize performances
+                unmountOnExit: true,
+              },
+            ]}
+          />
+        </ChartProvider>
         <SimulationControl />
       </Stack>
 

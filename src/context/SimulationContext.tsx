@@ -24,7 +24,10 @@ import {
   simulationHistory,
 } from '@/reducer/simulationHistoryReducer';
 import { FormattedHeatLoss } from '@/types/heatLoss';
-import { HeatLossPerComponent } from '@/types/houseComponent';
+import {
+  HeatLossPerComponent,
+  HeatLossPerComponentEntries,
+} from '@/types/houseComponent';
 import { SimulationStatus } from '@/types/simulation';
 import { TemperatureRow, UserOutdoorTemperature } from '@/types/temperatures';
 import { NonEmptyArray } from '@/types/utils';
@@ -146,17 +149,21 @@ export const SimulationProvider = ({
   // Hooks
   const houseComponentsHook = useHouseComponents();
 
-  const heatLossConstantFactors = useMemo(
+  // Transform in array here for performances in the SimulationHeatLoss.
+  // Otherwise, the transformation will be executed on each changes vs once here.
+  const heatLossConstantFactors: HeatLossPerComponentEntries = useMemo(
     () =>
-      houseComponentsHook.all.reduce<HeatLossPerComponent>(
-        (acc, c) => ({
-          ...acc,
-          [c.houseComponentId]: calculateHeatLossConstantFactor({
-            area: c.actualArea,
-            materials: c.buildingMaterials,
+      Object.entries(
+        houseComponentsHook.all.reduce<HeatLossPerComponent>(
+          (acc, c) => ({
+            ...acc,
+            [c.houseComponentId]: calculateHeatLossConstantFactor({
+              area: c.actualArea,
+              materials: c.buildingMaterials,
+            }),
           }),
-        }),
-        {},
+          {},
+        ),
       ),
     [houseComponentsHook.all],
   );

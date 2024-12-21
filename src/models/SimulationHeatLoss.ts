@@ -1,10 +1,13 @@
-import { HeatLossPerComponent } from '@/types/houseComponent';
+import {
+  HeatLossPerComponent,
+  HeatLossPerComponentEntries,
+} from '@/types/houseComponent';
 import { sumHeatLossRateForDay } from '@/utils/heatLoss';
 
 type Constructor = {
   indoorTemperature: number;
   outdoorTemperature: number;
-  heatLossConstantFactors: HeatLossPerComponent;
+  heatLossConstantFactors: HeatLossPerComponentEntries;
 };
 
 export class SimulationHeatLoss {
@@ -17,23 +20,22 @@ export class SimulationHeatLoss {
     outdoorTemperature,
     heatLossConstantFactors,
   }: Constructor) {
-    this.perComponent = Object.entries(
-      heatLossConstantFactors,
-    ).reduce<HeatLossPerComponent>(
-      (acc, [componentId, heatLossConstantFactor]) => ({
-        ...acc,
-        [componentId]: sumHeatLossRateForDay({
-          temperature: outdoorTemperature,
-          constantFactor: heatLossConstantFactor,
-          indoorTemperature,
-        }),
-      }),
-      {},
-    );
+    const perComponent: HeatLossPerComponent = {};
+    let global = 0;
 
-    this.global = Object.values(this.perComponent).reduce(
-      (acc, heatLoss) => acc + heatLoss,
-      0,
-    );
+    // Have to use for-loop for performances issues with reduce.
+    for (let i = 0; i < heatLossConstantFactors.length; i += 1) {
+      const [componentId, heatLossConstantFactor] = heatLossConstantFactors[i];
+      const heatLoss = sumHeatLossRateForDay({
+        temperature: outdoorTemperature,
+        constantFactor: heatLossConstantFactor,
+        indoorTemperature,
+      });
+      perComponent[componentId] = heatLoss;
+      global += heatLoss;
+    }
+
+    this.perComponent = perComponent;
+    this.global = global;
   }
 }

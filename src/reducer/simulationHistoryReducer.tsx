@@ -4,7 +4,7 @@ import {
   SIMULATION_PRICE_KWH,
 } from '@/config/simulation';
 import { SimulationHeatLoss } from '@/models/SimulationHeatLoss';
-import { HeatLossPerComponent } from '@/types/houseComponent';
+import { HeatLossPerComponentEntries } from '@/types/houseComponent';
 import { TemperatureRow, UserOutdoorTemperature } from '@/types/temperatures';
 import { CreateNonEmptyArray, NonEmptyArray } from '@/types/utils';
 import { WindowSizeType } from '@/types/window';
@@ -26,7 +26,7 @@ type SimulationSettings = {
   pricekWh: number;
   numberOfFloors: number;
   windowSize: WindowSizeType;
-  heatLossConstantFactors: HeatLossPerComponent;
+  heatLossConstantFactors: HeatLossPerComponentEntries;
 };
 
 type SimulationHistory = {
@@ -121,7 +121,7 @@ type Action =
     }
   | {
       type: 'updateConstantFactors';
-      heatLossConstantFactors: HeatLossPerComponent;
+      heatLossConstantFactors: HeatLossPerComponentEntries;
     }
   | {
       type: 'updateWindowSize';
@@ -148,7 +148,7 @@ export const createDefault = (): SimulationHistory => ({
     pricekWh: SIMULATION_PRICE_KWH,
     numberOfFloors: 1,
     windowSize: 'Medium',
-    heatLossConstantFactors: {},
+    heatLossConstantFactors: [],
   },
 });
 

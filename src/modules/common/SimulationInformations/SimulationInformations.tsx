@@ -46,7 +46,10 @@ export const SimulationInformations = (): JSX.Element => {
   const iconSize = md ? 24 : 16;
 
   return (
-    <LoadingComponent isLoading={status === SimulationStatus.INITIAL_LOADING}>
+    <LoadingComponent
+      isLoading={status === SimulationStatus.LOADING}
+      firstLoadOnly
+    >
       <Stack
         data-testid="simulation-informations"
         bgcolor="white"

@@ -23,7 +23,7 @@ import { SimulationSettingsPanel } from '../common/SimulationSettingsPanel/Simul
 import { HeatLossCharts } from '../common/charts/HeatLossCharts';
 import { Tabs } from '../common/tabs/Tabs';
 
-const SM = { width: 375, height: 400 };
+const SM = { width: 350, height: 475 };
 const MD = { width: 500, height: 500 };
 
 const PlayerViewComponent = (): JSX.Element => {

@@ -21,6 +21,8 @@ import {
 import { PERIODS, useChart } from '@/context/ChartContext';
 import { useSimulation } from '@/context/SimulationContext';
 
+import { ExportCSVButton } from '../ExportCSVButton';
+
 type Props = { width: number };
 export const HeatLossCharts = ({ width }: Props): JSX.Element => {
   const { t } = useTranslation('SIMULATION_GRAPHICS', {
@@ -52,7 +54,7 @@ export const HeatLossCharts = ({ width }: Props): JSX.Element => {
         value={period.numberOfDays}
         exclusive
         onChange={(_, v) => updatePeriod(v)}
-        aria-label="graphic period"
+        aria-label={t('PERIOD_LABEL')}
       >
         {PERIODS.map((p) => (
           <ToggleButton
@@ -85,7 +87,7 @@ export const HeatLossCharts = ({ width }: Props): JSX.Element => {
           dataKey="hl"
           stroke="#8884d8"
           activeDot={{ r: 8 }}
-          name="Heat Loss"
+          name={t('HEAT_LOSS_LABEL')}
           unit=" kilowatt"
           dot={false}
           animationDuration={0}
@@ -94,11 +96,12 @@ export const HeatLossCharts = ({ width }: Props): JSX.Element => {
         <Line
           dataKey="outdoor"
           unit=" °C"
-          name="Outdoor"
+          name={t('OUTDOOR_LABEL')}
           dot={false}
           animationDuration={0}
         />
       </LineChart>
+      <ExportCSVButton />
     </Stack>
   );
 };

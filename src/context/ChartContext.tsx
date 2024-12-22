@@ -4,17 +4,11 @@ import { undefinedContextErrorFactory } from '@/utils/context';
 
 type Period = {
   numberOfDays: number;
-  labelKey:
-    | 'ONE_MONTH'
-    | 'THREE_MONTHS'
-    | 'SIX_MONTHS'
-    | 'ONE_YEAR'
-    | 'THREE_YEARS';
+  labelKey: 'ONE_MONTH' | 'SIX_MONTHS' | 'ONE_YEAR' | 'THREE_YEARS';
 };
 
 export const PERIODS: Period[] = [
   { numberOfDays: 30, labelKey: 'ONE_MONTH' },
-  { numberOfDays: 90, labelKey: 'THREE_MONTHS' },
   { numberOfDays: 180, labelKey: 'SIX_MONTHS' },
   { numberOfDays: 365, labelKey: 'ONE_YEAR' },
   { numberOfDays: 1_095, labelKey: 'THREE_YEARS' },

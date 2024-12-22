@@ -95,10 +95,19 @@
   "SIMULATION_GRAPHICS": {
     "HEAT_LOSS": {
       "ONE_MONTH": "1 month",
-      "THREE_MONTHS": "3 months",
       "SIX_MONTHS": "6 months",
       "ONE_YEAR": "1 year",
-      "THREE_YEARS": "3 years"
+      "THREE_YEARS": "3 years",
+      "PERIOD_LABEL": "graphic period",
+      "HEAT_LOSS_LABEL": "Heat Loss",
+      "OUTDOOR_LABEL": "Outdoor"
+    },
+    "EXPORT_CSV": {
+      "DOWNLOAD_BTN_LABEL": "Download CSV"
+    },
+    "EXPORT_CHART": {
+      "DOWNLOAD_BTN_LABEL": "Download charts",
+      "DOWNLOADING_BTN_LABEL": "Downloading..."
     }
   },
   "INSULATIONS": {

@@ -4,6 +4,7 @@ import { Flower, Leaf, Snowflake, Sun } from 'lucide-react';
 
 import { useSeason } from '@/context/SeasonContext';
 import { useSimulation } from '@/context/SimulationContext';
+import { useHouseCost } from '@/hooks/useHouseCost';
 import { FormattedHeatLoss } from '@/types/heatLoss';
 import { HouseComponent } from '@/types/houseComponent';
 import { Season, Seasons } from '@/types/seasons';
@@ -32,7 +33,7 @@ export const useSimulationInformations =
 
     const {
       heatLoss: { global: heatLoss },
-      house: { getByType, getFirstOfType },
+      house: { getFirstOfType },
     } = useSimulation();
 
     const wallComponent = useMemo(
@@ -40,25 +41,11 @@ export const useSimulationInformations =
       [getFirstOfType],
     );
 
-    const wallPrices = useMemo(
-      () =>
-        getByType(HouseComponent.Wall).reduce(
-          (totCost, houseComponent) =>
-            totCost +
-            houseComponent.actualArea *
-              houseComponent.buildingMaterials.reduce(
-                (componentCost, material) =>
-                  componentCost + material.price * material.thickness,
-                0,
-              ),
-          0,
-        ),
-      [getByType],
-    );
+    const { wallCost } = useHouseCost();
 
     return {
       heatLoss: formatHeatLossRate(heatLoss),
-      wallsPrice: Math.round(wallPrices),
+      wallsPrice: Math.round(wallCost),
       seasonIcon: iconsBySeason[season],
       formattedWallSize: wallComponent
         ? formatComponentSize({

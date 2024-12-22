@@ -50,7 +50,7 @@ export const ExportCSVButton = (): JSX.Element => {
   return (
     <Button
       startIcon={<FileSpreadsheet />}
-      variant="contained"
+      variant="outlined"
       onClick={handleClick}
     >
       {t('DOWNLOAD_BTN_LABEL')}

@@ -104,7 +104,11 @@
       "OUTDOOR_LABEL": "Outdoor"
     },
     "EXPORT_CSV": {
-      "DOWNLOAD_BTN_LABEL": "Export CSV"
+      "DOWNLOAD_BTN_LABEL": "Download CSV"
+    },
+    "EXPORT_CHART": {
+      "DOWNLOAD_BTN_LABEL": "Download charts",
+      "DOWNLOADING_BTN_LABEL": "Downloading..."
     }
   },
   "INSULATIONS": {

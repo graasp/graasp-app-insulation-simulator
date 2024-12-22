@@ -1,13 +1,16 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import {
+  Button,
   Stack,
   ToggleButton,
   ToggleButtonGroup,
   Typography,
 } from '@mui/material';
 
+import { saveAs } from 'file-saver';
+import { FileChartLine } from 'lucide-react';
 import {
   CartesianGrid,
   Legend,
@@ -17,6 +20,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { useCurrentPng } from 'recharts-to-png';
 
 import { PERIODS, useChart } from '@/context/ChartContext';
 import { useSimulation } from '@/context/SimulationContext';
@@ -28,10 +32,15 @@ export const HeatLossCharts = ({ width }: Props): JSX.Element => {
   const { t } = useTranslation('SIMULATION_GRAPHICS', {
     keyPrefix: 'HEAT_LOSS',
   });
+  const { t: tExport } = useTranslation('SIMULATION_GRAPHICS', {
+    keyPrefix: 'EXPORT_CHART',
+  });
   const {
     days: { simulationDays, currentIdx },
   } = useSimulation('simulation');
   const { period, updatePeriod } = useChart();
+
+  const [getPng, { ref, isLoading }] = useCurrentPng();
 
   const chartData = useMemo(
     () =>
@@ -47,6 +56,14 @@ export const HeatLossCharts = ({ width }: Props): JSX.Element => {
     Math.max(currentIdx - period.numberOfDays, 0),
     currentIdx + 1,
   );
+
+  const handleDownload = useCallback(async () => {
+    const png = await getPng();
+
+    if (png) {
+      saveAs(png, 'simulation_heatloss_chart.png');
+    }
+  }, [getPng]);
 
   return (
     <Stack spacing={2} alignItems="center">
@@ -67,6 +84,7 @@ export const HeatLossCharts = ({ width }: Props): JSX.Element => {
         ))}
       </ToggleButtonGroup>
       <LineChart
+        ref={ref}
         width={width}
         height={300}
         data={data}
@@ -101,7 +119,19 @@ export const HeatLossCharts = ({ width }: Props): JSX.Element => {
           animationDuration={0}
         />
       </LineChart>
-      <ExportCSVButton />
+
+      <Stack direction="row" spacing={1}>
+        <Button
+          variant="outlined"
+          startIcon={<FileChartLine />}
+          onClick={handleDownload}
+        >
+          {isLoading
+            ? tExport('DOWNLOADING_BTN_LABEL')
+            : tExport('DOWNLOAD_BTN_LABEL')}
+        </Button>
+        <ExportCSVButton />
+      </Stack>
     </Stack>
   );
 };

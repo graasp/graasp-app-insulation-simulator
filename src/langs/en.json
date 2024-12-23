@@ -98,6 +98,7 @@
       "SIX_MONTHS": "6 months",
       "ONE_YEAR": "1 year",
       "THREE_YEARS": "3 years",
+      "PERIOD_TOOLTIP": "Analyze the last {{period}}.",
       "PERIOD_LABEL": "graphic period",
       "HEAT_LOSS_LABEL": "Heat Loss",
       "OUTDOOR_LABEL": "Outdoor"

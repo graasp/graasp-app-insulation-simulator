@@ -18,15 +18,10 @@ This repository hosts the code for the **Graasp App Insulation Simulator** writt
 
 ## Purpose
 
-The app's purpose is to help users understand and reduce heat loss through conduction in a house by testing various insulation materials, including advanced options like aerogel. Users can customize energy costs and the duration of the simulation (e.g., 1 year or 25 years) to see how these factors affect heat retention and energy efficiency over time. The app simulates heat loss scenarios based on user inputs, comparing them against a baseline to calculate energy savings and cost benefits. This allows users to visualize and quantify the impact of improved insulation on reducing heat loss by conduction.
+The app's purpose is to help users understand and reduce heat loss through conduction in a house by testing various insulation materials, including advanced options like aerogel. Users can customize energy costs and the duration of the simulation (e.g., 1 year or 25 years) to see how these factors affect heat retention and energy efficiency over time.
 
-## GitHub Repo setup
-
-If you choose to deploy your app with the provided GitHubActions workflows you will need to create the following secrets:
-
-- `APP_ID`: a UUID v4 that identifies your app for deployment
-- `APP_KEY`: a UUID v4 that authorizes your app with the Graasp API
-- `SENTRY_DSN`: your Sentry url to report issues and send telemetry
+> [!NOTE]
+> This simulation calculates the estimated heat loss of a house over time, focusing specifically on losses through the walls and windows. Heat loss through the door, roof, and ground are negligated in this model. When changing a setting (like the insulation or temperature), it applies retroactively to the entire simulation. The displayed results reflect the outcome as if the parameter had always been set to the new value.
 
 ## Running the app
 
@@ -78,13 +73,13 @@ Additionally, I used Blender to rename the object’s materials for clarity, suc
 
 Lastly, each header contains the URL of the original model if it wasn't created in-house, providing proper attribution and reference for future modifications.
 
-This approach simplifies the process of updating or adding a 3D model. To do so, simply place the model in the `public/models` folder and run the `npx gltfjsx` command. Afterward, move the original model into the `/models` folder (if we want to conserve the original) and store the generated code in the `src/modules/models` directory. It is also recommended to extract the logic from this component into a custom hook, making it modular and reusable while keeping the component clean and focused on rendering.
+This approach simplifies the process of updating or adding a 3D model. To do so, simply place the model in the `public/models` folder and run the `npx gltfjsx` command. Afterward, store the generated code in the `src/modules/models` directory. It is also recommended to extract the logic from this component into a custom hook, making it modular and reusable while keeping the component clean and focused on rendering.
 
 If an existing model is updated, we should replace the type and the React component group while leaving the logic hooks untouched. This approach ensures that the code remains valid and functional, as the underlying logic and behavior are preserved, reducing the risk of introducing errors.
 
 The positions of the meshes within the group are auto-generated, and they should never be manually modified. If an object needs to be repositioned, adjust its `position` prop applied directly to the group instead. This maintains consistency and ensures the auto-generated structure remains intact while allowing for flexible positioning.
 
-## Downloading a CSV File
+## Downloading a Temperatures CSV File
 
 To download a CSV file of temperatures, follow these steps:
 
@@ -110,26 +105,130 @@ To download a CSV file of temperatures, follow these steps:
 
 2. **File Location**:
 
-   - Ensure that your CSV file is located in the `public` directory of your project.
-   - For example, if your file is named `temperatures.csv`, the path will be `'temperatures.csv'` when referencing it from the public directory (i.e., `public/temperatures.csv`).
+   - Ensure that your CSV file is located in the `public/temperatures` directory of your project.
+   - As the application allows multiple locations, each location should have its own directory: `public/temperatures/<location_name>`.
+     - The directory should contains `public/temperatures/<location>/predictions_1_year.csv` for the weather of one year.
+     - The directory should contains `public/temperatures/<location>/predictions_25_year.csv` for the weather of 25 years.
 
 3. **Data Source**:
 
-   - You can download the required CSV data from [Open Meteo](https://open-meteo.com/).
+   - You can download the required CSV data from [Open Meteo](https://open-meteo.com/en/docs/climate-api#start_date=2020-01-01&end_date=2040-01-01&daily=temperature_2m_mean).
 
-   > [!WARNING]
-   > The measurement frequency changes depending on whether you are querying historical data (one temperature value per hour) or future predictions (one temperature value per day).
+> [!WARNING]
+> The measurement frequency changes depending on whether you are querying historical data (one temperature value per hour) or future predictions (one temperature value per day).
+> This application only supports one temperature per day!
 
-4. **Using the `TemperatureContext`**:
-   - In `TemperatureContext`, you can load this CSV file by referencing the appropriate path. Make sure to handle the data correctly based on the specified format and structure. Also be sure to specify the measurement frequency, which can be either per hour or per day, based on your needs.
+## How to update the materials
 
-Following these guidelines will ensure that your CSV file is correctly set up and accessible for the application.
+The house model uses two key concepts for materials:
+
+- **BuildingMaterial**: These represent the raw materials or insulation types themselves, like aerogel, brick, wood, etc. Each BuildingMaterial has properties like cost, thickness, and thermal conductivity.
+
+> [!NOTE]
+> To modify these properties for existing materials or to add new materials, edit the `config/buildingMaterials.ts` file.
+
+- **HouseInsulation**: This represents the layered insulation structure of the house and is defined as an array of `BuildingMaterials`. For example, a wall insulated with aerogel would be represented as a combination of brick (the structural material) and aerogel (the insulation layer). The `HouseInsulation` concept allows for modeling composite wall structures (or windows). You can adjust the layers within a `HouseInsulation` type also within `config/houseInsulations.ts`.
+
+## Demo
+
+https://github.com/user-attachments/assets/9256f636-7209-48e1-bdd8-d928f4647f8e
+
+### Simulation Controls
+
+The simulation offers the following controls, accessible via the "Settings" panel on the right:
+
+**1. Simulation Parameters:**
+
+- **Location of Simulation:**
+
+  - **Effect:** Determines the average outdoor temperature profile used in the simulation. Selecting a different location changes the simulated weather conditions, impacting heat loss calculations.
+  - **Options:** ["Ecublens", "Stockholm"]
+  - **Default Value:** ["Ecublens"]
+  - **How to adjust:** Select from the dropdown menu.
+
+- **Duration of Simulation:**
+  - **Effect:** Sets the time frame for the simulation.
+  - **Options:** ["1 year", "25 years"]
+  - **Default Value:** ["1 year"]
+  - **How to adjust:** Select from the dropdown menu.
+
+**2. House Parameters:**
+
+- **Wall Insulation:**
+
+  - **Effect:** Defines the material used for wall insulation, significantly influencing the rate of heat loss. Different materials have different thermal properties, affecting the simulation's outcome.
+  - **Options:** ["Aerogel", "Brick", "Fiberglass", "XPS Foam", "Mineral Wool"]
+  - **Default Value:** ["Aerogel"]
+  - **How to adjust:** Select from the dropdown menu. You can adjust the price (CHF/m³), thickness (cm), and thermal conductivity (W/m·K) of the insulation by using the settings modal (button on the right of the insulation).
+
+- **Window Insulation:**
+
+  - **Effect:** Specifies the type of windows used, affecting heat loss.
+  - **Options:** ["Single Pane", "Double Pane", "Triple Pane"]
+  - **Default Value:** ["Double Pane"]
+  - **How to adjust:** Select from the dropdown menu. The configuration window (right button) allows you to specify the "Window Size" (Small, Medium, Large) and displays the composition of the window.
+
+- **Number of Floors:**
+  - **Effect:** Increases or decreases the surface area of the walls, thus impacting the total heat loss.
+  - **Options:** ["1 Floor", "2 Floors"]
+  - **Default Value:** ["1 Floor"]
+  - **How to adjust:** Select from the dropdown menu.
+
+**3. Electricity Cost:**
+
+- **Electricity Cost:**
+  - **Effect:** Sets the cost of electricity (CHF/kWh), used to calculate the total cost of heat loss over the simulation duration.
+  - **Range:** ["0.00 to 1.00"]
+  - **Default Value:** ["0.22"]
+  - **How to adjust:** Enter a value directly.
+
+**4. Temperatures:**
+
+- **Indoor Temperature:**
+
+  - **Effect:** Sets the desired temperature inside the house, impacting the heat loss calculation. A larger difference between indoor and outdoor temperatures results in higher heat loss.
+  - **Range:** ["5°C to 35°C"]
+  - **Default Value:** ["22°C"]
+  - **How to adjust:** Use the slider.
+
+- **Outdoor Temperature:**
+  - **Effect:** Allows overriding the outdoor temperature determined by the "Location of Simulation." Used to model specific temperature scenarios. The override function is enabled by ticking the "Override Temperature" checkbox.
+  - **Range:** ["-10°C to 35°C"]
+  - **How to adjust:** Use the slider after enabling the override.
+
+### Visualization and Analysis
+
+- **Visualize Button:** Displays a 3D model of the house and shows real-time heat loss from walls and windows. Each arrow represents the heat loss for the component for the current day. If you want to compute the total heat loss, you have to sum all the arrows. The timeline slider beneath the visualization controls the current date within the simulation period.
+- **Analyze Button:** Switches to the analysis view, presenting a line graph of the simulated heat loss over the specified duration. You can select to analyze the results for 1 Month, 6 Months, 1 Year, or 3 Years. The graph shows heat loss (blue line) and outdoor temperature (purple line). You can download the chart data as an image or a CSV file using the buttons provided.
+
+### Timeline Slider
+
+The timeline slider at the bottom of the visualization controls the point in time being viewed, showing how heat loss changes throughout the simulation. It also dynamically updates the summary information above the house visualization. You can also adjust the playback speed of the simulation by using the button located on the right side of the slider.
+
+### Information Section
+
+This section displays a summary of the current simulation state including:
+
+- Date
+- Season
+- Outdoor Temperature
+- Indoor Temperature
+- Heat Loss for the day
+
+The total section displays the current total of:
+
+- Heat Loss (Kilowatt/Megawatt)
+- Electricity Cost (CHF)
+- House Wall Area (m²)
+- Wall Cost (CHF)
 
 ### Credits
 
 The house and tree models are created by [Sloyd.ai](https://www.sloyd.ai). All rights reserved by Sloyd for these models.
 
 ## Known issues
+
+### MUI Box
 
 Three.js and MUI can encounter conflicts when using the `Box` component from MUI. To resolve this issue, you can consider the following options:
 

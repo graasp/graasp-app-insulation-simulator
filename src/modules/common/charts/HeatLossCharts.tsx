@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 
 import {
   Button,
+  Tooltip as MUITooltip,
   Stack,
   ToggleButton,
   ToggleButtonGroup,
@@ -74,13 +75,14 @@ export const HeatLossCharts = ({ width }: Props): JSX.Element => {
         aria-label={t('PERIOD_LABEL')}
       >
         {PERIODS.map((p) => (
-          <ToggleButton
+          <MUITooltip
             key={p.labelKey}
-            value={p.numberOfDays}
-            aria-label={t(p.labelKey)}
+            title={t('PERIOD_TOOLTIP', { period: t(p.labelKey) })}
           >
-            <Typography>{t(p.labelKey)}</Typography>
-          </ToggleButton>
+            <ToggleButton value={p.numberOfDays} aria-label={t(p.labelKey)}>
+              <Typography>{t(p.labelKey)}</Typography>
+            </ToggleButton>
+          </MUITooltip>
         ))}
       </ToggleButtonGroup>
       <LineChart

@@ -34,7 +34,6 @@ export const SimulationControl = (): JSX.Element => {
           min={0}
           max={total - 1}
           hideValue
-          hideLabels={status === SimulationStatus.LOADING}
           formatValue={(v) => getDateOf(v).toLocaleDateString()}
           disabled={status === SimulationStatus.LOADING}
         />

@@ -54,6 +54,7 @@ export default ({ mode }: { mode: string }): UserConfigExport => {
           'coverage',
           '**/*.test.ts',
           '**/*.test.tsx',
+          'docs',
         ],
         extension: ['.js', '.ts', '.tsx'],
         requireEnv: false,

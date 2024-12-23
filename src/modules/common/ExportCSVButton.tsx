@@ -25,7 +25,7 @@ export const ExportCSVButton = (): JSX.Element => {
 
   const handleClick = (): void => {
     const data = simulationDays.map((d) => ({
-      'date (UTC)': d.date.toUTCString(),
+      'date (ISO)': d.date.toISOString(),
       'indoor (°C)': indoor,
       'outdoor (°C)': outdoor.value,
       'heat loss (W)': d.heatLoss.global,

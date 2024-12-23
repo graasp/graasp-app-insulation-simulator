@@ -235,3 +235,16 @@ Three.js and MUI can encounter conflicts when using the `Box` component from MUI
 - **Upgrade to MUI 6**: This may resolve the conflict, so it's worth testing.
 - **Use the `Box` component with a `div`**: Replace Box with `<Box component="div">...</Box>` to mitigate the issue.
 - **Avoid using `Box` altogether**: Instead, opt for the `Stack` component, which may provide a suitable alternative without conflicts.
+
+### Simulation doesn't work without the 3D House
+
+To simplify the code, I moved the responsibility of registering house components (walls and windows) directly to the 3D models. This aimed to avoid duplicating logic for handling both the 3D representation and the definition of house components.
+
+However, this introduced a problem. When hiding the house to display graphics, the unmounting of its components (walls and windows) removes them from the simulation. Also, changes like modifying the number of floors aren't applied until the house is displayed again.
+
+Two solutions exist:
+
+- Prevent unmounting by using visibility: hidden in CSS.
+- Decouple the logic and 3D representation.
+
+Due to time constraints, I chose the first solution. The second solution, while ideal, would be preferable given more time.

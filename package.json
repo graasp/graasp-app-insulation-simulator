@@ -107,7 +107,7 @@
     "playwright-test-coverage": "^1.2.12",
     "prettier": "3.3.3",
     "three-stdlib": "2.33.0",
-    "uuid": "9.0.1",
+    "uuid": "11.1.0",
     "vite": "^6.0.0",
     "vite-plugin-checker": "^0.8.0",
     "vite-plugin-istanbul": "^6.0.0",

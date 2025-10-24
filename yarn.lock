@@ -9000,7 +9000,7 @@ __metadata:
     i18next: "npm:^23.9.0"
     immer: "npm:^10.1.1"
     jsdom: "npm:^25.0.1"
-    lucide-react: "npm:^0.456.0"
+    lucide-react: "npm:^0.548.0"
     nock: "npm:^13.5.3"
     nyc: "npm:17.1.0"
     papaparse: "npm:^5.4.1"
@@ -10464,12 +10464,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lucide-react@npm:^0.456.0":
-  version: 0.456.0
-  resolution: "lucide-react@npm:0.456.0"
+"lucide-react@npm:^0.548.0":
+  version: 0.548.0
+  resolution: "lucide-react@npm:0.548.0"
   peerDependencies:
-    react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0-rc
-  checksum: 10/214a3585e9b028d86f7ea161a13c4b9b7578d3901a7fda040e1bb8e115552957b91d29c248a25c77e1b9e466c160195219809ea0fa4b26e5a741c8534cea17e9
+    react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
+  checksum: 10/70c3065daf44fb997fdec330c539c82cd3309dec6e287ef741c9b616695c92c16776d2fe5709776281b8eab02d30c38d8c7b79af9c65c08128e1cf950fc92f37
   languageName: node
   linkType: hard
 

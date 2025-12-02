@@ -106,7 +106,7 @@
     "nyc": "17.1.0",
     "playwright-test-coverage": "^1.2.12",
     "prettier": "3.6.2",
-    "three-stdlib": "2.36.0",
+    "three-stdlib": "2.36.1",
     "uuid": "9.0.1",
     "vite": "^6.0.0",
     "vite-plugin-checker": "^0.11.0",

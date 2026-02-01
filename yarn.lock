@@ -4664,12 +4664,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/node@npm:20.17.10":
-  version: 20.17.10
-  resolution: "@types/node@npm:20.17.10"
+"@types/node@npm:20.17.58":
+  version: 20.17.58
+  resolution: "@types/node@npm:20.17.58"
   dependencies:
     undici-types: "npm:~6.19.2"
-  checksum: 10/9a1bcb2f25ce1ad249497e5f10ed984bf0ec476439fad2e965c3d6cc4642abb23c5e8400f7e48e55ff121d2b80b14bdc1bd4eac7ff6848154033a2be25fffb17
+  checksum: 10/39415b7aafb6445cf521bd1b8847708d306078c43f382eefa0e64edabf39a9dbe8dfded76d3e02750e7eb0e96aaf59af8786254a9843d24668ceb131fe7d02e3
   languageName: node
   linkType: hard
 
@@ -9008,7 +9008,7 @@ __metadata:
     "@trivago/prettier-plugin-sort-imports": "npm:^4.3.0"
     "@types/file-saver": "npm:^2.0.7"
     "@types/i18n": "npm:0.13.12"
-    "@types/node": "npm:20.17.10"
+    "@types/node": "npm:20.17.58"
     "@types/papaparse": "npm:^5.3.15"
     "@types/react": "npm:18.3.16"
     "@types/react-dom": "npm:18.3.5"

@@ -8977,7 +8977,7 @@ __metadata:
     typescript: "npm:5.7.3"
     use-debounce: "npm:^10.0.4"
     use-immer: "npm:^0.11.0"
-    uuid: "npm:9.0.1"
+    uuid: "npm:14.0.0"
     vite: "npm:^6.0.0"
     vite-plugin-checker: "npm:^0.12.0"
     vite-plugin-istanbul: "npm:^6.0.0"
@@ -13866,6 +13866,15 @@ __metadata:
   dependencies:
     base64-arraybuffer: "npm:^1.0.2"
   checksum: 10/0c9458380bf3113f425a268e3d605aef163bfbaea62bf24de517b62b6e6744394d8ef1cdd9b07423359aec5ed402baab4bb2c5beec64f674ec635dc2f8dbd4bf
+  languageName: node
+  linkType: hard
+
+"uuid@npm:14.0.0":
+  version: 14.0.0
+  resolution: "uuid@npm:14.0.0"
+  bin:
+    uuid: dist-node/bin/uuid
+  checksum: 10/8ee9b98f9650e25555515f7a28d3c3ae9364e72f7bb19b9e08b681bc135338beba5509b2830f6ae1cfaba4d45401da0d16d4d109b977097bc3d6ba0c5583341b
   languageName: node
   linkType: hard
 

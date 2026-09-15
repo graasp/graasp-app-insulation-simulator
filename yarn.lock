@@ -9149,7 +9149,7 @@ __metadata:
     react-toastify: "npm:10.0.6"
     recharts: "npm:^2.15.0"
     recharts-to-png: "npm:^2.4.0"
-    three: "npm:^0.169.0"
+    three: "npm:^0.186.0"
     three-stdlib: "npm:2.36.1"
     typescript: "npm:5.7.3"
     use-debounce: "npm:^10.0.4"
@@ -13591,17 +13591,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"three@npm:^0.169.0":
-  version: 0.169.0
-  resolution: "three@npm:0.169.0"
-  checksum: 10/5d0a5a4c8aeff37877132c4cb633989dba0749891fd1bf6414c551b16ef46ddb3529954901cbcbe4b493698d93c915c1cff9145157adcaa69f122c1fc2d1538f
-  languageName: node
-  linkType: hard
-
 "three@npm:^0.170.0":
   version: 0.170.0
   resolution: "three@npm:0.170.0"
   checksum: 10/ce523a35b17b47526df7d21323afeac3482ef69a67d9304ed2d71877c079debfb1e77249af8a55ab376b48ee8265488da1bb0912200c170a6874f574f19f63c9
+  languageName: node
+  linkType: hard
+
+"three@npm:^0.186.0":
+  version: 0.186.0
+  resolution: "three@npm:0.186.0"
+  checksum: 10/9a2e21487ad7e424a1eed48284bdc285ad91f1a4ba16791e5567da144e76b03939aee82b8a2c00ab1e634d62aba47e13985a22a64a99f8fb7ffda968b9c85053
   languageName: node
   linkType: hard
 

@@ -11547,9 +11547,9 @@ __metadata:
   linkType: hard
 
 "papaparse@npm:^5.4.1":
-  version: 5.5.4
-  resolution: "papaparse@npm:5.5.4"
-  checksum: 10/929466b2acb464b2ac4ad5542d58097967a5c0ef0ca8d9e05e0e8effadbb4077692f19c7601bb32dc56bd982941b38a8e83d7db9e5025483ca859abf7e9a5031
+  version: 5.7.1
+  resolution: "papaparse@npm:5.7.1"
+  checksum: 10/308f26a55fd965289fffe7ac278723df3a328aec1efeed6cc0f9b69da5f7b4edc82eeb1e3347c1b161d8c4c81f9bc614ba579118636e957d2f5ccdcadc2de8cb
   languageName: node
   linkType: hard
 
